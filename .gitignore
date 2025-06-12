@@ -11,4 +11,5 @@ __pycache__/
 
 # Données temporaires
 data/output/
+!data/output/.gitkeep
 *.pdf
