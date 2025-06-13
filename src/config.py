@@ -1,8 +1,18 @@
 import pandas as pd
+import os
+
+#project_path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-df = pd.read_csv('../data/supplier.csv',sep=',')
-dg = pd.read_csv('../data/supplier_copy.csv',sep=',')
+#csv path
+SUPPLIER_CSV = os.path.join(BASE_DIR,"data","supplier.csv")
+SUPPLIER_COPY_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
+COMPANY_LIST_CSV = 
+
+#read csv
+df = pd.read_csv(SUPPLIER_CSV,sep=',')
+dg = pd.read_csv(SUPPLIER_COPY_CSV,sep=',')
 company_df = pd.read_csv('../data/list_company.csv')
 
 LIST_COMPANY_NAME_INVOICE = list(company_df['company_name_invoice'])
