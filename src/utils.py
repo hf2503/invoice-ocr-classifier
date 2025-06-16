@@ -27,7 +27,9 @@ def check_invoice(text):
     """
     return "verifie le" in text.lower()
 
-def check_company(text:str,company_list_name_invoice,company_list_name_registery):
+def check_company(text:str,
+                  company_list_name_invoice,
+                  company_list_tva):
     """check
 
     Args:
@@ -35,12 +37,26 @@ def check_company(text:str,company_list_name_invoice,company_list_name_registery
         company_list_name_invoice (_type_): _description_
         company_list_name_registery (_type_): _description_
     """
-    
-    
-    
-    pass
+    clean_text = text.lower().replace(" ","").replace("-","")
 
-def check_supplier(text:str, supplier_list:list,tva_supplier_list:list):
+    for company_name,tva_company in zip(company_list_name_invoice,company_list_tva):
+
+        if (company_name.lower().replace(" ","") in clean_text or 
+            tva_company.lower().replace(" ","") in clean_text 
+            ):
+            return company_name
+
+        # if company_name.lower() in text.lower():
+        #     return company_name
+
+    company_name = 'new_company'
+
+    return 'new_company'
+
+
+def check_supplier(text:str,
+                   supplier_list:list,
+                   tva_supplier_list:list):
     """
     check the company name in the invoice
 
@@ -50,17 +66,17 @@ def check_supplier(text:str, supplier_list:list,tva_supplier_list:list):
     """    
     clean_text = text.lower().replace(" ","").replace("-","")
     
-    for company_name,tva_company in zip(supplier_list,tva_supplier_list):
-        if (company_name.lower().replace(" ","") in clean_text or 
-            tva_company.lower().replace(" ","") in clean_text 
+    for supplier_name,tva_supplier in zip(supplier_list,tva_supplier_list):
+        if (supplier_name.lower().replace(" ","") in clean_text or 
+            tva_supplier.lower().replace(" ","") in clean_text 
             ):
-            return company_name
+            return supplier_name
     
     return None
 
 
 
-def normalise_company_name(text):
+def normalise_supply_name(text):
     """
     preprocess the companies name directory
 
@@ -77,8 +93,6 @@ def normalise_company_name(text):
     return text
 
 
-
-
 def make_directory_company(output_dir,directory):
     """
     Create a directory if it doesn't exist.
@@ -87,7 +101,7 @@ def make_directory_company(output_dir,directory):
         directory (str): The path of the directory to be created.
 
     Returns:
-        None
+        path
     """
     path = os.path.join(output_dir,directory)
     print(path)
@@ -98,6 +112,28 @@ def make_directory_company(output_dir,directory):
         return path
     else:
         print(f"dossier {directory} déjà existant")
+        return path
+
+
+def make_directory_supply(directory_company,directory_supplier):
+    """
+    Create a directory if it doesn't exist.
+
+    Args:
+        directory (str): The path of the directory to be created.
+
+    Returns:
+        path
+    """
+    path = os.path.join(directory_company,directory_supplier)
+    print(path)
+    
+    if not (os.path.exists(path)):
+        os.makedirs(path)
+        print(f"dossier {directory_supplier} créé")
+        return path
+    else:
+        print(f"dossier {directory_supplier} déjà existant")
         return path
     
 
