@@ -127,12 +127,10 @@ def reclassify_from_the_directory_new_company(input_new:str,
                         logging.debug("the supplier list is : %s",os.listdir(path_directory))
                         new_path = os.path.join(path_directory,supplier)
                         image = convert_pdf_to_PIL(new_path)
-                        print(new_path)
                         
                         try:
                             new_text = pytesseract.image_to_string(image[0])
                         except Exception as e:
-                            print(f"on eu l'erreur suivante avec l'OCR pytesseract sur le {filename} : {e}")
                             logging.error("OCR error on file %s: %s", new_path, e)
   
                         new_supply = check_supplier(new_text,new_company_list,tva_new_supplier_list)
