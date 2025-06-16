@@ -13,3 +13,6 @@ __pycache__/
 data/output/*
 
 *.pdf
+
+#log
+src/invoice_processing.log

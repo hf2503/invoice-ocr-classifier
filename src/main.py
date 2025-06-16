@@ -6,8 +6,19 @@ import os
 from config import *
 from utils import *
 import traceback
+import logging
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler('invoice_processing.log',mode='a',encoding='utf_8'),
+        logging.StreamHandler()
+    ]
+)
 
+#desactivate the debug message of pillow in the file invoice_processing.log
+logging.getLogger('PIL').setLevel(logging.WARNING)
 
 pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
 
@@ -19,7 +30,8 @@ def convert_invoice_pdf(input_pdf:str,
                         output_dir=OUTPUT_DIR,
                         supplier=LIST_SUPPLIER,
                         tva_supplier_list=LIST_TVA_SUPPLIER,
-                        NEW_SUPPLIER=NEW_SUPPLIER,
+                        new_supplier=NEW_SUPPLIER,
+                        new_company=NEW_COMPANY
                         ):
     """
     convert the Image PIL into pdf files
@@ -28,7 +40,8 @@ def convert_invoice_pdf(input_pdf:str,
         image : invoice image 
     """
     if not os.path.exists(input_pdf):
-        raise FileNotFoundError(f"le fichier {input_pdf} est introuvable")
+        logging.error("file not found")
+        raise FileNotFoundError(f"the file {input_pdf} is not found")
     
     
     images = convert_pdf_to_PIL(input_pdf)
@@ -38,7 +51,8 @@ def convert_invoice_pdf(input_pdf:str,
         try:
             text = pytesseract.image_to_string(image)
         except Exception as e:
-            print(f"on eu l'erreur suivante avec l'OCR pytesseract sur la page {i+1} du fichier {os.path.basename(input_pdf)}: {e}")
+            # print(f"on eu l'erreur suivante avec l'OCR pytesseract sur la page {i+1} du fichier {os.path.basename(input_pdf)}: {e}")
+            logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
             continue
         
         
@@ -50,18 +64,24 @@ def convert_invoice_pdf(input_pdf:str,
                                          company_list_tva=company_tva
                                          )
             
-            print(f'coucou {company_name}')
+            #print(f'company_name : {company_name}')
+            logging.debug("Detected company name : %s", company_name)
 
-            if not company_name == 'new_company':
-                directory_company = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values[0]
-                print(directory_company)
+
+            directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
+            
+            if len(directory_company_match):
+                print(directory_company_match)
+                directory_company = directory_company_match[0]   
                 directory_company_path = make_directory_company(output_dir,directory_company)
+                logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                 print(directory_company_path)
             
             else:
-                directory_company = 'new_company'
-                directory_company_path = make_directory_company(output_dir,directory_company)
-                print(directory_company_path)
+                logging.warning("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
+                # print(f"Nom introuvable : {company_name}")
+                directory_company_path = make_directory_company(output_dir,new_company)
+                # print(directory_company_path)
 
 
             #supplier detection
@@ -71,11 +91,13 @@ def convert_invoice_pdf(input_pdf:str,
                 norm_name = normalise_supply_name(text = supplier_name)
 
             else:
-                norm_name = normalise_supply_name(text = NEW_SUPPLIER)
+                norm_name = normalise_supply_name(text =new_supplier)
             
             dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            image.convert('RGB').save(os.path.join(dir_path_supply,f"facture{timestamp}.pdf"))
+            invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
+            image.convert('RGB').save(invoice_path)
+            logging.info("invoice save to : %s",invoice_path)
 
 
             # dir_path = make_directory_supply(output_dir=output_dir,directory=norm_name)
@@ -85,7 +107,7 @@ def convert_invoice_pdf(input_pdf:str,
 
         
         else:
-            print("Factures non validées")
+            logging.info("invoice's page rejected ")
 
 
 def reclassify_from_the_directory_new_company(input_new:str,
@@ -98,51 +120,49 @@ def reclassify_from_the_directory_new_company(input_new:str,
     Raises:
         TypeError: _description_
     """
-    print('hello')
-    print(os.listdir(input_new))
+    
+    
     if os.listdir(input_new):
+        logging.info("found directories in input:%s",os.listdir(input_new))
         for directory in os.listdir(input_new):
-            # print(f'directory:{directory}')
-            # print(f'new_supplier:{new_supplier}')
             path_directory_supply = os.path.join(input_new,directory)
-            # print(f'path_directory_supply: {path_directory_supply}')
+            
             for new_s in os.listdir(path_directory_supply):
-                # print(f'proof:{os.listdir(path_directory_supply)}')
                 if new_s ==  new_supplier:
-                    # print(f'directory:{new_s}')
                     path_directory = os.path.join(path_directory_supply,new_s)
-                    # print(f'path_supply : {path_directory}')
-                    # print(f'list_supply: {os.listdir(path_directory)}')
+                    
                     for supplier in os.listdir(path_directory):
-                        print(f'list_supplier_pdf:{os.listdir(path_directory)}')
+                        logging.debug("the supplier list is : %s",os.listdir(path_directory))
+                        #print(f'list_supplier_pdf:{os.listdir(path_directory)}')
                         new_path = os.path.join(path_directory,supplier)
                         image = convert_pdf_to_PIL(new_path)
                         print(new_path)
+                        
                         try:
                             new_text = pytesseract.image_to_string(image[0])
                         except Exception as e:
                             print(f"on eu l'erreur suivante avec l'OCR pytesseract sur le {filename} : {e}")
-                        # print(new_text)  
+                            logging.error("OCR error on file %s: %s", new_path, e)
+  
                         new_supply = check_supplier(new_text,new_company_list,tva_new_supplier_list)
-                        print(new_supply)
+                        logging.debug("detected supplier : %s",new_supply)
                         if new_supply:
                             norm_new_text = normalise_supply_name(new_supply)
-                            #à modifier pour envoyer le supply detecter dans le bon dossier
                             dir_new_path = make_directory_company(path_directory_supply,norm_new_text)
                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                            # print(image)
-                            image[0].convert('RGB').save(os.path.join(dir_new_path,f"facture_{timestamp}.pdf"))
-                
+                            new_invoice_path = os.path.join(dir_new_path,f"facture_{timestamp}.pdf")
+                            image[0].convert('RGB').save(new_invoice_path)
                         #delete the pdf file
                             os.remove(new_path)
-                            print(f"suppression du fichier {new_path}")
+                            logging.info("file %s moved and removed",new_path)
+                            #print(f"suppression du fichier {new_path}")
             
             else :
-                print('1')
+                logging.warning("Supplier not identified for file %s", new_path)
                 continue
             
     else:
-        print("There aren't new companies")
+        logging.info("No new companies found in input directory.")
         return None
                                   
                 
