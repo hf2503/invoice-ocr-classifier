@@ -51,7 +51,7 @@ def convert_invoice_pdf(input_pdf:str,
         try:
             text = pytesseract.image_to_string(image)
         except Exception as e:
-            # print(f"on eu l'erreur suivante avec l'OCR pytesseract sur la page {i+1} du fichier {os.path.basename(input_pdf)}: {e}")
+            
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
             continue
         
@@ -64,7 +64,7 @@ def convert_invoice_pdf(input_pdf:str,
                                          company_list_tva=company_tva
                                          )
             
-            #print(f'company_name : {company_name}')
+
             logging.debug("Detected company name : %s", company_name)
 
 
@@ -79,9 +79,8 @@ def convert_invoice_pdf(input_pdf:str,
             
             else:
                 logging.warning("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
-                # print(f"Nom introuvable : {company_name}")
                 directory_company_path = make_directory_company(output_dir,new_company)
-                # print(directory_company_path)
+
 
 
             #supplier detection
@@ -98,14 +97,7 @@ def convert_invoice_pdf(input_pdf:str,
             invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
             image.convert('RGB').save(invoice_path)
             logging.info("invoice save to : %s",invoice_path)
-
-
-            # dir_path = make_directory_supply(output_dir=output_dir,directory=norm_name)
-            # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            # image.convert('RGB').save(os.path.join(dir_path,f"facture{timestamp}.pdf"))
-            # print(f"facture{i+1}.pdf enregistré dans {dir_path}")
-
-        
+     
         else:
             logging.info("invoice's page rejected ")
 
@@ -133,7 +125,6 @@ def reclassify_from_the_directory_new_company(input_new:str,
                     
                     for supplier in os.listdir(path_directory):
                         logging.debug("the supplier list is : %s",os.listdir(path_directory))
-                        #print(f'list_supplier_pdf:{os.listdir(path_directory)}')
                         new_path = os.path.join(path_directory,supplier)
                         image = convert_pdf_to_PIL(new_path)
                         print(new_path)
@@ -155,7 +146,6 @@ def reclassify_from_the_directory_new_company(input_new:str,
                         #delete the pdf file
                             os.remove(new_path)
                             logging.info("file %s moved and removed",new_path)
-                            #print(f"suppression du fichier {new_path}")
             
             else :
                 logging.warning("Supplier not identified for file %s", new_path)
