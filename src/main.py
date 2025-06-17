@@ -40,7 +40,7 @@ def convert_invoice_pdf(input_pdf:str,
         image : invoice image 
     """
     if not os.path.exists(input_pdf):
-        logging.error("file not found")
+        logging.error("file %s not found",input_pdf)
         raise FileNotFoundError(f"the file {input_pdf} is not found")
     
     
@@ -116,14 +116,17 @@ def reclassify_from_the_directory_new_company(input_new:str,
     
     if os.listdir(input_new):
         logging.info("found directories in input:%s",os.listdir(input_new))
-        for directory in os.listdir(input_new):
+        list_direcories_input = os.listdir(input_new)
+        for directory in list_direcories_input:
             path_directory_supply = os.path.join(input_new,directory)
+            list_directories_supply = os.listdir(path_directory_supply)
             
-            for new_s in os.listdir(path_directory_supply):
+            for new_s in list_directories_supply:
                 if new_s ==  new_supplier:
                     path_directory = os.path.join(path_directory_supply,new_s)
+                    list_directories_new_supply = os.listdir(path_directory)
                     
-                    for supplier in os.listdir(path_directory):
+                    for supplier in list_directories_new_supply:
                         logging.debug("the supplier list is : %s",os.listdir(path_directory))
                         new_path = os.path.join(path_directory,supplier)
                         image = convert_pdf_to_PIL(new_path)
@@ -155,7 +158,9 @@ def reclassify_from_the_directory_new_company(input_new:str,
                                   
                 
 if __name__ == "__main__":
-    for filename in os.listdir(INPUT_PDF_FOLDER):
+    
+    list_pdf_input_folder = os.listdir(INPUT_PDF_FOLDER)
+    for filename in list_pdf_input_folder:
         if filename.endswith('.pdf'):
             input_pdf_path = os.path.join(INPUT_PDF_FOLDER,filename)
             
