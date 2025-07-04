@@ -5,8 +5,8 @@ FROM apache/airflow:2.8.2-python3.11
 WORKDIR /opt/airflow
 
 #copy source code and DAGS
-COPY ./src /opt/airflow/src
-COPY ./dags /opt/airflow/dags
+# COPY ./src /opt/airflow/src
+# COPY ./dags /opt/airflow/dags
 COPY requirements.txt .
 
 #install python dependencies
@@ -19,3 +19,7 @@ RUN apt-get update && apt-get install -y tesseract-ocr poppler-utils && apt-get 
 
 #return to airflow user
 USER airflow
+
+#variable d'environnement
+ENV TESSERACT_PATH=/usr/bin/tesseract
+ENV LANG C.UTF-8
