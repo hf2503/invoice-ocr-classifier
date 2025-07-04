@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 from dotenv import load_dotenv
+load_dotenv()
+
 
 #project_path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,9 +41,9 @@ LIST_TVA_NEW_SUPPLIER = list(dg['ID_TVA'])
 
 
 #tesseract_path
-load_dotenv()
-TESSERACT_PATH = os.getenv("TESSERACT_PATH", "tesseract")
 
+TESSERACT_PATH = os.getenv("TESSERACT_PATH", "tesseract")
+#TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 #constant
 NEW_SUPPLIER = "new_supplier"
