@@ -8,6 +8,9 @@ from utils import *
 import traceback
 import logging
 
+
+print(f"Tesseract path loaded: {TESSERACT_PATH}")
+
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
