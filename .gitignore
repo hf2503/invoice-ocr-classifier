@@ -16,6 +16,7 @@ data/output/*
 
 #log
 src/invoice_processing.log
+invoice_processing.log
 
 #varaible d'environnement
 .env
