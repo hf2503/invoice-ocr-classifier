@@ -7,11 +7,9 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-log = LoggingMixin().log
-log.info(f"TESSERACT_PATH visible par le DAG: {os.getenv('TESSERACT_PATH')}")
-
-
-from main import batch_invoice_preprocessing
+import config
+from batch_invoice_preprocessing import batch_invoice_preprocessing
+from reclassify_unidentified_invoices import reclassify_unidentified_invoices
 
 def check_path():
     log = LoggingMixin().log
@@ -19,6 +17,8 @@ def check_path():
     log.info(f"TESSERACT_PATH visible par le DAG: {path}")
     print(f"[DEBUG] Tessetact_path = {path} ")
     
+
+
 
 with DAG(
     dag_id = "lux_invoice",
@@ -37,3 +37,11 @@ with DAG(
         python_callable=batch_invoice_preprocessing
     )
     
+    reclassify_invoices = PythonOperator(
+        task_id = "reclassify_invoice",
+        python_callable=reclassify_unidentified_invoices,
+        op_kwargs={"input_new":config.OUTPUT_DIR}
+        
+    )
+    
+check_path_task >> invoice_task >> reclassify_invoices
