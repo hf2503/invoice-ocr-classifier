@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import platform
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -41,9 +42,14 @@ LIST_TVA_NEW_SUPPLIER = list(dg['ID_TVA'])
 
 
 #tesseract_path
+system = platform.system()
 
-TESSERACT_PATH = os.getenv("TESSERACT_PATH", "tesseract")
-#TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+if system == 'Windows':
+    TESSERACT_PATH = os.getenv("TESSERACT_PATH_WIN", "tesseract")
+
+else:
+    TESSERACT_PATH = os.getenv("TESSERACT_PATH_LINUX", "tesseract")
+    
 
 #constant
 NEW_SUPPLIER = "new_supplier"
