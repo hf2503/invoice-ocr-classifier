@@ -64,9 +64,9 @@ def reclassify_unidentified_invoices(input_new:str,
                             os.remove(new_path)
                             logging.info("file %s moved and removed",new_path)
             
-            else :
-                logging.warning("Supplier not identified for file %s", new_path)
-                continue
+                        else :
+                            logging.warning("Supplier not identified for file %s", new_path)
+                            
             
     else:
         logging.info("No new companies found in input directory.")
