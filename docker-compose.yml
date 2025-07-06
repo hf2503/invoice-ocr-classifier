@@ -24,6 +24,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
       - airflow-logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
 
   airflow-webserver:
     image: my-image_airflow
@@ -44,6 +45,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
       - airflow-logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
     command: webserver
 
   airflow-scheduler:
@@ -59,6 +61,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
       - airflow-logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
     command: scheduler
 
 
