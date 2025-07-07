@@ -19,7 +19,7 @@ src/invoice_processing.log
 invoice_processing.log
 
 #varaible d'environnement
-.env
+#.env
 
 #dossier
 FACTURES FOURNISSEURS LUXEMBOURG 2025
