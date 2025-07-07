@@ -28,6 +28,8 @@ def check_invoice(text):
     return "verifie le" in text.lower()
 
 def check_company(text:str,
+                  company_list_name_invoice_guillaume,
+                  company_list_tva_guillaume,
                   company_list_name_invoice,
                   company_list_tva):
     """check
@@ -39,17 +41,17 @@ def check_company(text:str,
     """
     clean_text = text.lower().replace(" ","").replace("-","")
 
+    for company_name_gui,tva_company_gui in zip(company_list_name_invoice_guillaume,
+                                                company_list_tva_guillaume):
+          if company_name_gui.lower().replace(" ","") in clean_text:
+              return company_name_gui
+          elif tva_company_gui.lower().replace(" ", "") in clean_text:
+              return 'new_company_gui'
+          
     for company_name,tva_company in zip(company_list_name_invoice,company_list_tva):
-
         if (company_name.lower().replace(" ","") in clean_text or 
-            tva_company.lower().replace(" ","") in clean_text 
-            ):
+            tva_company.lower().replace(" ","") in clean_text ):
             return company_name
-
-        # if company_name.lower() in text.lower():
-        #     return company_name
-
-    company_name = 'new_company'
 
     return 'new_company'
 
@@ -113,6 +115,29 @@ def make_directory_company(output_dir,directory):
     else:
         print(f"dossier {directory} déjà existant")
         return path
+
+
+def make_directory_mother_company(output_dir,mother_company,directory):
+    """
+    Create a directory if it doesn't exist.
+
+    Args:
+        directory (str): The path of the directory to be created.
+
+    Returns:
+        path
+    """
+    path = os.path.join(output_dir,mother_company,directory)
+    print(path)
+    
+    if not (os.path.exists(path)):
+        os.makedirs(path)
+        print(f"dossier {directory} créé")
+        return path
+    else:
+        print(f"dossier {directory} déjà existant")
+        return path
+
 
 
 def make_directory_supply(directory_company,directory_supplier):

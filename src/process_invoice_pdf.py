@@ -23,7 +23,12 @@ logging.getLogger('PIL').setLevel(logging.WARNING)
 pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 
 def process_invoice_pdf(input_pdf:str,
+                        parent_company_gui = config.PARENT_COMPANY,
+                        company_csv_gui = config.company_guillaume,
                         company_csv = config.company_df,
+                        company_invoice_gui = config.LIST_COMPANY_NAME_INVOICE_GUILLAUME,
+                        company_directory_gui = config.LIST_COMPANY_NAME_DIRECTORY_GUILLAUME,
+                        company_tva_gui = config.LIST_COMPANY_TVA_GUILLAUME,
                         company_invoice=config.LIST_COMPANY_NAME_INVOICE,
                         company_directory=config.LIST_COMPANY_NAME_DIRECTORY,
                         company_tva = config.LIST_COMPANY_TVA,
@@ -58,8 +63,12 @@ def process_invoice_pdf(input_pdf:str,
         
         if check_invoice(text):
 
+            directory_company_path = None
+
             #company detection
             company_name = check_company(text,
+                                         company_list_name_invoice_guillaume=company_invoice_gui,
+                                         company_list_tva_guillaume=company_tva_gui,
                                          company_list_name_invoice=company_invoice,
                                          company_list_tva=company_tva
                                          )
@@ -68,18 +77,38 @@ def process_invoice_pdf(input_pdf:str,
             logging.debug("Detected company name : %s", company_name)
 
 
-            directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
-            
-            if len(directory_company_match):
-                print(directory_company_match)
-                directory_company = directory_company_match[0]   
-                directory_company_path = make_directory_company(output_dir,directory_company)
-                logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
-                print(directory_company_path)
-            
+
+            if company_name in company_invoice_gui or company_name == 'new_company_gui':
+
+                directory_company_match = company_csv_gui.loc[company_csv_gui['company_name_invoice'] == company_name,'company_name_registery'].values
+
+                if len(directory_company_match):
+                    print(directory_company_match)
+                    directory_company = directory_company_match[0]   
+                    directory_company_path = make_directory_mother_company(output_dir,parent_company_gui,directory_company)
+                    logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
+                    print(directory_company_path)
+                
+                else:
+                    logging.debug("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
+                    directory_company_path = make_directory_mother_company(output_dir,parent_company_gui,new_company)
+
+
+            elif company_name in company_invoice or company_name == 'new_company':
+                directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
+                if len(directory_company_match):
+                    print(directory_company_match)
+                    directory_company = directory_company_match[0]   
+                    directory_company_path = make_directory_company(output_dir,directory_company)
+                    logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
+                    print(directory_company_path)
+                else:
+                    logging.debug("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
+                    directory_company_path = make_directory_company(output_dir,new_company)
+
             else:
-                logging.warning("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
-                directory_company_path = make_directory_company(output_dir,new_company)
+                logging.warning("company name '%s' not matched anywhere; fallback to '%s'", company_name, new_company)
+                directory_company_path = make_directory_company(output_dir, new_company)
 
 
 
