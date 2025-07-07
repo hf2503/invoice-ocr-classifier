@@ -41,12 +41,12 @@ def check_company(text:str,
     """
     clean_text = text.lower().replace(" ","").replace("-","")
 
-    for company_name_gui,tva_company_gui in zip(company_list_name_invoice_guillaume,
-                                                company_list_tva_guillaume):
-          if company_name_gui.lower().replace(" ","") in clean_text:
-              return company_name_gui
-          elif tva_company_gui.lower().replace(" ", "") in clean_text:
-              return 'new_company_gui'
+    # for company_name_gui,tva_company_gui in zip(company_list_name_invoice_guillaume,
+    #                                             company_list_tva_guillaume):
+    #       if company_name_gui.lower().replace(" ","") in clean_text:
+    #           return company_name_gui
+    #       elif tva_company_gui.lower().replace(" ", "") in clean_text:
+    #           return 'new_company_gui'
           
     for company_name,tva_company in zip(company_list_name_invoice,company_list_tva):
         if (company_name.lower().replace(" ","") in clean_text or 
