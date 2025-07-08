@@ -18,10 +18,10 @@ logging.basicConfig(
 
 
 
-def reclassify_unidentified_invoices(input_new:str,
-                                              new_company_list=config.LIST_NEW_SUPPLIER,
-                                              tva_new_supplier_list=config.LIST_TVA_NEW_SUPPLIER,
-                                              new_supplier=config.NEW_SUPPLIER):
+def reclassify_unidentified_invoices(output_classifier:str,
+                                     new_company_list=config.LIST_NEW_SUPPLIER,
+                                     tva_new_supplier_list=config.LIST_TVA_NEW_SUPPLIER,
+                                     new_supplier=config.NEW_SUPPLIER):
     """reclassify the invoice in the director
     when the csv LIST_SUPPLIER is update
 
@@ -30,11 +30,11 @@ def reclassify_unidentified_invoices(input_new:str,
     """
     
     
-    if os.listdir(input_new):
-        logging.info("found directories in input:%s",os.listdir(input_new))
-        list_direcories_input = os.listdir(input_new)
+    if os.listdir(output_classifier):
+        logging.info("found directories in input:%s",os.listdir(output_classifier))
+        list_direcories_input = os.listdir(output_classifier)
         for directory in list_direcories_input:
-            path_directory_supply = os.path.join(input_new,directory)
+            path_directory_supply = os.path.join(output_classifier,directory)
             list_directories_supply = os.listdir(path_directory_supply)
             
             for new_s in list_directories_supply:
