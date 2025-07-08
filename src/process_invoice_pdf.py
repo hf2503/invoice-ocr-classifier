@@ -24,11 +24,11 @@ pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 
 def process_invoice_pdf(input_pdf:str,
                         company_csv = config.company_df,
-                        company_invoice=config.LIST_COMPANY_NAME_INVOICE,
-                        company_tva = config.LIST_COMPANY_TVA,
+                        list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
+                        list_company_tva = config.LIST_COMPANY_TVA,
                         output_dir= config.OUTPUT_DIR,
-                        supplier= config.LIST_SUPPLIER,
-                        tva_supplier_list= config.LIST_TVA_SUPPLIER,
+                        list_supplier= config.LIST_SUPPLIER,
+                        list_tva_supplier= config.LIST_TVA_SUPPLIER,
                         new_supplier= config.NEW_SUPPLIER,
                         new_company= config.NEW_COMPANY
                         ):
@@ -63,34 +63,52 @@ def process_invoice_pdf(input_pdf:str,
             #company detection
             company_name = check_company(text,
                                          company_df=company_csv,
-                                         company_list_name_invoice=company_invoice,
-                                         company_list_tva=company_tva,
+                                         company_list_name_invoice=list_company_invoice,
+                                         company_list_tva=list_company_tva,
                                          new_company=new_company
                                          )
             
 
             logging.debug("Detected company name : %s", company_name)
 
-            if isinstance(company_name, tuple):
-                
-                directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
+            print(f"company name : {company_name}")
 
-                if len(directory_company_match):
-                    print(directory_company_match)
-                    directory_parent_company = directory_company_match[-1]
-                    directory_company = directory_company_match[1]   
+            if isinstance(company_name, tuple) :
+
+                directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
+                directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
+                
+                if directory_company_match.size > 0:
+
+                    logging.debug("directory_company_match: %s",directory_company_match)
+
+                    directory_parent_company = directory_parent_match[0]
+
+                    logging.debug("directory_parent_company:%s:",directory_parent_company)
+
+                    directory_company = directory_company_match[0]  
+
+                    logging.debug("ddirectory_company:%s:",directory_company)
+
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
+
+                    logging.debug("directory_company_path:%s:",directory_company_path)
+
                     logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                     print(directory_company_path)
                 
                 else:
-                    logging.debug("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
-                    directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,new_company)
+                    logging.info("company_name[1] : %s",company_name[1])
+                    logging.info("company_name[0] : %s",company_name[0])
+                    logging.debug("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
+                    directory_parent_company = company_name[0]
+                    directory_company = company_name[1]
+                    directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,company_name[1])
 
-        
-            elif company_name in company_invoice or company_name == 'new_company':
+
+            elif company_name in list_company_invoice or company_name == 'new_company':
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
-                if len(directory_company_match):
+                if directory_company_match.size > 0:
                     print(directory_company_match)
                     directory_company = directory_company_match[0]   
                     directory_company_path = make_directory_company(output_dir,directory_company)
@@ -107,7 +125,7 @@ def process_invoice_pdf(input_pdf:str,
 
 
             #supplier detection
-            supplier_name = check_supplier(text,supplier_list=supplier,tva_supplier_list=tva_supplier_list)
+            supplier_name = check_supplier(text,supplier_list=list_supplier,tva_supplier_list=list_tva_supplier)
 
             if supplier_name:
                 norm_name = normalise_supply_name(text = supplier_name)
