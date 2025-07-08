@@ -28,10 +28,10 @@ def check_invoice(text):
     return "verifie le" in text.lower()
 
 def check_company(text:str,
-                  company_list_name_invoice_guillaume,
-                  company_list_tva_guillaume,
+                  company_df,
                   company_list_name_invoice,
-                  company_list_tva):
+                  company_list_tva,
+                  new_company):
     """check
 
     Args:
@@ -40,6 +40,38 @@ def check_company(text:str,
         company_list_name_registery (_type_): _description_
     """
     clean_text = text.lower().replace(" ","").replace("-","")
+    
+    for index, row in company_df.iterrows():
+        print(row['company_name_invoice'])
+        company_name_invoice = row['company_name_invoice'].lower().replace(" ","").replace("-","")
+        tva_company = row['ID_TVA'].lower().replace(" ","")
+        
+        if company_name_invoice in clean_text and tva_company in company_list_tva and row['parent_company'] !=0:
+            return (row['parent_company'],company_name_invoice)
+        
+        elif company_name_invoice in clean_text and row['parent_company']!=0:
+            return (row['parent_company'],company_name_invoice)
+        
+        elif row['parent_company'] != 0:
+            return (row['parent_company'],new_company)
+        
+        elif company_name_invoice in clean_text and tva_company in company_list_tva :
+            return company_name_invoice
+        
+        elif tva_company and not row['parent_company']:
+            return company_list_name_invoice
+        
+        elif company_name_invoice in clean_text and not row['parent_company']:
+            return company_list_name_invoice
+        
+        elif row['parent_company'] ==0:
+            return new_company
+    
+    return new_company  
+            
+            
+            
+        
 
     # for company_name_gui,tva_company_gui in zip(company_list_name_invoice_guillaume,
     #                                             company_list_tva_guillaume):
@@ -47,13 +79,12 @@ def check_company(text:str,
     #           return company_name_gui
     #       elif tva_company_gui.lower().replace(" ", "") in clean_text:
     #           return 'new_company_gui'
-          
-    for company_name,tva_company in zip(company_list_name_invoice,company_list_tva):
-        if (company_name.lower().replace(" ","") in clean_text or 
-            tva_company.lower().replace(" ","") in clean_text ):
-            return company_name
 
-    return 'new_company'
+    # for company_name,tva_company in zip(company_list_name_invoice,company_list_tva):
+    #     if (company_name.lower().replace(" ","") in clean_text or 
+    #         tva_company.lower().replace(" ","") in clean_text ):
+    #         return company_name
+
 
 
 def check_supplier(text:str,
