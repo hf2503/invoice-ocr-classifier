@@ -1,8 +1,20 @@
+import pandas as pd
 import os
 import re
 import pytesseract
 from pdf2image import convert_from_path
 from config import OUTPUT_DIR #,LIST_COMPANY,INPUT_PDF
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler('logs/invoice_processing.log',mode='a',encoding='utf_8'),
+        logging.StreamHandler()
+    ]
+)
+
 
 def convert_pdf_to_PIL(input_pdf:str):
     if not os.path.exists(input_pdf):
@@ -28,10 +40,10 @@ def check_invoice(text):
     return "verifie le" in text.lower()
 
 def check_company(text:str,
-                  company_df,
-                  company_list_name_invoice,
-                  company_list_tva,
-                  new_company):
+                  company_df:pd.DataFrame,
+                  company_list_name_invoice: list,
+                  company_list_tva: list,
+                  new_company: str):
     """check
 
     Args:
@@ -40,51 +52,26 @@ def check_company(text:str,
         company_list_name_registery (_type_): _description_
     """
     clean_text = text.lower().replace(" ","").replace("-","")
+
+    if company_df.isna():
+        company_df = company_df.fillna('0')
+        logging.warning()
+
     
     for index, row in company_df.iterrows():
-        print(row['company_name_invoice'])
         company_name_invoice = row['company_name_invoice'].lower().replace(" ","").replace("-","")
         tva_company = row['ID_TVA'].lower().replace(" ","")
-        
-        if company_name_invoice in clean_text and tva_company in company_list_tva and row['parent_company'] !=0:
-            return (row['parent_company'],company_name_invoice)
-        
-        elif company_name_invoice in clean_text and row['parent_company']!=0:
-            return (row['parent_company'],company_name_invoice)
-        
-        elif row['parent_company'] != 0:
-            return (row['parent_company'],new_company)
-        
-        elif company_name_invoice in clean_text and tva_company in company_list_tva :
-            return company_name_invoice
-        
-        elif tva_company and not row['parent_company']:
-            return company_list_name_invoice
-        
-        elif company_name_invoice in clean_text and not row['parent_company']:
-            return company_list_name_invoice
-        
-        elif row['parent_company'] ==0:
-            return new_company
+        parent_company = row.get('parent_company',"")
+        logging.info("parent_company : %s",parent_company)
+
+        if company_name_invoice in clean_text or tva_company in clean_text:
+            if parent_company!="0":
+                #we take back row['company_name_invoice'] because we need the raw name
+                return (parent_company,row['company_name_invoice'])
+            else:
+                return row['company_name_invoice']
     
-    return new_company  
-            
-            
-            
-        
-
-    # for company_name_gui,tva_company_gui in zip(company_list_name_invoice_guillaume,
-    #                                             company_list_tva_guillaume):
-    #       if company_name_gui.lower().replace(" ","") in clean_text:
-    #           return company_name_gui
-    #       elif tva_company_gui.lower().replace(" ", "") in clean_text:
-    #           return 'new_company_gui'
-
-    # for company_name,tva_company in zip(company_list_name_invoice,company_list_tva):
-    #     if (company_name.lower().replace(" ","") in clean_text or 
-    #         tva_company.lower().replace(" ","") in clean_text ):
-    #         return company_name
-
+    return new_company
 
 
 def check_supplier(text:str,
