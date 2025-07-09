@@ -1,7 +1,8 @@
 entreprise,ID_TVA
 agimex,LU30148542
 atelier_de_reliure,LU32492171
-3c payment,LU28264772
+BMW,LU21427047
+3c_payment,LU28264772
 LS_avocat_a_la_cour,LU23014984
 bilia,LU21427047
 bouvy,LU18342585
@@ -43,11 +44,12 @@ muller&wegener,LU10720347
 nespresso,LU214435442
 ogc,LU25176775
 olinn,LU10467309
-otis,LU133882226
+otis,LU13388226
 amicale_des_pompiers,amical@cisma.lu
 pantoon,LU10403280
 Parkolux,19772201500
-post telecom,LU15558109
+payconiq,LU10003600
+post_telecom,LU15558109
 reiserbann,LU32255115
 reckinger,LU16970874
 reinert,LU17542506
@@ -57,9 +59,8 @@ scapa,FR23537871535
 schaller,LU18405806
 scheidt&bachmann,LU30172414
 schindler,LU11059658
-sd_workx,LU19477139
+sd_worx,LU19477139
 separc,LU17639800
-service_eaux_luxembourg,LU10355144
 snct,LU251806425
 steinhauser,20082239260
 stoll,LU19306019
@@ -69,6 +70,12 @@ sudenergie,LU320026185595897600
 taxes_communales_dechets_vdl,LU9801415100
 taxes_communales_grand_duche,LU10286570
 taxes_communales_differdange,LU10284954
+taxe_communale,LU10355144
+taxe_communale_eau_theatre,eau-guichets@vdl.lu
+taxe_communale_eau_theatre,LU10355144
+Service_biens_communaux,biens@vdl.lu
+snct,LU391111700891660000
+socom,LU16208516
 uma,LU30153200
 uncos,LU23553238
 vigicore,LU21992809
