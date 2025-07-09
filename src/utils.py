@@ -1,4 +1,5 @@
 import pandas as pd
+import unicodedata
 import os
 import re
 import pytesseract
@@ -51,15 +52,22 @@ def check_company(text:str,
         company_list_name_invoice (_type_): _description_
         company_list_name_registery (_type_): _description_
     """
-    clean_text = text.lower().replace(" ","").replace("-","")
+    
+ 
+    
+    text = text.lower()
+    clean_text = unicodedata.normalize('NFKD',text).encode('ascii','ignore').decode('utf-8')
+    # text = text.replace("-", " ").replace("_", " ")
+    # clean_text = text.strip()
+    
 
-    if company_df.isna():
-        company_df = company_df.fillna('0')
-        logging.warning()
+    # if company_df.isna().sum() > 0:
+    #     company_df = company_df.fillna('0')
+    #     logging.warning()
 
     
     for index, row in company_df.iterrows():
-        company_name_invoice = row['company_name_invoice'].lower().replace(" ","").replace("-","")
+        company_name_invoice = row['company_name_invoice'].lower().replace(" ","").replace("-","").replace("_","")
         tva_company = row['ID_TVA'].lower().replace(" ","")
         parent_company = row.get('parent_company',"")
         logging.info("parent_company : %s",parent_company)
@@ -84,12 +92,18 @@ def check_supplier(text:str,
         company name or None
 
     """    
-    clean_text = text.lower().replace(" ","").replace("-","")
+    text = text.lower()
+    text = unicodedata.normalize('NFKD',text).encode('ascii','ignore').decode('utf-8')
+    text = text.replace("-", " ").replace("_", " ")
+    clean_text = text.strip()
+    
+
     
     for supplier_name,tva_supplier in zip(supplier_list,tva_supplier_list):
         if (supplier_name.lower().replace(" ","") in clean_text or 
             tva_supplier.lower().replace(" ","") in clean_text 
             ):
+            print(tva_supplier.lower())
             return supplier_name
     
     return None

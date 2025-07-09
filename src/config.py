@@ -21,7 +21,7 @@ print(OUTPUT_DIR)
 
 
 #csv path
-SUPPLIER_CSV = os.path.join(BASE_DIR,"data","supplier.csv")
+SUPPLIER_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
 SUPPLIER_COPY_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
 COMPANY_LIST_CSV = os.path.join(BASE_DIR,"data","list_company.csv")
 COMPANY_LIST_GUILLAUME_CSV = os.path.join(BASE_DIR,"data","list_company_guillaume.csv")
