@@ -59,9 +59,9 @@ def process_invoice_pdf(input_pdf:str,
 
             directory_company_path = None
             directory_parent_company = None
-
+            clean_text_ocr = clean_text(text)
             #company detection
-            company_name = check_company(text,
+            company_name = check_company(clean_text_ocr,
                                          company_df=company_csv,
                                          company_list_name_invoice=list_company_invoice,
                                          company_list_tva=list_company_tva,
@@ -80,19 +80,19 @@ def process_invoice_pdf(input_pdf:str,
                 
                 if directory_company_match.size > 0:
 
-                    logging.debug("directory_company_match: %s",directory_company_match)
+                    logging.info("directory_company_match: %s",directory_company_match)
 
                     directory_parent_company = directory_parent_match[0]
 
-                    logging.debug("directory_parent_company:%s:",directory_parent_company)
+                    logging.info("directory_parent_company:%s:",directory_parent_company)
 
                     directory_company = directory_company_match[0]  
 
-                    logging.debug("ddirectory_company:%s:",directory_company)
+                    logging.info("ddirectory_company:%s:",directory_company)
 
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
 
-                    logging.debug("directory_company_path:%s:",directory_company_path)
+                    logging.info("directory_company_path:%s:",directory_company_path)
 
                     logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                     print(directory_company_path)
@@ -100,7 +100,7 @@ def process_invoice_pdf(input_pdf:str,
                 else:
                     logging.info("company_name[1] : %s",company_name[1])
                     logging.info("company_name[0] : %s",company_name[0])
-                    logging.debug("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
+                    logging.info("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
                     directory_parent_company = company_name[0]
                     directory_company = company_name[1]
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,company_name[1])
@@ -115,7 +115,7 @@ def process_invoice_pdf(input_pdf:str,
                     logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                     print(directory_company_path)
                 else:
-                    logging.debug("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
+                    logging.info("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
                     directory_company_path = make_directory_company(output_dir,new_company)
 
             else:
@@ -125,7 +125,7 @@ def process_invoice_pdf(input_pdf:str,
 
 
             #supplier detection
-            supplier_name = check_supplier(text,supplier_list=list_supplier,tva_supplier_list=list_tva_supplier)
+            supplier_name = check_supplier(clean_text_ocr,supplier_list=list_supplier,tva_supplier_list=list_tva_supplier)
 
             if supplier_name:
                 norm_name = normalise_supply_name(text = supplier_name)
