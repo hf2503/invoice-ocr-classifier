@@ -24,21 +24,24 @@ print(OUTPUT_DIR)
 SUPPLIER_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
 SUPPLIER_COPY_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
 COMPANY_LIST_CSV = os.path.join(BASE_DIR,"data","list_company.csv")
-COMPANY_LIST_GUILLAUME_CSV = os.path.join(BASE_DIR,"data","list_company_guillaume.csv")
+#COMPANY_LIST_GUILLAUME_CSV = os.path.join(BASE_DIR,"data","list_company_guillaume.csv")
+
+#database path for train:
+TRAIN_DIR = os.path.join(BASE_DIR,"data","train")
 
 #read csv
 df = pd.read_csv(SUPPLIER_CSV,sep=',')
 dg = pd.read_csv(SUPPLIER_COPY_CSV,sep=',')
 company_df = pd.read_csv(COMPANY_LIST_CSV,sep=',')
-company_guillaume = pd.read_csv(COMPANY_LIST_GUILLAUME_CSV,sep=',')
+#company_guillaume = pd.read_csv(COMPANY_LIST_GUILLAUME_CSV,sep=',')
 
 LIST_COMPANY_NAME_INVOICE = list(company_df['company_name_invoice'])
 LIST_COMPANY_NAME_DIRECTORY = list(company_df['company_name_registery'])
 LIST_COMPANY_TVA = list(company_df['ID_TVA'])
 
-LIST_COMPANY_NAME_INVOICE_GUILLAUME = list(company_guillaume['company_name_invoice'])
-LIST_COMPANY_NAME_DIRECTORY_GUILLAUME = list(company_guillaume['company_name_registery'])
-LIST_COMPANY_TVA_GUILLAUME = list(company_guillaume['ID_TVA'])
+#LIST_COMPANY_NAME_INVOICE_GUILLAUME = list(company_guillaume['company_name_invoice'])
+#LIST_COMPANY_NAME_DIRECTORY_GUILLAUME = list(company_guillaume['company_name_registery'])
+#LIST_COMPANY_TVA_GUILLAUME = list(company_guillaume['ID_TVA'])
 PARENT_COMPANY = 'SPG'
 
 

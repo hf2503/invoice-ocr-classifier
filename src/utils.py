@@ -17,9 +17,6 @@ logging.basicConfig(
     ]
 )
 
-
-
-
 def convert_pdf_to_PIL(input_pdf:str):
 
     if not os.path.exists(input_pdf):
@@ -34,12 +31,11 @@ def convert_pdf_to_PIL(input_pdf:str):
 
 def clean_text(text:str):
 
-    text = str(text)
-    text =  text.lower()
-    text = unicodedata.normalize('NFKD',text)
-    text = text.encode('ascii','ignore').decode('utf-8')
-    text = text.replace("-"," ").replace("_"," ")
-    text = re.sub(r"[^\w\s]","",text)
+    text = str(text).lower()
+    text = unicodedata.normalize('NFKD', text)  # enlève accents
+    text = text.encode('ascii', 'ignore').decode('utf-8')  # remove non-ascii
+    text = text.replace("-", " ").replace("_", " ")  # standardise séparateurs
+    text = re.sub(r"[^\w\s]", "", text)  # supprime ponctuation
     return text.strip()
 
 def match_word(text:str,
@@ -74,13 +70,6 @@ def check_company(text:str,
         company_list_name_invoice (_type_): _description_
         company_list_name_registery (_type_): _description_
     """
-    
-    #clean_text_ocr = clean_text(text)
-    
-    # text = text.lower()
-    # clean_text = unicodedata.normalize('NFKD',text).encode('ascii','ignore').decode('utf-8')
-    # text = text.replace("-", " ").replace("_", " ")
-    # clean_text = text.strip()
 
     
     for index, row in company_df.iterrows():
@@ -89,29 +78,26 @@ def check_company(text:str,
         parent_company = row.get('parent_company',"")
 
 
-
-        # company_name_invoice = row['company_name_invoice'].lower().replace(" ","").replace("-","").replace("_","")
-        # tva_company = row['ID_TVA'].lower().replace(" ","")
-        # parent_company = row.get('parent_company',"")
         score_match_company = match_word(text,company_name_invoice)
-        print(f"company_name :{row['company_name_invoice']}")
-        print(f"score_match_company:{score_match_company}")
+        score_tva_company = match_word(text,tva_company)
+        logging.info("company_name_loop : %s :, %s",company_name_invoice,score_match_company)
 
 
 
-        if score_match_company > 85 or tva_company in text:
-            if parent_company!="0":
-                return (parent_company,row['company_name_invoice'])
+        if score_match_company ==100 or score_tva_company ==100:
+            if pd.notna(parent_company) and str(parent_company) != "0":
+                if pd.notna(row['company_name_invoice']):
+                    return (parent_company, row['company_name_invoice'])   
+                else:
+                    logging.warning("Matched parent company but company_name_invoice is NaN.")
+                    return new_company
             else:
-                return row['company_name_invoice']
+                if pd.notna(row['company_name_invoice']):
+                    return row['company_name_invoice']
+                else:
+                    logging.warning("Matched company but company_name_invoice is NaN.")
+                    return new_company
 
-
-        # if company_name_invoice in clean_text_ocr or tva_company in clean_text:
-        #     if parent_company!="0":
-        #         #we take back row['company_name_invoice'] because we need the raw name
-        #         return (parent_company,row['company_name_invoice'])
-        #     else:
-        #         return row['company_name_invoice']
     
     return new_company
 
@@ -126,31 +112,20 @@ def check_supplier(text:str,
         company name or None
 
     """    
-    # text = text.lower()
-    # text = unicodedata.normalize('NFKD',text).encode('ascii','ignore').decode('utf-8')
-    # text = text.replace("-", " ").replace("_", " ")
-    # clean_text = text.strip()
+
     for supplier_name,tva_supplier in zip(supplier_list,tva_supplier_list):
         clean_supplier_name = clean_text(supplier_name)
         clean_tva_supplier = clean_text(tva_supplier)
 
         score_match_supplier = match_word(text,clean_supplier_name)
-        score_tva_supplier = match_word(text,clean_supplier_name)
+        score_tva_supplier = match_word(text,clean_tva_supplier)
         print(f"supplier_name :{supplier_name} : {score_match_supplier}")
 
 
-        if (score_match_supplier > 85 or score_tva_supplier == 100):
+        if (score_match_supplier == 100 or score_tva_supplier == 100):
             logging.info("supplier_name:%s",supplier_name)
             logging.info("tva_supplier:%s",tva_supplier)
             return supplier_name
-
-    
-    # for supplier_name,tva_supplier in zip(supplier_list,tva_supplier_list):
-    #     if (supplier_name.lower().replace(" ","") in text or 
-    #         tva_supplier.lower().replace(" ","") in text
-    #         ):
-    #         print(tva_supplier.lower())
-    #         return supplier_name
     
     return None
 

@@ -4,6 +4,7 @@ import os
 import logging
 import config
 from utils import *
+import csv
 
 
 print(f"Tesseract path loaded: {config.TESSERACT_PATH}")
@@ -20,9 +21,21 @@ logging.basicConfig(
 #desactivate the debug message of pillow in the file invoice_processing.log
 logging.getLogger('PIL').setLevel(logging.WARNING)
 
+
+#Pytesseract_path
 pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 
+#creation Train_dir 
+os.makedirs(config.TRAIN_DIR,exist_ok = True)
+
+#dictionnary_list:
+row_list = []
+
+
+
+
 def process_invoice_pdf(input_pdf:str,
+                        train_dir=config.TRAIN_DIR,
                         company_csv = config.company_df,
                         list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
                         list_company_tva = config.LIST_COMPANY_TVA,
@@ -42,13 +55,15 @@ def process_invoice_pdf(input_pdf:str,
         logging.error("file %s not found",input_pdf)
         raise FileNotFoundError(f"the file {input_pdf} is not found")
     
-    
+    #convert pdf into image
     images = convert_pdf_to_PIL(input_pdf)
     
     for i,image in enumerate(images):
+        image_rgb = image.convert("RGB")
         
+        #convert image to string
         try:
-            text = pytesseract.image_to_string(image)
+            text = pytesseract.image_to_string(image_rgb)
         except Exception as e:
             
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
@@ -57,10 +72,26 @@ def process_invoice_pdf(input_pdf:str,
         
         if check_invoice(text):
 
+            #feature_dictionnary
+            row={}
+
+
+            #-----------SAVED IMAGE------------
+            image_filename = f"{os.path.basename(input_pdf)[0:8]}_{i+1}.png"
+            train_image_path = os.path.join(train_dir,image_filename)
+            image.save(train_image_path)
+            logging.info("l'image est enregistré dans : %s",train_image_path)
+
+
+            #----------feature train_image_path------------
+            row['train_image_path'] = image_filename
+
             directory_company_path = None
             directory_parent_company = None
             clean_text_ocr = clean_text(text)
-            #company detection
+
+
+            #----- COMPANY DETECTION--------
             company_name = check_company(clean_text_ocr,
                                          company_df=company_csv,
                                          company_list_name_invoice=list_company_invoice,
@@ -73,16 +104,28 @@ def process_invoice_pdf(input_pdf:str,
 
             print(f"company name : {company_name}")
 
+
             if isinstance(company_name, tuple) :
 
                 directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
+
+                logging.info("directory_company_match_size: %s",directory_company_match.size)
                 
-                if directory_company_match.size > 0:
+                if directory_company_match.size > 1 :
 
                     logging.info("directory_company_match: %s",directory_company_match)
 
                     directory_parent_company = directory_parent_match[0]
+
+                    #------------feature parent_company-----------
+
+                    row['parent_company'] = directory_parent_match[0]
+
+
+                    #------feature company_name-------
+
+                    row['company_name'] = directory_parent_match[1]
 
                     logging.info("directory_parent_company:%s:",directory_parent_company)
 
@@ -101,6 +144,16 @@ def process_invoice_pdf(input_pdf:str,
                     logging.info("company_name[1] : %s",company_name[1])
                     logging.info("company_name[0] : %s",company_name[0])
                     logging.info("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
+
+                    #------------feature parent_company-----------
+
+                    row['parent_company'] = company_name[0]
+
+                    #------feature company_name-------
+
+                    row['company_name'] = company_name[1]
+
+
                     directory_parent_company = company_name[0]
                     directory_company = company_name[1]
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,company_name[1])
@@ -108,6 +161,11 @@ def process_invoice_pdf(input_pdf:str,
 
             elif company_name in list_company_invoice or company_name == 'new_company':
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
+
+                #------------feature parent_company-----------
+                
+                row['parent_company'] = company_name
+
                 if directory_company_match.size > 0:
                     print(directory_company_match)
                     directory_company = directory_company_match[0]   
@@ -138,6 +196,17 @@ def process_invoice_pdf(input_pdf:str,
             invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
             image.convert('RGB').save(invoice_path)
             logging.info("invoice save to : %s",invoice_path)
+
+            #--------feature supplier_name-------------
+            row['supplier_name'] = norm_name
+
+            row_list.append(row)
      
         else:
             logging.info("invoice's page rejected ")
+    
+    #-------------sauvegarde du dataframe----------------
+    train_data = pd.DataFrame(row_list)
+    train_data_path = os.path.join(train_dir,'train_data.csv')
+    logging.info("train_data.csv enregistré dans %s", train_data_path)
+    train_data.to_csv(train_data_path,index=False,encoding='utf-8')
