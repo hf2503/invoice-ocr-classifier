@@ -12,6 +12,9 @@ __pycache__/
 # Données temporaires
 data/output/*
 
+#data train 
+data/train/*
+train_data/*.csv
 *.pdf
 
 #log
@@ -20,6 +23,7 @@ invoice_processing.log
 
 #varaible d'environnement
 #.env
+.vscode
 
 #dossier
 FACTURES FOURNISSEURS LUXEMBOURG 2025
