@@ -71,12 +71,12 @@ def process_invoice_pdf(input_pdf:str,
         #preprocessing for pytesseract
         img_array = np.array(image_rgb)
         #filtered_image = cv2.bilateralFilter(img_array, 9, 75, 75)
-        # gray_image = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+        gray_image = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         #adaptive_threshold = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 25, 10)
         
         #convert image to string
         try:
-            text = pytesseract.image_to_string(img_array)
+            text = pytesseract.image_to_string(gray_image,config="--psm 6")
             
             
             

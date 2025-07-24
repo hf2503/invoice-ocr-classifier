@@ -163,7 +163,7 @@ def check_supplier(text:str,
         #print(f"supplier_name :{supplier_name} : {score_match_supplier}")
 
 
-        if (score_tva_supplier == 100 or score_match_supplier > 92 ):
+        if (score_tva_supplier == 100 or score_match_supplier > 90 ):
             #logging.info("supplier_name:%s",supplier_name)
             #logging.info("tva_supplier:%s",tva_supplier)
             return supplier_name
