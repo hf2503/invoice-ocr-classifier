@@ -32,7 +32,6 @@ imprimerie_centrale,LU20469685
 jeunesse_d_esch,LU540019500006374000
 kone,LU19882405675
 lavaux,LU2257070
-liminaris,LU22991326
 leo,LU19597485
 Loxam,LU19812006
 luxcontrol,LU12331853
