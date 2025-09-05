@@ -93,6 +93,7 @@ def check_company(text:str,
         
         if score_match_company > 92: #or score_tva_company ==100:
             return row['company_name_invoice']
+            # return row['company_name_registery']
         
     #----------------company with parent company---------------#
     
@@ -109,38 +110,9 @@ def check_company(text:str,
         
         if score_match_company  > 90:
             return (parent_company, row['company_name_invoice'])
+            # return (parent_company, row['company_name_registery'])
         
     return new_company
-        
-    
-    # for index, row in company_df.iterrows():
-    #     company_name_invoice = clean_text(row['company_name_invoice'])
-    #     tva_company = clean_text(row['ID_TVA'])
-    #     parent_company = row.get('parent_company',"")
-
-
-    #     score_match_company = match_word(text,company_name_invoice)
-    #     score_tva_company = match_word(text,tva_company)
-    #     logging.info("company_name_loop : %s :, %s",company_name_invoice,score_match_company)
-
-
-
-    #     if score_match_company ==100 or score_tva_company ==100:
-    #         if pd.notna(parent_company) and str(parent_company) != "0":
-    #             if pd.notna(row['company_name_invoice']):
-    #                 return (parent_company, row['company_name_invoice'])   
-    #             else:
-    #                 logging.warning("Matched parent company but company_name_invoice is NaN.")
-    #                 return new_company
-    #         else:
-    #             if pd.notna(row['company_name_invoice']):
-    #                 return row['company_name_invoice']
-    #             else:
-    #                 logging.warning("Matched company but company_name_invoice is NaN.")
-    #                 return new_company
-
-    
-    # return new_company
 
 
 def check_supplier(text:str,

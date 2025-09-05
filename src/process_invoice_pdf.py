@@ -274,7 +274,8 @@ def process_invoice_pdf(input_pdf:str,
     #-------------sauvegarde du dataframe----------------
     
     # logging.info("row_list %s", row_list)
+    # timestamp_2 = datetime.now().strftime("%Y%m%d_%H%M%S")
     train_data = pd.DataFrame(row_list)
-    train_data_path = os.path.join(train_dir,'train_data.csv')
+    train_data_path = os.path.join(train_dir,f'train_data.csv')
     logging.info("train_data.csv enregistré dans %s", train_data_path)
     train_data.to_csv(train_data_path,index=False,encoding='utf-8')
