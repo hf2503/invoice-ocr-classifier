@@ -28,6 +28,7 @@ COMPANY_LIST_CSV = os.path.join(BASE_DIR,"data","list_company.csv")
 
 #database path for train:
 TRAIN_DIR = os.path.join(BASE_DIR,"data","train")
+TRAIN_FINAL = os.path.join(BASE_DIR,"train_final",'dataset')
 
 #read csv
 df = pd.read_csv(SUPPLIER_CSV,sep=',')
