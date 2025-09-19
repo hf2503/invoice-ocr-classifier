@@ -39,6 +39,7 @@ row_list = []
 
 def process_invoice_pdf(input_pdf:str,
                         train_dir=config.TRAIN_DIR,
+                        train_final= config.TRAIN_FINAL,
                         company_csv = config.company_df,
                         list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
                         list_company_tva = config.LIST_COMPANY_TVA,
@@ -57,7 +58,7 @@ def process_invoice_pdf(input_pdf:str,
     if not os.path.exists(input_pdf):
         logging.error("file %s not found",input_pdf)
         raise FileNotFoundError(f"the file {input_pdf} is not found")
-    
+
    
     #convert pdf into image
     images = convert_pdf_to_PIL(input_pdf)
@@ -96,7 +97,9 @@ def process_invoice_pdf(input_pdf:str,
             #image_filename = f"{os.path.basename(input_pdf)[0:8]}_{i+1}.png"
             image_filename = f"{os.path.basename(input_pdf)}_{i+1}.png"
             train_image_path = os.path.join(train_dir,image_filename)
+            train_image_path_final = os.path.join(train_final,image_filename)
             image.save(train_image_path)
+            image.save(train_image_path_final)
             logging.info("l'image est enregistré dans : %s",train_image_path)
 
 
@@ -226,15 +229,30 @@ def process_invoice_pdf(input_pdf:str,
 
                 #------------feature parent_company-----------
                 
-                row['parent_company'] = company_name
+                #-------------MODIF 19/09/2025-----------
+                
+                #row['parent_company'] = company_name
+                #--------------FIN MODIF ------------------------
 
                 if directory_company_match.size > 0:
-                    print(directory_company_match)
+                    
+                    #-----------MODIF 19/09/2025--------------
+                    print(f"directory_company_match{directory_company_match}")
+                    row['parent_company'] = directory_company_match[0]
+                    
+                    #--------------FIN MODIF ------------------------
+                    
+                    print(f"directory_company_match{directory_company_match}")
                     directory_company = directory_company_match[0]   
                     directory_company_path = make_directory_company(output_dir,directory_company)
                     logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                     print(directory_company_path)
                 else:
+                    #------------MODIF 19/09/2025-------------
+                    row['parent_company'] = new_company
+                    
+                    #--------------FIN MODIF ------------------------
+                    
                     logging.info("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
                     directory_company_path = make_directory_company(output_dir,new_company)
 
@@ -276,6 +294,20 @@ def process_invoice_pdf(input_pdf:str,
     # logging.info("row_list %s", row_list)
     # timestamp_2 = datetime.now().strftime("%Y%m%d_%H%M%S")
     train_data = pd.DataFrame(row_list)
-    train_data_path = os.path.join(train_dir,f'train_data.csv')
-    logging.info("train_data.csv enregistré dans %s", train_data_path)
+    train_data_final = pd.DataFrame(row_list)
+    train_data_path = os.path.join(train_dir,'train_data.csv')
+    train_final_path = os.path.join(train_final,'train_final.csv')
+    
+    if os.path.exists(train_data_path):
+        logging.info("train_data.csv found, appending new_data....")
+        existing_data= pd.read_csv(train_data_path,encoding='utf_8')
+        train_data = pd.concat([existing_data,train_data],ignore_index=True)
+        train_data_final = pd.concat([existing_data,train_data],ignore_index=True)
+    else:
+        logging.info("the file train_data.csv not found, creating a new file ")
+        
+    
+    logging.info(f"train_data.csv updated : n_rows = {train_data.shape[0]} n_columns ={train_data.shape[1]}")
+    
     train_data.to_csv(train_data_path,index=False,encoding='utf-8')
+    train_data_final.to_csv(train_final_path,index=False,encoding='utf-8')
