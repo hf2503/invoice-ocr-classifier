@@ -16,6 +16,7 @@ data/output/*
 data/train/*
 train_data/*.csv
 *.pdf
+train_final/*
 
 #log
 src/invoice_processing.log
