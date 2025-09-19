@@ -7,18 +7,9 @@ load_dotenv()
 
 #project_path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-print(BASE_DIR)
 DATA_DIR = os.path.join(BASE_DIR,'data')
-print(DATA_DIR)
-
 INPUT_PDF_FOLDER = os.path.join(DATA_DIR,'input')
-print(INPUT_PDF_FOLDER)
-# INPUT_NEW_PDF_DIRECTORY = os.path.join()  
-
 OUTPUT_DIR = os.path.join(DATA_DIR,'output')
-print(OUTPUT_DIR)
-
 
 #csv path
 SUPPLIER_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
