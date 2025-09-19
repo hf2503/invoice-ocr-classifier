@@ -172,7 +172,8 @@ def make_directory_company(output_dir,directory):
         path
     """
     path = os.path.join(output_dir,directory)
-    print(path)
+    
+  
     
     if not (os.path.exists(path)):
         os.makedirs(path)
