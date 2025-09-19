@@ -18,6 +18,10 @@ logging.basicConfig(
 
 def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_PDF_FOLDER):
     list_pdf_input_folder = os.listdir(input_pdf_folder)
+        
+    if len(list_pdf_input_folder)==0:
+        print("there are not invoices into the directory input")
+        return None
     
     for filename in list_pdf_input_folder:
         if filename.endswith('.pdf'):
