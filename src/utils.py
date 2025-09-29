@@ -5,8 +5,10 @@ import os
 import re
 import pytesseract
 from pdf2image import convert_from_path
-from config import OUTPUT_DIR #,LIST_COMPANY,INPUT_PDF
 import logging
+
+from .config import OUTPUT_DIR #,LIST_COMPANY,INPUT_PDF
+
 
 logging.basicConfig(
     level=logging.DEBUG,

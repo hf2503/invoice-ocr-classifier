@@ -1,10 +1,11 @@
 import os
 import traceback
-import config
+# import config
 import logging
 
-from process_invoice_pdf import process_invoice_pdf
-from reclassify_unidentified_invoices import reclassify_unidentified_invoices
+from . import config
+from .process_invoice_pdf import process_invoice_pdf
+# from reclassify_unidentified_invoices import reclassify_unidentified_invoices
 
 logging.basicConfig(
     level=logging.DEBUG,

@@ -5,9 +5,10 @@ import cv2
 import os
 from PIL import Image
 import logging
-import config
-from utils import *
 import csv
+
+from . import config
+from .utils import *
 
 
 print(f"Tesseract path loaded: {config.TESSERACT_PATH}")
