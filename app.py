@@ -15,7 +15,7 @@ uploaded_files = st.file_uploader("Déposez vos factures PDF:",type='pdf')
 
 if uploaded_files:
     for file in uploaded_files:
-        save_path = os.path.join(config.INPUT_PDF_FOLDER,file.name)
+        save_path = os.path.join(config.INPUT_PDF_FOLDER,file.decode)
         with open(save_path,'wb') as f:
             f.write(file.getbuffer())
     st.success(f"{len(uploaded_files)} fichier pdf ont été ajoutées au dossier {config.INPUT_PDF_FOLDER}")
@@ -23,7 +23,7 @@ if uploaded_files:
 #---------run processing------------------#
 
 if st.button("traitement des factures", type="primary") :
-    st.spinner(texte='En cours de traitement',show_time=True)
+    st.spinner(text='En cours de traitement',show_time=True)
     batch_invoice_preprocessing(config.INPUT_PDF_FOLDER)
     st.success("traitement terminé")
 
