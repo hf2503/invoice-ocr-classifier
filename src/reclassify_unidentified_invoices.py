@@ -1,10 +1,9 @@
-import config
-from utils import *
 from datetime import datetime
 import pytesseract
 import logging
 
-
+from . import config
+from .utils import *
 
 # Logging
 logging.basicConfig(
