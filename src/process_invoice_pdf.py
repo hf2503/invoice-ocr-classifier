@@ -1,5 +1,6 @@
 import pytesseract
 import numpy as np
+import pandas as pd
 from datetime import datetime
 import cv2
 import os
@@ -37,7 +38,6 @@ row_list = []
 
 
 
-
 def process_invoice_pdf(input_pdf:str,
                         train_dir=config.TRAIN_DIR,
                         train_final= config.TRAIN_FINAL,
@@ -60,7 +60,9 @@ def process_invoice_pdf(input_pdf:str,
         logging.error("file %s not found",input_pdf)
         raise FileNotFoundError(f"the file {input_pdf} is not found")
 
-   
+    #dictionnary_list:
+    row_list = []
+    
     #convert pdf into image
     images = convert_pdf_to_PIL(input_pdf)
     
@@ -292,8 +294,12 @@ def process_invoice_pdf(input_pdf:str,
     
     #-------------sauvegarde du dataframe----------------
     
-    # logging.info("row_list %s", row_list)
-    # timestamp_2 = datetime.now().strftime("%Y%m%d_%H%M%S")
+    #---------------debogage du 29/09/2025-----------------
+     
+    logging.info("size_row_list %s", len(row_list))
+    
+    
+    
     train_data = pd.DataFrame(row_list)
     train_data_final = pd.DataFrame(row_list)
     train_data_path = os.path.join(train_dir,'train_data.csv')
