@@ -14,11 +14,11 @@ st.title("classifieur de factures")
 uploaded_files = st.file_uploader("Déposez vos factures PDF:",type='pdf')
 
 if uploaded_files:
-    for file in uploaded_files:
-        save_path = os.path.join(config.INPUT_PDF_FOLDER,file.decode())
-        with open(save_path,'wb') as f:
-            f.write(file.getbuffer())
-    st.success(f"{len(uploaded_files)} fichier pdf ont été ajoutées au dossier {config.INPUT_PDF_FOLDER}")
+    filename = os.path.basename(uploaded_files.name or "upload.pdf")
+    save_path = os.path.join(config.INPUT_PDF_FOLDER,filename) 
+    with open(save_path,'wb') as f:
+        f.write(uploaded_files.getbuffer())
+    st.success(f"{uploaded_files} fichier pdf ont été ajoutées au dossier {config.INPUT_PDF_FOLDER}")
 
 #---------run processing------------------#
 
