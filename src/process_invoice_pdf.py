@@ -6,7 +6,7 @@ import cv2
 import os
 from PIL import Image
 import logging
-import csv
+
 
 from . import config
 from .utils import *
@@ -74,6 +74,8 @@ def process_invoice_pdf(input_pdf:str,
         
         #preprocessing for pytesseract
         img_array = np.array(image_rgb)
+        
+        
         #filtered_image = cv2.bilateralFilter(img_array, 9, 75, 75)
         gray_image = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         #adaptive_threshold = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 25, 10)
@@ -293,28 +295,23 @@ def process_invoice_pdf(input_pdf:str,
             logging.info("invoice's page rejected ")
     
     #-------------sauvegarde du dataframe----------------
-    
-    #---------------debogage du 29/09/2025-----------------
-     
-    logging.info("size_row_list %s", len(row_list))
-    
-    
-    
+
     train_data = pd.DataFrame(row_list)
-    train_data_final = pd.DataFrame(row_list)
+
+    logging.info(train_data)
+    
     train_data_path = os.path.join(train_dir,'train_data.csv')
     train_final_path = os.path.join(train_final,'train_final.csv')
     
     if os.path.exists(train_data_path):
         logging.info("train_data.csv found, appending new_data....")
-        existing_data= pd.read_csv(train_data_path,encoding='utf_8')
+        existing_data= pd.read_csv(train_data_path,encoding='utf-8')
         train_data = pd.concat([existing_data,train_data],ignore_index=True)
-        train_data_final = pd.concat([existing_data,train_data],ignore_index=True)
     else:
         logging.info("the file train_data.csv not found, creating a new file ")
-        
+        train_data=pd.DataFrame(columns=["train_image_path", "parent_company", "supplier_name"],index=None)
     
     logging.info(f"train_data.csv updated : n_rows = {train_data.shape[0]} n_columns ={train_data.shape[1]}")
     
     train_data.to_csv(train_data_path,index=False,encoding='utf-8')
-    train_data_final.to_csv(train_final_path,index=False,encoding='utf-8')
+    train_data.to_csv(train_final_path,index=False,encoding='utf-8')
