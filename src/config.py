@@ -8,18 +8,21 @@ load_dotenv()
 #project_path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR,'data')
-INPUT_PDF_FOLDER = os.path.join(DATA_DIR,'input')
-OUTPUT_DIR = os.path.join(DATA_DIR,'output')
+INPUT_DIR = os.path.join(DATA_DIR,'factures_brutes')
+OUTPUT_DIR = os.path.join(DATA_DIR,'factures')
+ARCHIVE_DIR = os.path.join(DATA_DIR,'facture_brutes_archivees')
+
 
 #csv path
-SUPPLIER_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
-SUPPLIER_COPY_CSV = os.path.join(BASE_DIR,"data","supplier_copy.csv")
+SUPPLIER_CSV = os.path.join(BASE_DIR,"data","list_supplier.csv")
+SUPPLIER_COPY_CSV = os.path.join(BASE_DIR,"data","list_supplier.csv")
 COMPANY_LIST_CSV = os.path.join(BASE_DIR,"data","list_company.csv")
 #COMPANY_LIST_GUILLAUME_CSV = os.path.join(BASE_DIR,"data","list_company_guillaume.csv")
 
 #database path for train:
 TRAIN_DIR = os.path.join(BASE_DIR,"data","train")
 TRAIN_FINAL = os.path.join(BASE_DIR,"train_final",'dataset')
+ARCHIVE_CSV = os.path.join(BASE_DIR,'data','facture_brutes_archivées')
 
 #read csv
 df = pd.read_csv(SUPPLIER_CSV,sep=',')
