@@ -38,12 +38,17 @@ row_list = []
 
 
 
+
+
+
+
 def process_invoice_pdf(input_pdf:str,
                         train_dir=config.TRAIN_DIR,
                         train_final= config.TRAIN_FINAL,
                         company_csv = config.company_df,
                         list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
                         list_company_tva = config.LIST_COMPANY_TVA,
+                        input_dir = config.INPUT_DIR,
                         output_dir= config.OUTPUT_DIR,
                         list_supplier= config.LIST_SUPPLIER,
                         list_tva_supplier= config.LIST_TVA_SUPPLIER,
@@ -57,6 +62,7 @@ def process_invoice_pdf(input_pdf:str,
         image : invoice image 
     """
     
+    #création des dossiers
     
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(train_final, exist_ok=True) 
