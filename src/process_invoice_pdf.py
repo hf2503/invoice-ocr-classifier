@@ -56,6 +56,12 @@ def process_invoice_pdf(input_pdf:str,
     Args:
         image : invoice image 
     """
+    
+    
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(train_final, exist_ok=True) 
+    os.makedirs(output_dir, exist_ok=True)
+    
     if not os.path.exists(input_pdf):
         logging.error("file %s not found",input_pdf)
         raise FileNotFoundError(f"the file {input_pdf} is not found")
