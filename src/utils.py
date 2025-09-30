@@ -5,9 +5,10 @@ import os
 import re
 import pytesseract
 from pdf2image import convert_from_path
-import logging
+from datetime import datetime
 
-from .config import OUTPUT_DIR #,LIST_COMPANY,INPUT_PDF
+import logging
+import hashlib
 
 
 logging.basicConfig(
@@ -230,4 +231,14 @@ def make_directory_supply(directory_company,directory_supplier):
         print(f"dossier {directory_supplier} déjà existant")
         return path
     
+def extract_SHA1(file_path):
+
+    #création de l'insance de l'algorithme de hachage cryptographqiue
+    h = hashlib.sha1()
+
+    #Hachage du fichier
+    with open(file_path,'rb') as f:
+        data = f.read()
+        h.update(data)
+        return h.hexdigest()
 
