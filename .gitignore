@@ -17,12 +17,13 @@ data/train/*
 train_data/*.csv
 *.pdf
 train_final/*
+data/suivi
 
 #log
 src/invoice_processing.log
 invoice_processing.log
 
-#varaible d'environnement
+#variable d'environnement
 #.env
 .vscode
 
