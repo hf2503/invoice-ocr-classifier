@@ -22,8 +22,9 @@ logging.basicConfig(
 
 def archive_csv(file_path,csv_path=config.ARCHIVE_CSV):
 
-    if not os.path.exists(csv_path):
-        os.path.join(config.ARCHIVE_DIR,csv)
+
+    #vérification que le dossier archive_brute.csv existe
+    os.makedirs(os.path.dirname(csv_path),exist_ok=True)
 
     filename = os.path.basename(file_path)
     now = datetime.now()
@@ -31,16 +32,9 @@ def archive_csv(file_path,csv_path=config.ARCHIVE_CSV):
     heure = now.strftime("%M-%M")
     pdf_hash = extract_SHA1(file_path)
 
-    with open(file_path,'w',newline='') as f :
+    with open(file_path,'a',newline='') as f :
         writer = csv.writer(f,delimiter=';')
         writer.writerow([filename,date,heure,pdf_hash])
-
-
-
-
-
-
-
 
 
 
