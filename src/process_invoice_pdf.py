@@ -6,6 +6,8 @@ import cv2
 import os
 from PIL import Image
 import logging
+import csv
+import datetime
 
 
 from . import config
@@ -30,11 +32,32 @@ logging.getLogger('PIL').setLevel(logging.WARNING)
 #Pytesseract_path
 pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 
-#creation Train_dir 
-os.makedirs(config.TRAIN_DIR,exist_ok = True)
-
 #dictionnary_list:
 row_list = []
+
+def suivi_csv(file_path,csv_path = config.TRAIN_DIR_CSV,row=None):
+
+    #création du dossier suivi
+    os.makedirs(csv_path,exist_ok=True)
+
+    now = datetime.now
+    date = now.strftime("%d-%m-%Y")
+    sha1_pdf = extract_SHA1(file_path)
+
+
+
+
+
+
+    with open(csv_path,'a',delimiter='') as f:
+        writer = csv.writer(f,sep=';')
+        writer.writerow()
+
+
+
+
+
+
 
 
 
@@ -306,14 +329,36 @@ def process_invoice_pdf(input_pdf:str,
         else:
             logging.info("invoice's page rejected ")
     
-    #-------------sauvegarde du dataframe----------------
+    #-------------sauvegarde de la row_list dans le fichier suivi.csv----------------
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     train_data = pd.DataFrame(row_list)
 
     logging.info(train_data)
     
     train_data_path = os.path.join(train_dir,'train_data.csv')
-    train_final_path = os.path.join(train_final,'train_final.csv')
+    # train_final_path = os.path.join(train_final,'train_final.csv')
     
     if os.path.exists(train_data_path):
         logging.info("train_data.csv found, appending new_data....")
@@ -326,4 +371,4 @@ def process_invoice_pdf(input_pdf:str,
     logging.info(f"train_data.csv updated : n_rows = {train_data.shape[0]} n_columns ={train_data.shape[1]}")
     
     train_data.to_csv(train_data_path,index=False,encoding='utf-8')
-    train_data.to_csv(train_final_path,index=False,encoding='utf-8')
+    # train_data.to_csv(train_final_path,index=False,encoding='utf-8')
