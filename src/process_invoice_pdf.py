@@ -38,31 +38,23 @@ row_list = []
 def suivi_csv(file_path,csv_path = config.TRAIN_DIR_CSV,row=None):
 
     #création du dossier suivi
-    os.makedirs(csv_path,exist_ok=True)
+    os.makedirs(os.path.dirname(csv_path),exist_ok=True)
 
-    now = datetime.now
+    now = datetime.now()
     date = now.strftime("%d-%m-%Y")
     sha1_pdf = extract_SHA1(file_path)
 
-
-
-
-
-
-    with open(csv_path,'a',delimiter='') as f:
-        writer = csv.writer(f,sep=';')
-        writer.writerow()
-
-
-
-
-
-
-
-
-
-
-
+    #valeur pour ecriture
+    values = list(row.values()) + [date,sha1_pdf]
+    
+    #on test si le csv existe
+    file_exists = os.path.exists(csv_path)
+    
+    with open(csv_path,'a',newline='',encoding='utf-8') as f:
+        writer = csv.writer(f,delimiter=';')
+        if not file_exists:
+            writer.writerow(list(row.keys()) + ['date' + 'sha1_pdf'])
+        writer.writerow(values)
 
 
 def process_invoice_pdf(input_pdf:str,
@@ -144,6 +136,7 @@ def process_invoice_pdf(input_pdf:str,
 
 
             #----------feature train_image_path------------
+            
             row['train_image_path'] = image_filename
 
             directory_company_path = None
@@ -311,12 +304,15 @@ def process_invoice_pdf(input_pdf:str,
 
             else:
                 norm_name = normalise_supply_name(text =new_supplier)
+                
+            
+            #creation du chemin de la facture    
             
             dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
             
-            #----------convert_pdf_format------------
+            #----------convert_pdf_format + sauvegarde ------------
             resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
             resized_image.convert('RGB').save(invoice_path)
             logging.info("invoice save to : %s",invoice_path)
@@ -330,45 +326,28 @@ def process_invoice_pdf(input_pdf:str,
             logging.info("invoice's page rejected ")
     
     #-------------sauvegarde de la row_list dans le fichier suivi.csv----------------
+    
+    suivi_csv(invoice_path,csv_path = config.TRAIN_DIR_CSV,row=row)
 
     
+    #-------------Fin sauvegarde de la row_list dans le fichier suivi.csv----------------
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    train_data = pd.DataFrame(row_list)
+    # train_data = pd.DataFrame(row_list)
 
-    logging.info(train_data)
+    # logging.info(train_data)
     
-    train_data_path = os.path.join(train_dir,'train_data.csv')
+    # train_data_path = os.path.join(train_dir,'suivi.csv')
     # train_final_path = os.path.join(train_final,'train_final.csv')
     
-    if os.path.exists(train_data_path):
-        logging.info("train_data.csv found, appending new_data....")
-        existing_data= pd.read_csv(train_data_path,encoding='utf-8')
-        train_data = pd.concat([existing_data,train_data],ignore_index=True)
-    else:
-        logging.info("the file train_data.csv not found, creating a new file ")
-        train_data=pd.DataFrame(columns=["train_image_path", "parent_company", "supplier_name"],index=None)
+    # if os.path.exists(train_data_path):
+    #     logging.info("suivi.csv found, appending new_data....")
+    #     existing_data= pd.read_csv(train_data_path,encoding='utf-8')
+    #     train_data = pd.concat([existing_data,train_data],ignore_index=True)
+    # else:
+    #     logging.info("the file suivi.csv not found, creating a new file ")
+    #     train_data=pd.DataFrame(columns=["train_image_path", "parent_company", "supplier_name"],index=None)
     
-    logging.info(f"train_data.csv updated : n_rows = {train_data.shape[0]} n_columns ={train_data.shape[1]}")
+    # logging.info(f"train_data.csv updated : n_rows = {train_data.shape[0]} n_columns ={train_data.shape[1]}")
     
-    train_data.to_csv(train_data_path,index=False,encoding='utf-8')
+    # train_data.to_csv(train_data_path,index=False,encoding='utf-8')
     # train_data.to_csv(train_final_path,index=False,encoding='utf-8')
