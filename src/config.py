@@ -14,16 +14,20 @@ ARCHIVE_DIR = os.path.join(DATA_DIR,'factures_brutes_archivees')
 TRAIN_DIR = os.path.join(DATA_DIR,"suivi")
 
 #csv path
-SUPPLIER_CSV = os.path.join(DATA_DIR,"list_supplier.csv")
+SUPPLIER_LIST_CSV = os.path.join(DATA_DIR,"list_supplier.csv")
 COMPANY_LIST_CSV = os.path.join(DATA_DIR,"list_company.csv")
 ARCHIVE_CSV = os.path.join(DATA_DIR,'archive_facture_brutes.csv')
 TRAIN_DIR_CSV = os.path.join(DATA_DIR,'archive_facture_brutes.csv')
+
+
+#A supprimer
+TRAIN_FINAL = os.path.join(BASE_DIR,"train_final",'dataset')
 
 #database path for train:
 # TRAIN_DIR = os.path.join(BASE_DIR,"data","suivi")
 
 #read csv
-df = pd.read_csv(SUPPLIER_CSV,sep=',')
+df = pd.read_csv(SUPPLIER_LIST_CSV ,sep=',')
 # dg = pd.read_csv(SUPPLIER_COPY_CSV,sep=',')
 company_df = pd.read_csv(COMPANY_LIST_CSV,sep=',')
 #company_guillaume = pd.read_csv(COMPANY_LIST_GUILLAUME_CSV,sep=',')
@@ -41,8 +45,8 @@ PARENT_COMPANY = 'SPG'
 LIST_SUPPLIER = list(df['entreprise'])
 LIST_TVA_SUPPLIER = list(df['ID_TVA'])
 
-LIST_NEW_SUPPLIER = list(dg['entreprise'])
-LIST_TVA_NEW_SUPPLIER = list(dg['ID_TVA'])
+# LIST_NEW_SUPPLIER = list(dg['entreprise'])
+# LIST_TVA_NEW_SUPPLIER = list(dg['ID_TVA'])
 
 
 #tesseract_path
