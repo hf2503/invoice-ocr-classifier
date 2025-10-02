@@ -2,7 +2,7 @@ import os
 import traceback
 import shutil
 import logging
-import datetime
+from datetime import datetime
 import csv
 
 from . import config
@@ -57,17 +57,27 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
         print("there are not invoices into the directory input")
         return None
     
+    
     for filename in list_pdf_input_folder:
         if filename.endswith('.pdf'):
+            
             input_pdf_path = os.path.join(input_pdf_folder,filename)
             logging.info("input_pdf_folder:%s:",input_pdf_folder)
+            
+            #enregistrement dans le fichier archive_facture.csv
+            raw_file_path = os.path.join(input_pdf_folder,filename)
+            archive_csv(raw_file_path)
             
             try:
                 process_invoice_pdf(input_pdf=input_pdf_path)
 
                 #archivage du fichier brut 
-                shutil.move(input_pdf_path,archive_input_pdf_folder)
-
+                archive_path = os.path.join(archive_input_pdf_folder,filename)
+                
+                if not os.path.exists(archive_path):
+                    shutil.move(input_pdf_path,archive_input_pdf_folder)
+                else:
+                    logging.warning("l'archive existe déjà")
 
             except Exception as e:
                 print(f"on eu l'erreur suivante avec le fichier {filename} : {e}")
