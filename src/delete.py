@@ -1,5 +1,5 @@
 import subprocess
 
-subprocess.run("rm -rf ../data/factures/*",shell=True)
+subprocess.run("rm -rf ../data/factures_classees/*",shell=True)
 subprocess.run("rm -rf ../data/suivi/*",shell=True)
-subprocess.run("rm -rf ../data/facture_brutes_archivees/*",shell=True)
+subprocess.run("rm -rf ../data/factures_brutes_archivees/*",shell=True)
