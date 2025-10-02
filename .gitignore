@@ -18,6 +18,7 @@ train_data/*.csv
 *.pdf
 train_final/*
 data/suivi
+archive_facture_brutes.csv
 
 #log
 src/invoice_processing.log
