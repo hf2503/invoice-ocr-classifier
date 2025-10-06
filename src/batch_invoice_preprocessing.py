@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 
 
-def archive_csv(file_path,csv_path=config.ARCHIVE_CSV):
+def archive_csv(file_path,csv_path=config.ARCHIVE_CSV,columns=config.COLUMNS_SUIVI_BRUTE):
 
 
     #vérification que le dossier archive_brute.csv existe
@@ -31,14 +31,29 @@ def archive_csv(file_path,csv_path=config.ARCHIVE_CSV):
     date = now.strftime("%d-%m-%Y")
     heure = now.strftime("%M-%M")
     pdf_hash = extract_SHA1(file_path)
+    
+    #valeur pour écriture
+    values = [filename,date,heure,pdf_hash]
+    
+    #on test si le csv existe
+    file_exists = os.path.exists(csv_path)
 
+    with open(csv_path,'a',newline='',encoding='utf-8') as f:
+        writer = csv.writer(f,delimiter=';')
+        if not file_exists : 
+            writer.writerow(columns)
+        writer.writerow(values)
+    
+    
+    
+    
+    
+    
+    
+    
     with open(file_path,'a',newline='') as f :
         writer = csv.writer(f,delimiter=';')
         writer.writerow([filename,date,heure,pdf_hash])
-
-
-
-
 
 
 def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
@@ -66,7 +81,7 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
             
             #enregistrement dans le fichier archive_facture.csv
             raw_file_path = os.path.join(input_pdf_folder,filename)
-            archive_csv(raw_file_path)
+            archive_csv(filename)
             
             try:
                 process_invoice_pdf(input_pdf=input_pdf_path)
