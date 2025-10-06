@@ -11,26 +11,22 @@ DATA_DIR = os.path.join(BASE_DIR,'data')
 INPUT_DIR = os.path.join(DATA_DIR,'factures_brutes')
 OUTPUT_DIR = os.path.join(DATA_DIR,'factures_classees')
 ARCHIVE_DIR = os.path.join(DATA_DIR,'factures_brutes_archivees')
-TRAIN_DIR = os.path.join(DATA_DIR,"suivi")
+SUIVI_DIR = os.path.join(DATA_DIR,'suivi')
 
 #csv path
 SUPPLIER_LIST_CSV = os.path.join(DATA_DIR,"list_supplier.csv")
 COMPANY_LIST_CSV = os.path.join(DATA_DIR,"list_company.csv")
-ARCHIVE_CSV = os.path.join(DATA_DIR,'archive_facture_brutes.csv')
-TRAIN_DIR_CSV = os.path.join(DATA_DIR,'archive_facture_brutes.csv')
+ARCHIVE_CSV = os.path.join(ARCHIVE_DIR,'facture__brutes_archivees.csv')
+SUIVI_CSV = os.path.join(SUIVI_DIR,'suivi.csv')
 
 
 #A supprimer
 TRAIN_FINAL = os.path.join(BASE_DIR,"train_final",'dataset')
 
-#database path for train:
-# TRAIN_DIR = os.path.join(BASE_DIR,"data","suivi")
-
 #read csv
 df = pd.read_csv(SUPPLIER_LIST_CSV ,sep=',')
-# dg = pd.read_csv(SUPPLIER_COPY_CSV,sep=',')
 company_df = pd.read_csv(COMPANY_LIST_CSV,sep=',')
-#company_guillaume = pd.read_csv(COMPANY_LIST_GUILLAUME_CSV,sep=',')
+
 
 LIST_COMPANY_NAME_INVOICE = list(company_df['company_name_invoice'])
 LIST_COMPANY_NAME_DIRECTORY = list(company_df['company_name_registery'])
