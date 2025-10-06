@@ -89,14 +89,15 @@ def check_company(text:str,
     #loop on company_no_parent
     for index, row in company_no_parent.iterrows():
         company_name_invoice = clean_text(row['company_name_invoice'])
-        tva_company = clean_text(row['ID_TVA'])
+
         score_match_company = match_word(text,company_name_invoice)
-        score_tva_company = match_word(text,tva_company)
-        logging.info("company_name_loop : %s :, %s",company_name_invoice,score_match_company)
+
+        # logging.info("company_name_loop : %s :, %s",company_name_invoice,score_match_company)
         
-        if score_match_company > 92: #or score_tva_company ==100:
+        if score_match_company > 92:
+            logging.info("company_name_loop : %s :, %s",company_name_invoice,score_match_company)
             return row['company_name_invoice']
-            # return row['company_name_registery']
+
         
     #----------------company with parent company---------------#
     
@@ -106,14 +107,15 @@ def check_company(text:str,
     for index, row in company_with_parent.iterrows():
         parent_company = row['parent_company']
         company_name_invoice = clean_text(row['company_name_invoice'])
-        tva_company = clean_text(row['ID_TVA'])
+
         score_match_company = match_word(text,company_name_invoice)
-        score_tva_company = match_word(text,tva_company)
-        logging.info("company_name_loop : %s :, %s | parent_company : %s", company_name_invoice,score_match_company,parent_company)
+
+        # logging.info("company_name_loop : %s :, %s | parent_company : %s", company_name_invoice,score_match_company,parent_company)
         
         if score_match_company  > 90:
+            logging.info("company_name_loop : %s :, %s | parent_company : %s", company_name_invoice,score_match_company,parent_company)
             return (parent_company, row['company_name_invoice'])
-            # return (parent_company, row['company_name_registery'])
+
         
     return new_company
 
@@ -134,11 +136,11 @@ def check_supplier(text:str,
         clean_tva_supplier = clean_text(tva_supplier)
 
         score_match_supplier = match_word(text,clean_supplier_name)
-        score_tva_supplier = match_word(text,clean_tva_supplier)
+        # score_tva_supplier = match_word(text,clean_tva_supplier)
         #print(f"supplier_name :{supplier_name} : {score_match_supplier}")
 
-
-        if (score_tva_supplier == 100 or score_match_supplier > 90 ):
+        if score_match_supplier > 90 :
+        # if (score_tva_supplier == 100 or score_match_supplier > 90 ):
             #logging.info("supplier_name:%s",supplier_name)
             #logging.info("tva_supplier:%s",tva_supplier)
             return supplier_name
