@@ -31,18 +31,15 @@ company_df = pd.read_csv(COMPANY_LIST_CSV,sep=',')
 LIST_COMPANY_NAME_INVOICE = list(company_df['company_name_invoice'])
 LIST_COMPANY_NAME_DIRECTORY = list(company_df['company_name_registery'])
 LIST_COMPANY_TVA = list(company_df['ID_TVA'])
-
-#LIST_COMPANY_NAME_INVOICE_GUILLAUME = list(company_guillaume['company_name_invoice'])
-#LIST_COMPANY_NAME_DIRECTORY_GUILLAUME = list(company_guillaume['company_name_registery'])
-#LIST_COMPANY_TVA_GUILLAUME = list(company_guillaume['ID_TVA'])
 PARENT_COMPANY = 'SPG'
+
+#Colonnes suivi.csv et facture_brutes_archivees.csv
+COLUMNS_SUIVI_BRUTE = ['facture_brute','date','heure','sha1_pdf']
+COLUMNS_SUIVI = ['facture_traitee','parent_company','company_name','supplier_name','date','sha1_pdf']
 
 
 LIST_SUPPLIER = list(df['entreprise'])
 LIST_TVA_SUPPLIER = list(df['ID_TVA'])
-
-# LIST_NEW_SUPPLIER = list(dg['entreprise'])
-# LIST_TVA_NEW_SUPPLIER = list(dg['ID_TVA'])
 
 
 #tesseract_path
