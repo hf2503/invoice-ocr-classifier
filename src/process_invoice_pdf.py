@@ -35,7 +35,7 @@ pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 #dictionnary_list:
 row_list = []
 
-def suivi_csv(file_path,csv_path = config.TRAIN_DIR_CSV,row=None):
+def suivi_csv(file_path,csv_path = config.SUIVI_CSV,row=None):
 
     #création du dossier suivi
     os.makedirs(os.path.dirname(csv_path),exist_ok=True)
@@ -58,7 +58,7 @@ def suivi_csv(file_path,csv_path = config.TRAIN_DIR_CSV,row=None):
 
 
 def process_invoice_pdf(input_pdf:str,
-                        train_dir=config.TRAIN_DIR,
+                        train_dir=config.SUIVI_DIR,
                         train_final= config.TRAIN_FINAL,
                         company_csv = config.company_df,
                         list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
@@ -165,11 +165,13 @@ def process_invoice_pdf(input_pdf:str,
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
                 
                 
+                
+                
                 logging.info("directory_company_match_size: %s",directory_company_match.size)
                 
                 
                                     
-                #-------------deboguage----------------
+                #-------------debogage----------------
                     
                     
                 logging.info("directory_parent_match_debogage_1: %s",directory_parent_match)
@@ -188,16 +190,14 @@ def process_invoice_pdf(input_pdf:str,
 
                     row['parent_company'] = directory_parent_match[0]
 
-
                     #------feature company_name-------
-
                     row['company_name'] = directory_parent_match[1]
 
                     logging.info("directory_parent_company:%s:",directory_parent_company)
 
                     directory_company = directory_company_match[0]  
 
-                    logging.info("ddirectory_company:%s:",directory_company)
+                    logging.info("directory_company:%s:",directory_company)
 
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
 
@@ -220,7 +220,7 @@ def process_invoice_pdf(input_pdf:str,
 
 
 
-                    #-------------deboguage----------------
+                    #-------------debogage----------------
                     
                     logging.info("row_debogage_3: %s",row)
                     
@@ -321,16 +321,16 @@ def process_invoice_pdf(input_pdf:str,
             row['supplier_name'] = norm_name
 
             row_list.append(row)
+
+            #-------------sauvegarde de la row dans le fichier suivi.csv----------------
+
+            suivi_csv(invoice_path,csv_path = config.SUIVI_CSV,row=row)
      
         else:
             logging.info("invoice's page rejected ")
     
-    #-------------sauvegarde de la row_list dans le fichier suivi.csv----------------
     
-    suivi_csv(invoice_path,csv_path = config.TRAIN_DIR_CSV,row=row)
-
-    
-    #-------------Fin sauvegarde de la row_list dans le fichier suivi.csv----------------
+        #-------------Fin sauvegarde de la row_list dans le fichier suivi.csv----------------
     
     # train_data = pd.DataFrame(row_list)
 
