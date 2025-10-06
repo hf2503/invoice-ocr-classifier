@@ -35,7 +35,7 @@ pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 #dictionnary_list:
 row_list = []
 
-def suivi_csv(file_path,csv_path = config.SUIVI_CSV,row=None):
+def suivi_csv(file_path,csv_path = config.SUIVI_CSV,row=None,columns=config.COLUMNS_SUIVI):
 
     #création du dossier suivi
     os.makedirs(os.path.dirname(csv_path),exist_ok=True)
@@ -53,7 +53,7 @@ def suivi_csv(file_path,csv_path = config.SUIVI_CSV,row=None):
     with open(csv_path,'a',newline='',encoding='utf-8') as f:
         writer = csv.writer(f,delimiter=';')
         if not file_exists:
-            writer.writerow(list(row.keys()) + ['date' + 'sha1_pdf'])
+            writer.writerow(columns)
         writer.writerow(values)
 
 
@@ -256,36 +256,32 @@ def process_invoice_pdf(input_pdf:str,
                     
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
 
-
+            #------------------cas ou il n'y a pas de societe mere------------------
             elif company_name in list_company_invoice or company_name == 'new_company':
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
-
-                #------------feature parent_company-----------
                 
-                #-------------MODIF 19/09/2025-----------
-                
-                #row['parent_company'] = company_name
-                #--------------FIN MODIF ------------------------
+                #pas de société mère
+                row['parent_company'] = 0
 
+                
                 if directory_company_match.size > 0:
                     
-                    #-----------MODIF 19/09/2025--------------
-                    print(f"directory_company_match{directory_company_match}")
-                    row['parent_company'] = directory_company_match[0]
+   
+                    logging.info(f"directory_company_match : {directory_company_match}")
                     
-                    #--------------FIN MODIF ------------------------
+                    row['company_name'] = directory_company_match[0]
                     
-                    print(f"directory_company_match{directory_company_match}")
+                    # row['parent_company'] = directory_company_match[0]
+                    
+                    
+                    
                     directory_company = directory_company_match[0]   
                     directory_company_path = make_directory_company(output_dir,directory_company)
                     logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                     print(directory_company_path)
                 else:
-                    #------------MODIF 19/09/2025-------------
-                    row['parent_company'] = new_company
-                    
-                    #--------------FIN MODIF ------------------------
-                    
+                    row['company_name'] = new_company
+                    #row['parent_company'] = new_company
                     logging.info("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
                     directory_company_path = make_directory_company(output_dir,new_company)
 
