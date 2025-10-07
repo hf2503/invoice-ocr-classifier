@@ -19,6 +19,16 @@ logging.basicConfig(
     ]
 )
 
+def clear_folder():
+    pass
+
+
+
+
+
+
+
+
 
 def archive_csv(file_path,
                 csv_path=config.ARCHIVE_CSV,
@@ -51,9 +61,9 @@ def archive_csv(file_path,
 
 def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
                                 archive_input_pdf_folder = config.ARCHIVE_DIR,
-                                raw_invoice_folder = config.FACTURES_BRUTES_DIR):
-
-
+                                raw_invoice_folder = config.FACTURES_BRUTES_DIR,
+                                class_invoices = config.OUTPUT_DIR
+                                ):
     #vérification de l'existence du dossier data/facture brutes
     os.makedirs(input_pdf_folder,exist_ok=True)
 
