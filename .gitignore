@@ -12,13 +12,13 @@ __pycache__/
 # Données temporaires
 data/output/*
 
-#data train 
+#data 
 data/train/*
 train_data/*.csv
 *.pdf
 train_final/*
 data/suivi
-archive_facture_brutes.csv
+data/factures_brutes_archivees/*
 
 #log
 src/invoice_processing.log
@@ -31,3 +31,6 @@ invoice_processing.log
 #dossier
 FACTURES FOURNISSEURS LUXEMBOURG 2025
 invoice_issue
+
+#brouillon notebook
+expand.ipynb
