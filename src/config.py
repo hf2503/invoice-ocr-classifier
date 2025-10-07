@@ -22,6 +22,7 @@ SUPPLIER_LIST_CSV = os.path.join(DATA_DIR,"list_supplier.csv")
 COMPANY_LIST_CSV = os.path.join(DATA_DIR,"list_company.csv")
 ARCHIVE_CSV = os.path.join(ARCHIVE_DIR,'factures__brutes_archivees.csv')
 SUIVI_CSV = os.path.join(SUIVI_DIR,'suivi_factures_traitees.csv')
+RESULTAT_CSV = os.path.join(OUTPUT_DIR,'resultat.csv')
 
 #read csv
 df = pd.read_csv(SUPPLIER_LIST_CSV ,sep=',')
