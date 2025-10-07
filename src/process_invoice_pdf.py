@@ -35,26 +35,39 @@ pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 #dictionnary_list:
 row_list = []
 
-def suivi_csv(file_path,csv_path = config.SUIVI_CSV,row=None,columns=config.COLUMNS_SUIVI):
+def suivi_resultat_csv(file_path,
+                       csv_path_suivi = config.SUIVI_CSV,
+                       csv_path_result = config.RESULTAT_CSV,
+                       row=None,
+                       columns=config.COLUMNS_SUIVI):
 
     #création du dossier suivi
-    os.makedirs(os.path.dirname(csv_path),exist_ok=True)
+    os.makedirs(os.path.dirname(csv_path_suivi),exist_ok=True)
 
     now = datetime.now()
     date = now.strftime("%d-%m-%Y")
     sha1_pdf = extract_SHA1(file_path)
 
-    #valeur pour ecriture
+    #valeur pour ecriture dans le fichier suivi.csv
     values = list(row.values()) + [date,sha1_pdf]
     
-    #on test si le csv existe
-    file_exists = os.path.exists(csv_path)
+    #on test si  suivi.csv et resultat.csv existe
+    file_exists = os.path.exists(csv_path_suivi)
     
-    with open(csv_path,'a',newline='',encoding='utf-8') as f:
+    #ajout des resultats dans le fichier suivi.csv
+    with open(csv_path_suivi,'a',newline='',encoding='utf-8') as f:
         writer = csv.writer(f,delimiter=';')
         if not file_exists:
             writer.writerow(columns)
         writer.writerow(values)
+    
+    #ecriture des resultats dans resultats.csv  
+    with open(csv_path_result,'a',newline='',encoding='utf-8') as f:
+        writer = csv.writer(f,delimiter=';')
+        if not file_exists:
+            writer.writerow(columns)
+        writer.writerow(values)
+
 
 
 def process_invoice_pdf(input_pdf:str,
@@ -305,7 +318,7 @@ def process_invoice_pdf(input_pdf:str,
 
             #-------------sauvegarde de la row dans le fichier suivi.csv----------------
 
-            suivi_csv(invoice_path,csv_path = config.SUIVI_CSV,row=row)
+            suivi_resultat_csv(file_path=invoice_path,row=row)
      
         else:
             logging.info("invoice's page rejected ")
