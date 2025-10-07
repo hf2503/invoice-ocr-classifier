@@ -58,15 +58,12 @@ def suivi_csv(file_path,csv_path = config.SUIVI_CSV,row=None,columns=config.COLU
 
 
 def process_invoice_pdf(input_pdf:str,
-                        train_dir=config.SUIVI_DIR,
-                        train_final= config.TRAIN_FINAL,
+                        suivi_dir=config.SUIVI_DIR,
+                        archive_suivi_dir=config.FACTURE_CLASSEES_DIR, 
                         company_csv = config.company_df,
                         list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
-                        list_company_tva = config.LIST_COMPANY_TVA,
-                        input_dir = config.INPUT_DIR,
                         output_dir= config.OUTPUT_DIR,
                         list_supplier= config.LIST_SUPPLIER,
-                        list_tva_supplier= config.LIST_TVA_SUPPLIER,
                         new_supplier= config.NEW_SUPPLIER,
                         new_company= config.NEW_COMPANY
                         ):
@@ -79,9 +76,9 @@ def process_invoice_pdf(input_pdf:str,
     
     #création des dossiers
     
-    os.makedirs(train_dir, exist_ok=True)
-    os.makedirs(train_final, exist_ok=True) 
+    os.makedirs(suivi_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(archive_suivi_dir,exist_ok=True)
     
     if not os.path.exists(input_pdf):
         logging.error("file %s not found",input_pdf)
@@ -103,16 +100,13 @@ def process_invoice_pdf(input_pdf:str,
         img_array = np.array(image_rgb)
         
         
-        #filtered_image = cv2.bilateralFilter(img_array, 9, 75, 75)
         gray_image = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-        #adaptive_threshold = cv2.adaptiveThreshold(gray_image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 25, 10)
+
         
         #convert image to string
         try:
             text = pytesseract.image_to_string(gray_image,config="--psm 6")
-            
-            
-            
+                
         except Exception as e:
             
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
@@ -123,16 +117,13 @@ def process_invoice_pdf(input_pdf:str,
 
             #feature_dictionnary
             row={}
-
-
+            
             #-----------SAVED IMAGE------------
-            #image_filename = f"{os.path.basename(input_pdf)[0:8]}_{i+1}.png"
+            
             image_filename = f"{os.path.basename(input_pdf)}_{i+1}.png"
-            train_image_path = os.path.join(train_dir,image_filename)
-            train_image_path_final = os.path.join(train_final,image_filename)
-            image.save(train_image_path)
-            image.save(train_image_path_final)
-            logging.info("l'image est enregistré dans : %s",train_image_path)
+            archive_image_path = os.path.join(suivi_dir,archive_suivi_dir,image_filename)
+            image.save(archive_image_path)
+            logging.info("l'image est enregistré dans : %s",archive_image_path)
 
 
             #----------feature train_image_path------------
@@ -147,8 +138,6 @@ def process_invoice_pdf(input_pdf:str,
             #----- COMPANY DETECTION--------
             company_name = check_company(clean_text_ocr,
                                          company_df=company_csv,
-                                         company_list_name_invoice=list_company_invoice,
-                                         company_list_tva=list_company_tva,
                                          new_company=new_company
                                          )
             
@@ -207,7 +196,7 @@ def process_invoice_pdf(input_pdf:str,
                     print(directory_company_path)
                 
                 else:
-                    #-------------deboguage----------------
+                    #-------------debogage----------------
                     logging.info("directory_parent_match_debogage_2: %s",directory_parent_match)
                     logging.info("directory_company_match_debogage_2: %s",directory_company_match)
                     
@@ -241,11 +230,7 @@ def process_invoice_pdf(input_pdf:str,
                     directory_company = directory_company_match[0]
                     
                     
-                    # directory_parent_company = company_name[0]
-                    # directory_company = company_name[1]
-                    
-                    
-                    #-------------deboguage----------------
+                    #-------------debogage----------------
                     
                     logging.info("directory_parent_company_debogage_4: %s",directory_parent_company)
                     logging.info(" directory_company_debogage_4: %s",directory_company)
@@ -260,7 +245,7 @@ def process_invoice_pdf(input_pdf:str,
             elif company_name in list_company_invoice or company_name == 'new_company':
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
                 
-                #pas de société mère
+                #------------------pas de société mère--------------
                 row['parent_company'] = 0
 
                 
@@ -291,8 +276,8 @@ def process_invoice_pdf(input_pdf:str,
 
 
 
-            #supplier detection
-            supplier_name = check_supplier(clean_text_ocr,supplier_list=list_supplier,tva_supplier_list=list_tva_supplier)
+            #--------------supplier detection----------------------
+            supplier_name = check_supplier(clean_text_ocr,supplier_list=list_supplier)
             
 
             if supplier_name:
@@ -302,7 +287,7 @@ def process_invoice_pdf(input_pdf:str,
                 norm_name = normalise_supply_name(text =new_supplier)
                 
             
-            #creation du chemin de la facture    
+            #--------------creation du chemin de la facture-----------------------    
             
             dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -328,22 +313,3 @@ def process_invoice_pdf(input_pdf:str,
     
         #-------------Fin sauvegarde de la row_list dans le fichier suivi.csv----------------
     
-    # train_data = pd.DataFrame(row_list)
-
-    # logging.info(train_data)
-    
-    # train_data_path = os.path.join(train_dir,'suivi.csv')
-    # train_final_path = os.path.join(train_final,'train_final.csv')
-    
-    # if os.path.exists(train_data_path):
-    #     logging.info("suivi.csv found, appending new_data....")
-    #     existing_data= pd.read_csv(train_data_path,encoding='utf-8')
-    #     train_data = pd.concat([existing_data,train_data],ignore_index=True)
-    # else:
-    #     logging.info("the file suivi.csv not found, creating a new file ")
-    #     train_data=pd.DataFrame(columns=["train_image_path", "parent_company", "supplier_name"],index=None)
-    
-    # logging.info(f"train_data.csv updated : n_rows = {train_data.shape[0]} n_columns ={train_data.shape[1]}")
-    
-    # train_data.to_csv(train_data_path,index=False,encoding='utf-8')
-    # train_data.to_csv(train_final_path,index=False,encoding='utf-8')
