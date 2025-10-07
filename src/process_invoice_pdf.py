@@ -47,7 +47,7 @@ def suivi_resultat_csv(file_path,
     now = datetime.now()
     date = now.strftime("%d-%m-%Y")
     sha1_pdf = extract_SHA1(file_path)
-
+    
     #valeur pour ecriture dans le fichier suivi.csv
     values = list(row.values()) + [date,sha1_pdf]
     
