@@ -70,8 +70,6 @@ def check_invoice(text):
 
 def check_company(text:str,
                   company_df:pd.DataFrame,
-                  company_list_name_invoice: list,
-                  company_list_tva: list,
                   new_company: str):
     """check
 
@@ -121,8 +119,7 @@ def check_company(text:str,
 
 
 def check_supplier(text:str,
-                   supplier_list:list,
-                   tva_supplier_list:list):
+                   supplier_list:list):
     """
     check the company name in the invoice
 
@@ -130,21 +127,18 @@ def check_supplier(text:str,
         company name or None
 
     """    
-
-    for supplier_name,tva_supplier in zip(supplier_list,tva_supplier_list):
+    list_score_supplier = []
+    for supplier_name in supplier_list:
         clean_supplier_name = clean_text(supplier_name)
-        clean_tva_supplier = clean_text(tva_supplier)
 
         score_match_supplier = match_word(text,clean_supplier_name)
-        # score_tva_supplier = match_word(text,clean_tva_supplier)
-        #print(f"supplier_name :{supplier_name} : {score_match_supplier}")
+        list_score_supplier.append((supplier_name,score_match_supplier))
 
         if score_match_supplier > 90 :
-        # if (score_tva_supplier == 100 or score_match_supplier > 90 ):
-            #logging.info("supplier_name:%s",supplier_name)
-            #logging.info("tva_supplier:%s",tva_supplier)
+            logging.info("supplier_name:%s",supplier_name)
             return supplier_name
     
+    logging.info(f"le score max trouvé est : supplier_name {max(list_score_supplier)[0]} pour un score de {max(list_score_supplier)[1]}")
     return None
 
 
@@ -177,8 +171,6 @@ def make_directory_company(output_dir,directory):
         path
     """
     path = os.path.join(output_dir,directory)
-    
-  
     
     if not (os.path.exists(path)):
         os.makedirs(path)
