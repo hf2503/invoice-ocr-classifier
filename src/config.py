@@ -13,15 +13,15 @@ OUTPUT_DIR = os.path.join(DATA_DIR,'factures_classees')
 ARCHIVE_DIR = os.path.join(DATA_DIR,'factures_brutes_archivees')
 SUIVI_DIR = os.path.join(DATA_DIR,'suivi')
 
+#dossier facture classé (format png) et dossier facture brutes (format pdf)
+FACTURE_CLASSEES_DIR = os.path.join(SUIVI_DIR,'factures_traitees_archive')
+FACTURES_BRUTES_DIR = os.path.join(ARCHIVE_DIR,'factures_brutes')
+
 #csv path
 SUPPLIER_LIST_CSV = os.path.join(DATA_DIR,"list_supplier.csv")
 COMPANY_LIST_CSV = os.path.join(DATA_DIR,"list_company.csv")
-ARCHIVE_CSV = os.path.join(ARCHIVE_DIR,'facture__brutes_archivees.csv')
-SUIVI_CSV = os.path.join(SUIVI_DIR,'suivi.csv')
-
-
-#A supprimer
-TRAIN_FINAL = os.path.join(BASE_DIR,"train_final",'dataset')
+ARCHIVE_CSV = os.path.join(ARCHIVE_DIR,'factures__brutes_archivees.csv')
+SUIVI_CSV = os.path.join(SUIVI_DIR,'suivi_factures_traitees.csv')
 
 #read csv
 df = pd.read_csv(SUPPLIER_LIST_CSV ,sep=',')
