@@ -6,6 +6,7 @@ import re
 import pytesseract
 from pdf2image import convert_from_path
 from datetime import datetime
+import shutil
 
 import logging
 import hashlib
@@ -236,3 +237,22 @@ def extract_SHA1(file_path):
         h.update(data)
         return h.hexdigest()
 
+def clear_result(dir_path):
+
+    if len(os.listdir(dir_path)) == 0 :
+        print("le dossier des resultats est vide")
+        return None
+
+    for elmt in os.listdir(dir_path):
+        elmt_path = os.path.join(dir_path,elmt)
+
+        try :
+            if os.path.isfile(elmt_path):
+                os.remove(elmt_path)
+            elif os.path.isdir(elmt_path):
+                shutil.rmtree(elmt_path)
+        
+        except Exception as e:
+            print(f"on a eu l'erreur suivante lors de la suppression de {elmt_path}:{e}")
+        
+    print(f"le contenu du dossier {dir_path} a été vidé avec succés")
