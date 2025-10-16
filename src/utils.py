@@ -237,7 +237,7 @@ def extract_SHA1(file_path):
         h.update(data)
         return h.hexdigest()
 
-def clear_result(dir_path):
+def clear_result_and_raw(dir_path):
 
     if len(os.listdir(dir_path)) == 0 :
         print("le dossier des resultats est vide")
@@ -256,3 +256,5 @@ def clear_result(dir_path):
             print(f"on a eu l'erreur suivante lors de la suppression de {elmt_path}:{e}")
         
     print(f"le contenu du dossier {dir_path} a été vidé avec succés")
+
+
