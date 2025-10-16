@@ -52,19 +52,20 @@ def suivi_resultat_csv(file_path,
     values = list(row.values()) + [date,sha1_pdf]
     
     #on test si  suivi.csv et resultat.csv existe
-    file_exists = os.path.exists(csv_path_suivi)
+    file_exists_suivi = os.path.exists(csv_path_suivi)
+    file_exists_result = os.path.exists(csv_path_result)
     
     #ajout des resultats dans le fichier suivi.csv
     with open(csv_path_suivi,'a',newline='',encoding='utf-8') as f:
         writer = csv.writer(f,delimiter=';')
-        if not file_exists:
+        if not file_exists_suivi:
             writer.writerow(columns)
         writer.writerow(values)
     
     #ecriture des resultats dans resultats.csv  
     with open(csv_path_result,'a',newline='',encoding='utf-8') as f:
         writer = csv.writer(f,delimiter=';')
-        if not file_exists:
+        if not file_exists_result:
             writer.writerow(columns)
         writer.writerow(values)
 
