@@ -8,7 +8,7 @@ load_dotenv()
 #project_path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR,'data')
-INPUT_DIR = os.path.join(DATA_DIR,'factures_brutes')
+INPUT_DIR = os.path.join(DATA_DIR,'factures_brutes_a_traiter')
 OUTPUT_DIR = os.path.join(DATA_DIR,'factures_classees')
 ARCHIVE_DIR = os.path.join(DATA_DIR,'factures_brutes_archivees')
 SUIVI_DIR = os.path.join(DATA_DIR,'suivi')
