@@ -7,13 +7,19 @@ WORKDIR /app
 #on se met en root pour installer les dependances
 USER root
 
-RUN apt-get update && apt-get install -y tesseract-ocr-fra poppler-utils && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    tesseract-ocr-fra \
+    poppler-utils \
+    libgl1 \
+    libglib2.0-0\
+    && rm -rf /var/lib/apt/lists/*
 
 #copy du requirement.txt
-COPY requirements.txt /app/requirements.txt
+COPY requirements_docker.txt /app/requirements_docker.txt
 
 #installation des dépendances python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements_docker.txt
 
 #copie du projet dans app
 COPY . /app
