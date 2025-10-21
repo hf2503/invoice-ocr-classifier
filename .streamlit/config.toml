@@ -4,3 +4,7 @@ primaryColor="#e74c3c"
 backgroundColor="#f6f8fb"
 secondaryBackgroundColor="#ffffff"
 textColor="#0f172a"
+
+[server]
+fileWatcherType = "none"
+folderWatchBlacklist = ["/app/logs","/app/data"]
