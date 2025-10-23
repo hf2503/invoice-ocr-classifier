@@ -86,73 +86,12 @@ with left:
     with st.expander(":point_right: Aide/Guide d'utlisation"):
         st.subheader("info & chemins")
         st.write(f" Dossier d'entrée : {config.INPUT_DIR}")
-        st.write(f" Dosiiser de sorie : {config.OUTPUT_DIR}")
+        st.write(f" Dossier de sortie : {config.OUTPUT_DIR}")
         st.write(f" Tableaux recap des résultats : {config.RESULTAT_CSV}")
         st.info("Astuce : utilisez l'onglet ** importer ** pour ajouter des pdf , puis **traiter**."
                 "le bouton **Effacer** remets tout à zéro")
 
 
 
-
-
-
-# # -------------Upload-------------------#
-# #avec modification de la key du widget pour pouvoir le reinitialiser
-
-# uploaded_files = st.file_uploader("Déposez vos factures PDF:",
-#                                   type="pdf",
-#                                   accept_multiple_files=True,
-#                                   key=f"uploader_{st.session_state['uploader_key']}")
-
-
-
-# if uploaded_files:
-
-#     for files in uploaded_files:
-#         filename = os.path.basename(files.name or "upload.pdf")
-#         save_path = os.path.join(config.INPUT_DIR,filename) 
-#         with open(save_path,'wb') as f:
-#             f.write(files.getbuffer())
-
-#     st.success(f"{len(uploaded_files)} fichier pdf ont été ajoutées au dossier {config.INPUT_DIR}")
-
-# else :
-#     st.info("il y aucun fichier à traiter")
-
-# #---------run processing------------------#
-
-# if st.button("traitement des factures", type="primary") :
-#     with st.spinner(text='En cours de traitement ...',show_time=True):
-#         batch_invoice_preprocessing(config.INPUT_DIR)
-#     st.balloons()
-#     st.success("traitement terminé")
-
-#     #------------reset de l'uploader ----------------
-#     reset_uploader()
-#     # st.rerun()
-
-# #---------results------------------------#
-
-# resultat_csv = config.RESULTAT_CSV
-
-# st.subheader("Résultats")
-
-# if os.path.exists(resultat_csv):
-#     df = pd.read_csv(resultat_csv,sep=';')
-#     st.info(f"{df.shape[0]} factures ont été traitées")
-#     st.dataframe(df)
-
-# else:
-#     st.info("resultats non disponibles")
-
-# if st.button("effacer les résultats", type="primary"):
-#     with st.spinner(text='en cours de suppression', show_time=True):
-#         clear_result_and_raw(config.OUTPUT_DIR)
-#         clear_result_and_raw(config.INPUT_DIR)
-#         st.balloons()
-#     st.info("résultats effacés")
-#     st.rerun()
-
-# #------------Raffraichissement de l'interface utilisateur ----------
 
 
