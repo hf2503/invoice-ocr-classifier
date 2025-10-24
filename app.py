@@ -4,7 +4,7 @@ import os
 
 from src import config
 from src.batch_invoice_preprocessing import batch_invoice_preprocessing
-from src.utils import clear_result_and_raw
+from src.utils import clear_result_and_raw,clear_result_csv
 
 
 # ----------------- Page -----------------
@@ -16,7 +16,8 @@ st.set_page_config(page_title="Classifieur de factures",
 st.title(f"{':grinning:'} CLASSIFIEUR DE FACTURES")
 st.caption("Reconnaissance semi-automatique + correction comptable")
 
-
+#varaible pour avoir un set des fichier dèjà trité et éviter les doublons
+already_archived = set(os.listdir(config.FACTURES_BRUTES_DIR))
 
 #key pour modifier l'état du widget traitement des factures pour vider le buffer de streamlit
 
@@ -40,7 +41,14 @@ with left:
     if uploaded_files:
 
         for files in uploaded_files:
+
             filename = os.path.basename(files.name or "upload.pdf")
+
+            #on vérifie que le file n'a pas été dèja traité
+            if filename in already_archived:
+                st.warning(f" ⚠️ le fichier {filename} a déja été traité")
+                continue
+
             save_path = os.path.join(config.INPUT_DIR,filename) 
             with open(save_path,'wb') as f:
                 f.write(files.getbuffer())
@@ -56,6 +64,7 @@ with left:
 
     if process_clicked:
         with st.spinner(text="\U000023F0 en cours de traitement"):
+
             batch_invoice_preprocessing(config.INPUT_DIR)
             st.toast("Traitement terminé",icon="😍")
             st.balloons()
@@ -64,6 +73,7 @@ with left:
     if clear_clicked:
         with st.spinner(text=" 🫧nettoyage"):
             #clear_result_and_raw(config.OUTPUT_DIR)
+            clear_result_csv(config.OUTPUT_DIR)
             clear_result_and_raw(config.INPUT_DIR)
             st.balloons()
         st.toast("pdf importés effacés", icon="😄")
