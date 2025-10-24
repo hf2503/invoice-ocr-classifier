@@ -63,10 +63,10 @@ with left:
     
     if clear_clicked:
         with st.spinner(text=" 🫧nettoyage"):
-            clear_result_and_raw(config.OUTPUT_DIR)
+            #clear_result_and_raw(config.OUTPUT_DIR)
             clear_result_and_raw(config.INPUT_DIR)
             st.balloons()
-        st.toast("résultats effacés", icon="😄")
+        st.toast("pdf importés effacés", icon="😄")
         reset_uploader()
         st.rerun()
     
