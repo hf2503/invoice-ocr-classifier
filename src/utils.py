@@ -240,7 +240,7 @@ def extract_SHA1(file_path):
 def clear_result_and_raw(dir_path):
 
     if len(os.listdir(dir_path)) == 0 :
-        print("le dossier des resultats est vide")
+        print("le dossier est vide")
         return None
 
     for elmt in os.listdir(dir_path):
@@ -257,4 +257,20 @@ def clear_result_and_raw(dir_path):
         
     print(f"le contenu du dossier {dir_path} a été vidé avec succés")
 
+def clear_result_csv(dir_path):
+
+    if len(os.listdir(dir_path)) == 0 :
+        print("pas de fichier resultat.csv à supprimer")
+        return None
+    
+    for elmt in os.listdir(dir_path):
+        elmt_path = os.path.join(dir_path,elmt)
+
+        try:
+            if os.path.isfile(elmt_path):
+                os.remove(elmt_path)
+        except Exception as e:
+            print(f"on a eu l'erreur suivante lors de la suprression du fichier {elmt_path} : {e} ")
+    
+    print(f"le fichier {elmt_path} a été supprimée avec succés")
 
