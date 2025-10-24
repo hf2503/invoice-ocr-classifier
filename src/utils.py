@@ -21,7 +21,21 @@ logging.basicConfig(
     ]
 )
 
+logger = logging.getLogger(__name__)
+
 def convert_pdf_to_PIL(input_pdf:str):
+    """
+    Convert a pdf file into a list of PIL images (one per page)
+    
+    parameteres:
+
+            input_pdf : str
+                    Absolute or relative path to the PDF file to convert.
+    
+    Returns 
+        A list of Pillow images, one for each page between first_page and last_page
+    """
+
 
     if not os.path.exists(input_pdf):
         raise FileNotFoundError(f"the file {input_pdf} doesn't exist")
@@ -34,23 +48,37 @@ def convert_pdf_to_PIL(input_pdf:str):
 
 
 def clean_text(text:str):
+    """
+        preprocessing and cleaning text for fuzzy matching
+
+        parameters:
+            text : str
+
+                Input text to normalize
+        
+        Returns
+
+            Cleaned text
+
+    """
+
     text = text.lower()
-    text = unicodedata.normalize('NFKD', text)  # enlève accents
+    text = unicodedata.normalize('NFKD', text)  # remove accents
     text = text.encode('ascii', 'ignore').decode('utf-8')  # remove non-ascii
-    text = text.replace("-", " ").replace("_", " ")  # standardise séparateurs
-    text = re.sub(r"[^\w\s]", "", text)  # supprime ponctuation
-    # text = re.sub(r"\s+", "", text)  # supprime tous les espaces (ou remplace par un espace si tu veux garder les mots)
+    text = text.replace("-", " ").replace("_", " ")  # standardize séparators
+    text = re.sub(r"[^\w\s]", "", text)  # drop ponctuation
+
     return text.strip()
 
-    # text = str(text).lower()
-    # text = unicodedata.normalize('NFKD', text)  # enlève accents
-    # text = text.encode('ascii', 'ignore').decode('utf-8')  # remove non-ascii
-    # text = text.replace("-", " ").replace("_", " ")  # standardise séparateurs
-    # text = re.sub(r"[^\w\s]", "", text)  # supprime ponctuation
-    # return text.strip()
 
 def match_word(text:str,
                target:str):
+    
+    """
+    compute similarity score between two string using partial ratio
+
+
+    """
 
     score_partial_ratio = fuzz.partial_ratio(text,target)
 
