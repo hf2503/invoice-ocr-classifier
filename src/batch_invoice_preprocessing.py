@@ -67,7 +67,7 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
     #vérification de l'existence du dossier data/facture brutes
     os.makedirs(input_pdf_folder,exist_ok=True)
 
-    #vérification de l'exitence du dossier facture brutes archives
+    #vérification de l'exitence du dossier facture brutes archivees
     os.makedirs(archive_input_pdf_folder,exist_ok=True)
     
     #verification de l'existence du dossier facture brute
