@@ -12,3 +12,9 @@ services:
     env_file:
       - src/.env
     restart: unless-stopped
+    command: >
+      bash -c "
+        mkdir -p /app/data/factures_brutes_archivees/factures_brutes &&
+        exec \"$@\"
+      "
+
