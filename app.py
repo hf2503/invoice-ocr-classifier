@@ -17,6 +17,7 @@ st.title(f"{':grinning:'} CLASSIFIEUR DE FACTURES")
 st.caption("Reconnaissance semi-automatique + correction comptable")
 
 #varaible pour avoir un set des fichier dèjà trité et éviter les doublons
+os.makedirs(config.FACTURES_BRUTES_DIR, exist_ok=True)
 already_archived = set(os.listdir(config.FACTURES_BRUTES_DIR))
 
 #key pour modifier l'état du widget traitement des factures pour vider le buffer de streamlit
