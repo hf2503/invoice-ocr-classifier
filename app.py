@@ -16,7 +16,11 @@ st.set_page_config(page_title="Classifieur de factures",
 st.title(f"{':grinning:'} CLASSIFIEUR DE FACTURES")
 st.caption("Reconnaissance semi-automatique + correction comptable")
 
-#varaible pour avoir un set des fichier dèjà trité et éviter les doublons
+#on s'assure de l'existence du dossier des inputs
+os.makedirs(config.INPUT_DIR, exist_ok=True)
+
+
+#variable pour avoir un set des fichier dèjà traité et éviter les doublons
 os.makedirs(config.FACTURES_BRUTES_DIR, exist_ok=True)
 already_archived = set(os.listdir(config.FACTURES_BRUTES_DIR))
 
