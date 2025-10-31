@@ -24,16 +24,24 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def convert_pdf_to_PIL(input_pdf:str):
+
     """
     Convert a pdf file into a list of PIL images (one per page)
-    
+
     parameteres:
 
-            input_pdf : str
-                    Absolute or relative path to the PDF file to convert.
-    
-    Returns 
-        A list of Pillow images, one for each page between first_page and last_page
+        input_pdf : (str) Absolute or relative path to the PDF file to convert
+
+    Raises:
+        FileNotFoundError: 
+            if the provided file path does not exist
+
+        ValueError:
+            if the provided file is not a .pdf.
+
+    Returns:
+        list [PIL.Image]:
+            List of PIL Image objects representing the pages of the pdf
     """
 
 
@@ -48,18 +56,14 @@ def convert_pdf_to_PIL(input_pdf:str):
 
 
 def clean_text(text:str):
-    """
-        preprocessing and cleaning text for fuzzy matching
+    """_summary_
 
-        parameters:
-            text : str
+    Args:
+        text (str): Input text to normalize
 
-                Input text to normalize
-        
-        Returns
 
-            Cleaned text
-
+    Returns:
+        str : Cleaned text
     """
 
     text = text.lower()
@@ -73,11 +77,15 @@ def clean_text(text:str):
 
 def match_word(text:str,
                target:str):
-    
-    """
-    compute similarity score between two string using partial ratio
+    """_summary_
+
+    Args:
+        text (str): OCR result + cleaned text
+        target (str): text to compare against (reference name)
 
 
+    Returns:
+        float: partial_ratio score from rapidfuzz (0-100)
     """
 
     score_partial_ratio = fuzz.partial_ratio(text,target)
@@ -85,27 +93,47 @@ def match_word(text:str,
     return score_partial_ratio
 
 
-def check_invoice(text):
+def check_invoice(text:str):
     """
     check the invoice's page where "verifie le " is written
 
     Args:
-        text (str): ten invoice's text
+        text (str): invoice's text
 
     Returns:
-        True or False
+        bool: True of False
     """
+
+
     return "verifie le" in text.lower()
 
 def check_company(text:str,
                   company_df:pd.DataFrame,
                   new_company: str):
-    """check
+    """
+    Identify the name of company and the parent company referenced in the invoice text 
+
+    the function tries two passes:
+
+        - comapny without a parent company (parent_company == '0')
+        - Company with a parent company (parent_company != '0')
+
+    the function uses fuzzy string matching between each company name known (comapny_df)
+    and the OCR text and returns the first match above a score threshold ( = 92)
+
+    if not match is found , returns 'new_company'
 
     Args:
-        text (str): _description_
-        company_list_name_invoice (_type_): _description_
-        company_list_name_registery (_type_): _description_
+        text (str): Cleaned OCR text
+        company_df (pd.DataFrame): DataFrame containing :
+                                                        - company_name_invoice
+                                                        - parent_company
+        new_company (str): fallback label if no match
+
+    Returns:
+            str | tuple (str, str)
+                Either a company name (str), a tuple (parent_company, child company)
+                or the provided fallback label 'new_company
     """
 
     
@@ -149,13 +177,23 @@ def check_company(text:str,
 
 def check_supplier(text:str,
                    supplier_list:list):
+
     """
-    check the company name in the invoice
+    Detect the supplier's name in the text OCR cleaned using the fuzzy matching.
 
-    return
-        company name or None
+    The detection of the supplier name depends of a score (fuzz partial ratio)
 
-    """    
+    if the score > 90 it returns the supplier name else return NONE and logs the best score
+
+    Args:
+        text (str): _description_
+        supplier_list (list): _description_
+
+    Returns:
+        str or None
+            the supplier name (with a threshol >90) or None
+    """
+
     list_score_supplier = []
     for supplier_name in supplier_list:
         clean_supplier_name = clean_text(supplier_name)
@@ -172,7 +210,7 @@ def check_supplier(text:str,
 
 
 
-def normalise_supply_name(text):
+def normalise_supply_name(text:str):
     """
     preprocess the companies name directory
 
@@ -189,7 +227,8 @@ def normalise_supply_name(text):
     return text
 
 
-def make_directory_company(output_dir,directory):
+def make_directory_company(output_dir:str,
+                           directory:str):
     """
     Create a directory if it doesn't exist.
 
@@ -203,14 +242,16 @@ def make_directory_company(output_dir,directory):
     
     if not (os.path.exists(path)):
         os.makedirs(path)
-        print(f"dossier {directory} créé")
+        logger.info(f"dossier {directory} créé")
         return path
     else:
-        print(f"dossier {directory} déjà existant")
+        logger.info(f"dossier {directory} déjà existant")
         return path
 
 
-def make_directory_mother_company(output_dir,mother_company,directory):
+def make_directory_mother_company(output_dir:str,
+                                  mother_company:str,
+                                  directory:str):
     """
     Create a directory if it doesn't exist.
 
@@ -221,19 +262,19 @@ def make_directory_mother_company(output_dir,mother_company,directory):
         path
     """
     path = os.path.join(output_dir,mother_company,directory)
-    #print(path)
+
     
     if not (os.path.exists(path)):
         os.makedirs(path)
-        print(f"dossier {directory} créé")
+        logger.info(f"dossier {directory} créé")
         return path
     else:
-        print(f"dossier {directory} déjà existant")
+        logger.info(f"dossier {directory} déjà existant")
         return path
 
 
 
-def make_directory_supply(directory_company,directory_supplier):
+def make_directory_supply(directory_company:str,directory_supplier:str):
     """
     Create a directory if it doesn't exist.
 
@@ -248,13 +289,21 @@ def make_directory_supply(directory_company,directory_supplier):
     
     if not (os.path.exists(path)):
         os.makedirs(path)
-        print(f"dossier {directory_supplier} créé")
+        logger.info(f"dossier {directory_supplier} créé")
         return path
     else:
-        print(f"dossier {directory_supplier} déjà existant")
+        logger.info(f"dossier {directory_supplier} déjà existant")
         return path
     
-def extract_SHA1(file_path):
+def extract_SHA1(file_path:str):
+    """
+    Compute the SHA1 hash of a file
+    Args:
+        file_path (str): the path to the file
+
+    Returns:
+        str: hex digest string
+    """
 
     #création de l'insance de l'algorithme de hachage cryptographqiue
     h = hashlib.sha1()
@@ -265,10 +314,19 @@ def extract_SHA1(file_path):
         h.update(data)
         return h.hexdigest()
 
-def clear_result_and_raw(dir_path):
+def clear_result_and_raw(dir_path:str):
+    """
+    Delete all files and subdirecories in a given directory
+
+    Args:
+        dir_path (str): path to the directory
+        
+    Returns:
+            None
+    """
 
     if len(os.listdir(dir_path)) == 0 :
-        print("le dossier est vide")
+        logger.info("le dossier est vide")
         return None
 
     for elmt in os.listdir(dir_path):
@@ -281,14 +339,23 @@ def clear_result_and_raw(dir_path):
                 shutil.rmtree(elmt_path)
         
         except Exception as e:
-            print(f"on a eu l'erreur suivante lors de la suppression de {elmt_path}:{e}")
+            logger.info(f"on a eu l'erreur suivante lors de la suppression de {elmt_path}:{e}")
         
-    print(f"le contenu du dossier {dir_path} a été vidé avec succés")
+    logger.info(f"le contenu du dossier {dir_path} a été vidé avec succés")
 
-def clear_result_csv(dir_path):
+def clear_result_csv(dir_path :str):
+    """
+    remove the file in csv format
+
+    Args:
+        dir_path (str): path to the directory who contents the files in format csv
+
+    Returns:
+        None
+    """
 
     if len(os.listdir(dir_path)) == 0 :
-        print("pas de fichier resultat.csv à supprimer")
+        logger.info("pas de fichier resultat.csv à supprimer")
         return None
     
     for elmt in os.listdir(dir_path):
@@ -298,7 +365,7 @@ def clear_result_csv(dir_path):
             if os.path.isfile(elmt_path):
                 os.remove(elmt_path)
         except Exception as e:
-            print(f"on a eu l'erreur suivante lors de la suprression du fichier {elmt_path} : {e} ")
+            logger.error(f"on a eu l'erreur suivante lors de la suprression du fichier {elmt_path} : {e} ")
     
-    print(f"le fichier {elmt_path} a été supprimée avec succés")
+    logger.info(f"le fichier {elmt_path} a été supprimée avec succés")
 
