@@ -35,3 +35,6 @@ invoice_issue
 
 #brouillon notebook
 expand.ipynb
+
+#docker
+*.tar
