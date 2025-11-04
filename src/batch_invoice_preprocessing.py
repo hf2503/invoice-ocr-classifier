@@ -1,3 +1,19 @@
+""" 
+This modules do the following actions:
+
+  - 'archive_csv ' :Ensure the tracking and archiving of pdf files containing invoices
+  
+  
+  - 'batch_invoice_preprocessing' : 
+        It's the entry point of the pdf files with numerous invoices, this founction do :
+
+        - scan an input folder for pdf
+        - check the if the pdf file has been processed
+        - call 'archive_csv' to save the pdf file in a folder track and csv file track
+        - call process_invoice_pdf for OCR classification
+        - move processed invoice to an archive folder or delete the processed invoice if it already exists in the archive folder).
+"""
+
 import os
 import traceback
 import shutil
@@ -19,21 +35,32 @@ logging.basicConfig(
     ]
 )
 
-def clear_folder():
-    pass
-
-
-
-
-
-
-
-
-
 def archive_csv(file_path,
                 csv_path=config.ARCHIVE_CSV,
                 columns=config.COLUMNS_SUIVI_BRUTE):
+    """
 
+    This function ensure the tracking of the raw pdf file (date,time and SHA1)
+
+    Args:
+        file_path (str): Path of the raw pdf file
+        csv_path (str): Path the archive csv file. Defaults to config.ARCHIVE_CSV.
+        columns (list[str]): csv headers if the file doesn't exist . Defaults to config.COLUMNS_SUIVI_BRUTE.
+
+
+    returns 
+
+        None : writes in a tracking folder  
+
+    
+    side Effects:
+
+        - creates the parent directory if it doesn't exist
+        - open and appends to a csv file on disk (delimiter=';', encoding = 'utf8')
+        - produces log messages
+
+
+    """
 
     #vérification que le dossier archive_brute.csv existe
     os.makedirs(os.path.dirname(csv_path),exist_ok=True)
@@ -64,6 +91,11 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
                                 raw_invoice_folder = config.FACTURES_BRUTES_DIR,
                                 ):
     
+    
+
+
+
+
     #vérification de l'existence du dossier data/facture brutes
     os.makedirs(input_pdf_folder,exist_ok=True)
 
@@ -81,7 +113,7 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
         print("there are not invoices into the directory input")
         return None
     
-    
+    # scan du dossier contenant les fichier à traiter
     for filename in list_pdf_input_folder:
 
         if not filename.endswith('.pdf'):
@@ -94,7 +126,7 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
             continue
 
             
-            #enregistrement dans le fichier archive_facture.csv
+        #enregistrement dans le fichier archive_facture.csv
 
         file_path = os.path.join(input_pdf_folder,filename)
         logging.info("input_pdf_folder:%s:",file_path)
@@ -103,7 +135,7 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
         try:
             process_invoice_pdf(input_pdf=file_path)
 
-            #sauvegarde du fichier pdf brut dans un le dossier  facture brute archive
+        #sauvegarde du fichier pdf brut dans un le dossier  facture brute archive
             archive_path = os.path.join(archive_input_pdf_folder,raw_invoice_folder,filename)
 
 

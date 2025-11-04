@@ -1,3 +1,15 @@
+"""
+    invoice processing and filing utilities
+
+    this module : 
+      - configure Tesseract path and logging
+      - converts PDFs to images and performs OCR with pytesseract
+      - detects the target company, parent company and the supplier
+      - create the folder structure and save the invoice's page in pdf/png format according to the filing logic
+      - save the results into CSV files
+
+"""
+
 import pytesseract
 import numpy as np
 import pandas as pd
@@ -12,18 +24,6 @@ import datetime
 
 from . import config
 from .utils import *
-
-"""
-    invoice processing and filing utilities
-
-    this module : 
-      - configure Tesseract path and logging
-      - converts PDFs to images and performs OCR with pytesseract
-      - detects the target company, parent company and the supplier
-      - create the folder structure and save the invoice's page in pdf/png format according to the filling logic
-      - save the results into CSV files
-
-"""
 
 
 logging.basicConfig(
@@ -124,18 +124,32 @@ def process_invoice_pdf(input_pdf:str,
 
 
     Args:
-        input_pdf (str): _description_
-        suivi_dir (_type_, optional): _description_. Defaults to config.SUIVI_DIR.
-        archive_suivi_dir (_type_, optional): _description_. Defaults to config.FACTURE_CLASSEES_DIR.
-        company_csv (_type_, optional): _description_. Defaults to config.company_df.
-        list_company_invoice (_type_, optional): _description_. Defaults to config.LIST_COMPANY_NAME_INVOICE.
-        output_dir (_type_, optional): _description_. Defaults to config.OUTPUT_DIR.
-        list_supplier (_type_, optional): _description_. Defaults to config.LIST_SUPPLIER.
-        new_supplier (_type_, optional): _description_. Defaults to config.NEW_SUPPLIER.
-        new_company (_type_, optional): _description_. Defaults to config.NEW_COMPANY.
+        input_pdf (str): Path to the actual pdf file containing numerous invoices
+        suivi_dir (str): Folder tracking for processed invoice. Defaults to config.SUIVI_DIR.
+        archive_suivi_dir (str): Folder containing the process invoice filed into their corresponding folder . Defaults to config.FACTURE_CLASSEES_DIR.
+        company_csv (pandas.DataFrame): DataFrame containing the name of companies, parent companies and TVA. Defaults to config.company_df.
+        list_company_invoice (list[str]): list containing the name of the company . Defaults to config.LIST_COMPANY_NAME_INVOICE.
+        output_dir (str): Path of the folder who contains the filed invoices. Defaults to config.OUTPUT_DIR.
+        list_supplier (list[str]): Fallback label. Defaults to config.LIST_SUPPLIER.
+        new_supplier (str): Fallback label when no supplier has been identified . Defaults to config.NEW_SUPPLIER.
+        new_company (_type_, optional): Fallback label when no company has been identified . Defaults to config.NEW_COMPANY.
 
+    Return:
+
+        None : Writes files to disk, logs, and updates tracking csv    
+    
+        
+    Side Effects :
+        - create directories
+        - Writes/appends lines to csv files
+        - produces log messages
+    
     Raises:
         FileNotFoundError: _description_
+        Exception : any exception from ocr
+
+    
+    
     """
     
     #création des dossiers
