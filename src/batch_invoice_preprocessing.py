@@ -90,8 +90,38 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
                                 archive_input_pdf_folder = config.ARCHIVE_DIR,
                                 raw_invoice_folder = config.FACTURES_BRUTES_DIR,
                                 ):
+    """
+
+    Ingest pdf invoice from an input folder (input_pdf_folder)
+    
+    workflow :
+    
+        - Ensure that input folder, archive folder exist
+        - Ensure that input folder is not empty
+        - List the pdf file in input folder and list the pdf files in archive folder
+        - For each new pdf file :
+                    - call 'process_invoice_pdf' to run OCR, classification, filing
+                    - Move processed pdf invoice to tracking folder and tracking csv file if 
+                    the pdf invoice already exist , the pdf file is deleted
     
     
+    
+    Args:
+        input_pdf_folder (str): Path to the folder who contains the raw pdf file. Defaults to config.INPUT_DIR.
+        archive_input_pdf_folder (str): Path to the root archive directory who contains the folder for archieve raw pdf processed and csv file for the tracking. Defaults to config.ARCHIVE_DIR.
+        raw_invoice_folder (str): Path to the subdirectory under the archive root who contains the raw pdf processed . Defaults to config.FACTURES_BRUTES_DIR.
+
+    Returns:
+       None
+       
+    Side Effects:
+            - creates folder if they don't exist
+            - Moves or removes files
+            - Appends a row to the archive_tracking csv
+            - call 'process_invoice_pdf' witch perform OCR and write some files
+        
+        
+    """
 
 
 
@@ -113,7 +143,7 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
         print("there are not invoices into the directory input")
         return None
     
-    # scan du dossier contenant les fichier à traiter
+    # scan du dossier contenant les fichiers à traiter
     for filename in list_pdf_input_folder:
 
         if not filename.endswith('.pdf'):
