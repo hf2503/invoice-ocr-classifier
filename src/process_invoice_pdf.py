@@ -13,8 +13,18 @@ import datetime
 from . import config
 from .utils import *
 
+"""
+    invoice processing and filing utilities
 
-print(f"Tesseract path loaded: {config.TESSERACT_PATH}")
+    this module : 
+      - configure Tesseract path and logging
+      - converts PDFs to images and performs OCR with pytesseract
+      - detects the target company, parent company and the supplier
+      - create the folder structure and save the invoice's page in pdf/png format according to the filling logic
+      - save the results into CSV files
+
+"""
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -24,6 +34,8 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+logging.info(f"Tesseract path loaded: {config.TESSERACT_PATH}")
 
 #desactivate the debug message of pillow in the file invoice_processing.log
 logging.getLogger('PIL').setLevel(logging.WARNING)
@@ -35,11 +47,31 @@ pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 #dictionnary_list:
 row_list = []
 
-def suivi_resultat_csv(file_path,
+def suivi_resultat_csv(file_path:str,
                        csv_path_suivi = config.SUIVI_CSV,
                        csv_path_result = config.RESULTAT_CSV,
                        row=None,
                        columns=config.COLUMNS_SUIVI):
+    """
+    Append one result row to the CSV files 
+
+    this function : 
+
+    - compute the current date, the SHA-1 hash of the file and append them to the row 
+    - append the row to csv_path_suivi and csv_path_result
+
+    Args:
+        file_path (str): path to the actual saved invoice file
+        csv_path_suivi (str): path to the tracking csv file that archives the results
+        csv_path_result (str): path to the csv file containing the result of the processing 
+        row (dict): the dict who contains the reults of the processing
+        columns (list[str]): CSV header to write if the file does not exist
+
+    returns
+
+        None: Write to the disk, no values is returned
+    
+    """
 
     #création du dossier suivi
     os.makedirs(os.path.dirname(csv_path_suivi),exist_ok=True)
@@ -82,10 +114,28 @@ def process_invoice_pdf(input_pdf:str,
                         new_company= config.NEW_COMPANY
                         ):
     """
-    convert the Image PIL into pdf files
+
+    process a pdf file containing numerous invoices
+
+    the function perfomr the following tasks:
+        - convert the pdf file into PIL format
+        - convert each image into string format
+        - filter the image 
+
 
     Args:
-        image : invoice image 
+        input_pdf (str): _description_
+        suivi_dir (_type_, optional): _description_. Defaults to config.SUIVI_DIR.
+        archive_suivi_dir (_type_, optional): _description_. Defaults to config.FACTURE_CLASSEES_DIR.
+        company_csv (_type_, optional): _description_. Defaults to config.company_df.
+        list_company_invoice (_type_, optional): _description_. Defaults to config.LIST_COMPANY_NAME_INVOICE.
+        output_dir (_type_, optional): _description_. Defaults to config.OUTPUT_DIR.
+        list_supplier (_type_, optional): _description_. Defaults to config.LIST_SUPPLIER.
+        new_supplier (_type_, optional): _description_. Defaults to config.NEW_SUPPLIER.
+        new_company (_type_, optional): _description_. Defaults to config.NEW_COMPANY.
+
+    Raises:
+        FileNotFoundError: _description_
     """
     
     #création des dossiers
