@@ -38,3 +38,6 @@ expand.ipynb
 
 #docker
 *.tar
+
+#tree
+tree.txt
