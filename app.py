@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import os
-
+import time
+import csv
 from src import config
 from src.batch_invoice_preprocessing import batch_invoice_preprocessing
 from src.utils import clear_result_and_raw,clear_result_csv
@@ -19,10 +20,32 @@ st.caption("Reconnaissance semi-automatique + correction comptable")
 #on s'assure de l'existence du dossier des inputs
 os.makedirs(config.INPUT_DIR, exist_ok=True)
 
+#on s'assure de l'existence du dossier du suivi
+os.makedirs(config.SUIVI_DIR,exist_ok=True)
 
 #variable pour avoir un set des fichier dèjà traité et éviter les doublons
 os.makedirs(config.FACTURES_BRUTES_DIR, exist_ok=True)
 already_archived = set(os.listdir(config.FACTURES_BRUTES_DIR))
+
+#----initialisaton des csv----------
+
+csv_a_initialiser = {
+    config.RESULTAT_CSV : config.COLUMNS_SUIVI,
+    config.SUIVI_CSV : config.COLUMNS_SUIVI,
+    config.ARCHIVE_CSV : config.COLUMNS_SUIVI_BRUTE
+}
+
+for path, columns in csv_a_initialiser.items():
+    os.makedirs(os.path.dirname(path),exist_ok=True)
+    
+    #on test si le csv existe ou qu'il n'est pas vide
+    with open(path,'a',newline='',encoding='utf-8') as f:
+        writer = csv.writer(f,delimiter=';')
+        if not os.path.exists(path) or os.path.getsize(path) == 0 : 
+            writer.writerow(columns)
+
+            
+
 
 #key pour modifier l'état du widget traitement des factures pour vider le buffer de streamlit
 
@@ -46,6 +69,7 @@ with left:
     if uploaded_files:
 
         for files in uploaded_files:
+            
 
             filename = os.path.basename(files.name or "upload.pdf")
 
@@ -61,6 +85,7 @@ with left:
 
     else :
         st.info("il y aucun fichier à traiter")
+        st.stop()
 
     st.divider()
     c1,c2 = st.columns(2)
@@ -69,33 +94,21 @@ with left:
 
     if process_clicked:
 
-        # pdf = [f for f in os.listdir(config.INPUT_DIR)]
-        # total = len(pdf)
-
-        # if total == 0:
-        #     st.info("Aucun PDF à traiter")
-        #     st.stop()
-        
-        # my_bar =st.progress(0)
-
-
-
-
-        #on controle si les fichiers excels concernés sont fermés
-
-        check_csv_closed = [
-            config.ARCHIVE_CSV,
-            config.SUIVI_CSV,
-            config.RESULTAT_CSV
-        ]
+        #on controle les fichiers csv ne sont pas ouverts
+        check_csv_closed = list(csv_a_initialiser.keys())
 
         csv_error= []
+        
+        # st.write(f"🔍 Vérif CSV à contrôler : {check_csv_closed}")
 
         for csv_path in check_csv_closed:
+
             try:
                 with open(csv_path,'a') as file:
                     pass
             except PermissionError :
+                # st.error(f"⚠️ Impossible de lancer le traitement le fichier suivant {csv_path} est ouvert")
+                # st.stop()
                 csv_error.append(csv_path)
 
             except Exception as e:
@@ -103,22 +116,25 @@ with left:
                 st.stop()
             
         if csv_error:
+            #-------------debug---------------------
+            st.write(f"les erreurs sont {csv_error}")
             st.error(f"⚠️ Impossible de lancer le traitement les fichiers suivants : {','.join(csv_error)} sont ouverts dans excel . \n\n"
-                       "Fermez les puis réessayez")
+                     "Fermez les puis réessayez")
             
-            #Bouton pour retester sans recharger la page
-            if st.button("🔁 Réessayer"):
-                st.rerun()
-            st.stop()
+        #     Bouton pour retester sans recharger la page
+            # if st.button("🔁 Réessayer"):
+            #     st.rerun()
 
-        with st.spinner(text="\U000023F0 en cours de traitement",
-                        show_time=True,
-                        width="content"):
+        else:
 
-            batch_invoice_preprocessing(config.INPUT_DIR)
-            st.toast("Traitement terminé",icon="😍")
-            st.balloons()
-            # reset_uploader()
+            with st.spinner(text="\U000023F0 en cours de traitement",
+                            show_time=True,
+                            width="content"):
+
+                batch_invoice_preprocessing(config.INPUT_DIR)
+                st.toast("Traitement terminé",icon="😍")
+                st.balloons()
+                # reset_uploader()
     
     if clear_clicked:
         with st.spinner(text=" 🫧nettoyage"):
@@ -134,7 +150,8 @@ with left:
         st.subheader("Resultats")
         resultat_csv = config.RESULTAT_CSV
         
-        if os.path.exists(resultat_csv):
+        if os.path.exists(resultat_csv) and os.path.getsize(resultat_csv):
+            
             df = pd.read_csv(resultat_csv,sep=';')
             st.info(f"{df.shape[0]} factures ont été traitées")
             st.dataframe(df)
