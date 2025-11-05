@@ -68,7 +68,52 @@ with left:
     clear_clicked = c2.button("\U0001F528 Effacer",type ="secondary",use_container_width=True)
 
     if process_clicked:
-        with st.spinner(text="\U000023F0 en cours de traitement"):
+
+        # pdf = [f for f in os.listdir(config.INPUT_DIR)]
+        # total = len(pdf)
+
+        # if total == 0:
+        #     st.info("Aucun PDF à traiter")
+        #     st.stop()
+        
+        # my_bar =st.progress(0)
+
+
+
+
+        #on controle si les fichiers excels concernés sont fermés
+
+        check_csv_closed = [
+            config.ARCHIVE_CSV,
+            config.SUIVI_CSV,
+            config.RESULTAT_CSV
+        ]
+
+        csv_error= []
+
+        for csv_path in check_csv_closed:
+            try:
+                with open(csv_path,'a') as file:
+                    pass
+            except PermissionError :
+                csv_error.append(csv_path)
+
+            except Exception as e:
+                st.error(f"❌ erreur inattendue : {e}")
+                st.stop()
+            
+        if csv_error:
+            st.error(f"⚠️ Impossible de lancer le traitement les fichiers suivants : {','.join(csv_error)} sont ouverts dans excel . \n\n"
+                       "Fermez les puis réessayez")
+            
+            #Bouton pour retester sans recharger la page
+            if st.button("🔁 Réessayer"):
+                st.rerun()
+            st.stop()
+
+        with st.spinner(text="\U000023F0 en cours de traitement",
+                        show_time=True,
+                        width="content"):
 
             batch_invoice_preprocessing(config.INPUT_DIR)
             st.toast("Traitement terminé",icon="😍")
@@ -105,6 +150,7 @@ with left:
         st.write(f" Tableaux recap des résultats : {config.RESULTAT_CSV}")
         st.info("Astuce : utilisez l'onglet ** importer ** pour ajouter des pdf , puis **traiter**."
                 "le bouton **Effacer** remets tout à zéro")
+        st.info(f"Les fichiers excels {','.join([config.ARCHIVE_CSV,config.SUIVI_CSV,config.RESULTAT_CSV])} doivent être fermés pour lancer le traitement")
 
 
 
