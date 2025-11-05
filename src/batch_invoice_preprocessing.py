@@ -152,7 +152,7 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
 
 
         if filename in already_archived:
-            print("le fichier a déjà été traité")
+            logging.info("le fichier a déjà été traité")
             continue
 
             
