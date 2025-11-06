@@ -174,18 +174,14 @@ def process_invoice_pdf(input_pdf:str,
         #convert image PIL in RGB 
         image_rgb = image.convert("RGB")
         
-        
         #preprocessing for pytesseract
         img_array = np.array(image_rgb)
-        
-        
         gray_image = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
 
         
         #convert image to string
         try:
             text = pytesseract.image_to_string(gray_image,config="--psm 6")
-            
             logging.info(f"text_pytesseract : {text}")
 
                 
@@ -193,7 +189,6 @@ def process_invoice_pdf(input_pdf:str,
             
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
             continue
-        
         
         if check_invoice(text):
 
@@ -215,33 +210,28 @@ def process_invoice_pdf(input_pdf:str,
             directory_parent_company = None
             clean_text_ocr = clean_text(text)
 
-
             #----- COMPANY DETECTION--------
             company_name = check_company(clean_text_ocr,
                                          company_df=company_csv,
                                          new_company=new_company
                                          )
             
-
             logging.debug("Detected company name : %s", company_name)
 
             print(f"company name : {company_name}")
-
 
             if isinstance(company_name, tuple) :
 
                 #directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
                 directory_parent_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'parent_company'].values
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
-                
-                
+                                
                 logging.info("directory_company_match_size: %s",directory_company_match.size)    
                 logging.info("directory_parent_match_debogage_1: %s",directory_parent_match)
                 logging.info("directory_company_match_debogage_1: %s",directory_company_match)
                      
                 if directory_company_match.size > 1 :
                     
-
                     directory_parent_company = directory_parent_match[0]
 
                     #------------feature parent_company-----------
