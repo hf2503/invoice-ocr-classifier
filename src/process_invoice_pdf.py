@@ -107,6 +107,7 @@ def process_invoice_pdf(input_pdf:str,
                         suivi_dir=config.SUIVI_DIR,
                         archive_suivi_dir=config.FACTURE_CLASSEES_DIR, 
                         company_csv = config.company_df,
+                        supplier_csv = config.supplier_df,
                         list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
                         output_dir= config.OUTPUT_DIR,
                         list_supplier= config.LIST_SUPPLIER,
@@ -184,6 +185,9 @@ def process_invoice_pdf(input_pdf:str,
         #convert image to string
         try:
             text = pytesseract.image_to_string(gray_image,config="--psm 6")
+            
+            logging.info(f"text_pytesseract : {text}")
+
                 
         except Exception as e:
             
@@ -202,7 +206,6 @@ def process_invoice_pdf(input_pdf:str,
             archive_image_path = os.path.join(suivi_dir,archive_suivi_dir,image_filename)
             image.save(archive_image_path)
             logging.info("l'image est enregistré dans : %s",archive_image_path)
-
 
             #----------feature train_image_path------------
             
@@ -232,22 +235,10 @@ def process_invoice_pdf(input_pdf:str,
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
                 
                 
-                
-                
-                logging.info("directory_company_match_size: %s",directory_company_match.size)
-                
-                
-                                    
-                #-------------debogage----------------
-                    
-                    
+                logging.info("directory_company_match_size: %s",directory_company_match.size)    
                 logging.info("directory_parent_match_debogage_1: %s",directory_parent_match)
                 logging.info("directory_company_match_debogage_1: %s",directory_company_match)
-                    
-                    
-                #-------------fin_debogage------------------
-            
-                
+                     
                 if directory_company_match.size > 1 :
                     
 
@@ -277,23 +268,12 @@ def process_invoice_pdf(input_pdf:str,
                     #-------------debogage----------------
                     logging.info("directory_parent_match_debogage_2: %s",directory_parent_match)
                     logging.info("directory_company_match_debogage_2: %s",directory_company_match)
-                    
-                    
+                        
                     #-------------fin_debogage------------------
                     
                     logging.info("company_name[1] : %s",company_name[1])
                     logging.info("company_name[0] : %s",company_name[0])
                     logging.info("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
-
-
-
-                    #-------------debogage----------------
-                    
-                    logging.info("row_debogage_3: %s",row)
-                    
-                    
-                    #-------------fin_debogage------------------
-
 
                     #------------feature parent_company-----------
 
@@ -302,11 +282,8 @@ def process_invoice_pdf(input_pdf:str,
                     #------feature company_name-------
 
                     row['company_name'] = directory_company_match[0]
-                    
-                    
                     directory_parent_company = directory_parent_match[0]
                     directory_company = directory_company_match[0]
-                    
                     
                     #-------------debogage----------------
                     
@@ -355,12 +332,17 @@ def process_invoice_pdf(input_pdf:str,
 
 
             #--------------supplier detection----------------------
-            supplier_name = check_supplier(clean_text_ocr,supplier_list=list_supplier)
+            supplier_name = check_supplier(clean_text_ocr,text,supplier_list=list_supplier)
             
+            # logging.info(f'ocr_text : {clean_text_ocr}')
+            # 
+            logging.info(f'raw_text : {text.lower()}')
 
             if supplier_name:
-                norm_name = normalise_supply_name(text = supplier_name)
-
+                
+                registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
+                norm_name = normalise_supply_name(text = registery_name[0])
+                
             else:
                 norm_name = normalise_supply_name(text =new_supplier)
                 
