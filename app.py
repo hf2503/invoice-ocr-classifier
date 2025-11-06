@@ -39,10 +39,16 @@ for path, columns in csv_a_initialiser.items():
     os.makedirs(os.path.dirname(path),exist_ok=True)
     
     #on test si le csv existe ou qu'il n'est pas vide
-    with open(path,'a',newline='',encoding='utf-8') as f:
-        writer = csv.writer(f,delimiter=';')
-        if not os.path.exists(path) or os.path.getsize(path) == 0 : 
-            writer.writerow(columns)
+
+    try :
+        with open(path,'a',newline='',encoding='utf-8') as f:
+            writer = csv.writer(f,delimiter=';')
+            if not os.path.exists(path) or os.path.getsize(path) == 0 : 
+                writer.writerow(columns)
+    
+    except PermissionError:
+        st.error(f"le fichier {path} est ouvert , fermez le et raffraichissez la page")
+        st.stop()
 
             
 
@@ -104,12 +110,11 @@ with left:
         for csv_path in check_csv_closed:
 
             try:
-                with open(csv_path,'a') as file:
+                with open(csv_path,'r+') as file:
+                    os.rename(csv_path,csv_path) # on essaye de renommer le fichier (avec le meme nom) pour s'assurer s'il est verrouillé ou non
                     pass
             except PermissionError :
-                # st.error(f"⚠️ Impossible de lancer le traitement le fichier suivant {csv_path} est ouvert")
-                # st.stop()
-                csv_error.append(csv_path)
+                csv_error.append(os.path.basename(csv_path))
 
             except Exception as e:
                 st.error(f"❌ erreur inattendue : {e}")
@@ -118,12 +123,12 @@ with left:
         if csv_error:
             #-------------debug---------------------
             st.write(f"les erreurs sont {csv_error}")
-            st.error(f"⚠️ Impossible de lancer le traitement les fichiers suivants : {','.join(csv_error)} sont ouverts dans excel . \n\n"
+            st.error(f"⚠️ Impossible de lancer le traitement, un (ou plusieurs) des fichiers suivants : {''.join(csv_error)} sont ouverts dans excel . \n\n"
                      "Fermez les puis réessayez")
             
         #     Bouton pour retester sans recharger la page
-            # if st.button("🔁 Réessayer"):
-            #     st.rerun()
+            if st.button("🔁 Réessayer"):
+                 st.rerun()
 
         else:
 
