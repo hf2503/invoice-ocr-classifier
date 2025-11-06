@@ -35,25 +35,23 @@ csv_a_initialiser = {
     config.ARCHIVE_CSV : config.COLUMNS_SUIVI_BRUTE
 }
 
+
+    #on verifie si les dossiers contenant les resultats ,le suivi et les archives existent
+
 for path, columns in csv_a_initialiser.items():
     os.makedirs(os.path.dirname(path),exist_ok=True)
     
-    #on test si le csv existe ou qu'il n'est pas vide
+    #on teste si le csv existe ou qu'il n'est pas vide
 
-    try :
-        with open(path,'a',newline='',encoding='utf-8') as f:
-            writer = csv.writer(f,delimiter=';')
-            if not os.path.exists(path) or os.path.getsize(path) == 0 : 
-                writer.writerow(columns)
-    
-    except PermissionError:
-        st.error(f"le fichier {path} est ouvert , fermez le et raffraichissez la page")
-        st.stop()
 
-            
+    with open(path,'a',newline='',encoding='utf-8') as f:
+        writer = csv.writer(f,delimiter=';')
+        if not os.path.exists(path) or os.path.getsize(path) == 0 : 
+            writer.writerow(columns)
 
 
 #key pour modifier l'état du widget traitement des factures pour vider le buffer de streamlit
+#afin de pouvoir reseter
 
 if "uploader_key" not in st.session_state:
     st.session_state["uploader_key"] = 0
