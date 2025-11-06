@@ -108,8 +108,8 @@ with left:
         for csv_path in check_csv_closed:
 
             try:
-                with open(csv_path,'r+') as file:
-                    os.rename(csv_path,csv_path) # on essaye de renommer le fichier (avec le meme nom) pour s'assurer s'il est verrouillé ou non
+                with open(csv_path,'a') as file:
+                    # os.rename(csv_path,csv_path) # on essaye de renommer le fichier (avec le meme nom) pour s'assurer s'il est verrouillé ou non
                     pass
             except PermissionError :
                 csv_error.append(os.path.basename(csv_path))
