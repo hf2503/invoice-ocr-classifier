@@ -175,7 +175,8 @@ def check_company(text:str,
     return new_company
 
 
-def check_supplier(text:str,
+def check_supplier(ocr_text:str,
+                   raw_text:str,
                    supplier_list:list):
 
     """
@@ -194,18 +195,24 @@ def check_supplier(text:str,
             the supplier name (with a threshol >90) or None
     """
 
-    list_score_supplier = []
+    list_score_supplier_ocr = []
+    list_score_supplier_raw = []
     for supplier_name in supplier_list:
         clean_supplier_name = clean_text(supplier_name)
 
-        score_match_supplier = match_word(text,clean_supplier_name)
-        list_score_supplier.append((supplier_name,score_match_supplier))
+        score_match_supplier_ocr = match_word(ocr_text,clean_supplier_name)
+        score_match_supplier_raw = match_word(raw_text.lower(),clean_supplier_name)
+        
+        list_score_supplier_ocr.append((supplier_name,score_match_supplier_ocr))
+        list_score_supplier_raw.append((supplier_name,score_match_supplier_raw))
+        
 
-        if score_match_supplier > 90 :
+        if score_match_supplier_ocr > 90 or score_match_supplier_raw > 90 :
             logging.info("supplier_name:%s",supplier_name)
             return supplier_name
     
-    logging.info(f"le score max trouvé est : supplier_name {max(list_score_supplier)[0]} pour un score de {max(list_score_supplier)[1]}")
+    logging.info(f"le score max_OCR trouvé est : supplier_name {max(list_score_supplier_ocr)[0]} pour un score de {max(list_score_supplier_ocr)[1]} \n"
+                 f"le score max_RAW trouvé est : supplier_name {max(list_score_supplier_raw)[0]} pour un score de {max(list_score_supplier_raw)[1]}")
     return None
 
 
