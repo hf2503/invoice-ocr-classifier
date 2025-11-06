@@ -43,11 +43,14 @@ for path, columns in csv_a_initialiser.items():
     
     #on teste si le csv existe ou qu'il n'est pas vide
 
-
+try:
     with open(path,'a',newline='',encoding='utf-8') as f:
         writer = csv.writer(f,delimiter=';')
         if not os.path.exists(path) or os.path.getsize(path) == 0 : 
             writer.writerow(columns)
+
+except PermissionError:
+    st.error(f"veuillez fermer le fichier excel suivant : {os.path.basename(path)}")
 
 
 #key pour modifier l'état du widget traitement des factures pour vider le buffer de streamlit
