@@ -19,6 +19,7 @@ climalux,climalux,LU19097974
 comptoir_des_fers_et_metaux,comptoir_des_fers_et_metaux,LU18879516
 creos,creos,LU10320554
 douane_accises_grand_duche,douane_accises_grand_duche,caisse.centrale@do.etat.lu
+douane,douane_accises_grand_duche,caisse.centrale@do.etat.lu
 eltrona,eltrona,LU28180834
 elco,elco,LU20075964
 etude_avocats,etude_avocats,LU32627602
@@ -27,6 +28,7 @@ leoenergie,leoenergie,LU19597485
 enovos,enovos,LU23238809
 footgolf,footgolf,LU630099780001390038
 foyer_assurances,foyer_assurances,LU14673765
+foyer,foyer_assurances,LU14673765
 Gilbert,Gilbert,LU18554771
 grun_signalisation,grun_signalisation,info@grun.lu
 hotel_standinn,hotel_standinn,LU18856361
@@ -82,7 +84,7 @@ taxes_communales,taxes_communales,LU10286570
 taxes_communales_dechets_vdl,taxes_communales_dechets_vdl,LU9801415100
 taxes_communales_grand_duche,taxes_communales_grand_duche,LU10286570
 taxes_communales_differdange,taxes_communales_differdange,LU10284954
-taxe_communale,taxe_communale,LU10355144
+service_eaux,taxe_communale_eau_sppo,LU10355144
 taxe_communale_eau_theatre,taxe_communale_eau_theatre,eau-guichets@vdl.lu
 taxe_communale_eau_theatre,taxe_communale_eau_theatre,LU10355144
 Service_biens_communaux,Service_biens_communaux,biens@vdl.lu
