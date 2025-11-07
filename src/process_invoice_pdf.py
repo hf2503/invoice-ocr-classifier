@@ -318,10 +318,11 @@ def process_invoice_pdf(input_pdf:str,
                 logging.warning("company name '%s' not matched anywhere; fallback to '%s'", company_name, new_company)
                 directory_company_path = make_directory_company(output_dir, new_company)
 
-
+            logging.info(f"list_supplier : {list_supplier}")
 
             #--------------supplier detection----------------------
-            supplier_name = check_supplier(clean_text_ocr,text,supplier_list=list_supplier)
+            supplier_name = check_supplier(clean_text_ocr,
+                                           supplier_list=list_supplier)
             
             # logging.info(f'ocr_text : {clean_text_ocr}')
             # 
@@ -337,13 +338,13 @@ def process_invoice_pdf(input_pdf:str,
                 image_retry = Image.open(archive_image_path)
 
             # #on met l'image au standard RGB
-            #     image_retry_rgb = image_retry.convert("RGB")
+                image_retry_rgb = image_retry.convert("RGB")
 
             # #on convertit l'image en tableau numpy
-            #     image_retry_array = np.array(image_retry_rgb)
+                image_retry_array = np.array(image_retry_rgb)
 
             # # conversion de l'image en niveau de gris
-            #     image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
+                image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
 
             # #conversion en HSV pour detecter le stabylo jaune
             #     hsv = cv2.cvtColor(image_retry_gray, cv2.COLOR_BGR2HSV)
@@ -363,7 +364,8 @@ def process_invoice_pdf(input_pdf:str,
             #---------------------fin debogage-------------------
 
             #on retry la fonction check supply 
-                supplier_name_retry = check_supplier(clean_text_retry_ocr,supplier_list = list_supplier) 
+                supplier_name_retry = check_supplier(ocr_text =clean_text_retry_ocr,
+                                                     supplier_list = list_supplier) 
               
                 if supplier_name_retry:
                     registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name_retry]['supplier_registery'].unique()
