@@ -182,7 +182,7 @@ def process_invoice_pdf(input_pdf:str,
         #convert image to string
         try:
             text = pytesseract.image_to_string(gray_image,config="--psm 6")
-            logging.info(f"text_pytesseract : {text}")
+            # logging.info(f"text_pytesseract : {text}")
 
                 
         except Exception as e:
@@ -252,18 +252,17 @@ def process_invoice_pdf(input_pdf:str,
                     logging.info("directory_company_path:%s:",directory_company_path)
 
                     logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
-                    print(directory_company_path)
                 
                 else:
                     #-------------debogage----------------
-                    logging.info("directory_parent_match_debogage_2: %s",directory_parent_match)
-                    logging.info("directory_company_match_debogage_2: %s",directory_company_match)
+                    # logging.info("directory_parent_match_debogage_2: %s",directory_parent_match)
+                    # logging.info("directory_company_match_debogage_2: %s",directory_company_match)
                         
                     #-------------fin_debogage------------------
                     
-                    logging.info("company_name[1] : %s",company_name[1])
-                    logging.info("company_name[0] : %s",company_name[0])
-                    logging.info("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
+                    # logging.info("company_name[1] : %s",company_name[1])
+                    # logging.info("company_name[0] : %s",company_name[0])
+                    # logging.info("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
 
                     #------------feature parent_company-----------
 
@@ -277,8 +276,8 @@ def process_invoice_pdf(input_pdf:str,
                     
                     #-------------debogage----------------
                     
-                    logging.info("directory_parent_company_debogage_4: %s",directory_parent_company)
-                    logging.info(" directory_company_debogage_4: %s",directory_company)
+                    # logging.info("directory_parent_company_debogage_4: %s",directory_parent_company)
+                    # logging.info(" directory_company_debogage_4: %s",directory_company)
                     
                     #-------------fin_debogage------------------
                     
@@ -326,17 +325,52 @@ def process_invoice_pdf(input_pdf:str,
             
             # logging.info(f'ocr_text : {clean_text_ocr}')
             # 
-            logging.info(f'raw_text : {text.lower()}')
+            # logging.info(f'raw_text : {text.lower()}')
 
             if supplier_name:
                 
                 registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
                 norm_name = normalise_supply_name(text = registery_name[0])
-                
+
             else:
-                norm_name = normalise_supply_name(text =new_supplier)
-                
+            #on retente le process sur l'image png sauvegardé , le deuxième traitement arrive souvent à identifier le supplier    
+                image_retry = Image.open(archive_image_path)
+
+            #on met l'image au standard RGB
+                image_retry_rgb = image_retry.convert("RGB")
+
+            #on convertit l'image en tableau numpy
+                image_retry_array = np.array(image_retry_rgb)
+
+            # conversion de l'image en niveau de gris
+                image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
+
+            #conversion en HSV pour detecter le stabylo jaune
+                hsv = cv2.cvtColor(image_retry_gray, cv2.COLOR_BGR2HSV)
+                lower_yellow = np.array([20,80,80])
+                upper_yellow = np.array([40,255,255])
+                mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
+                _,mask_text = cv2.threshold(hsv,0,255,cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+
+
             
+            #on detecte le texte de l'image grace à pytesseract
+                text_retry = pytesseract.image_to_string(image_retry_gray)
+                clean_text_retry_ocr = clean_text(text_retry) 
+
+            #--------------------debogage------------------------
+                logging.info(f"text_retry_ocr = {clean_text_retry_ocr}")
+            #---------------------fin debogage-------------------
+
+            #on retry la fonction check supply 
+                supplier_name_retry = check_supplier(clean_text_retry_ocr,supplier_list = list_supplier) 
+              
+                if supplier_name_retry:
+                    registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name_retry]['supplier_registery'].unique()
+                    norm_name = normalise_supply_name(text = registery_name[0])
+                else:
+                    norm_name = normalise_supply_name(text =new_supplier)
+        
             #--------------creation du chemin de la facture-----------------------    
             
             dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
