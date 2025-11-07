@@ -336,21 +336,21 @@ def process_invoice_pdf(input_pdf:str,
             #on retente le process sur l'image png sauvegardé , le deuxième traitement arrive souvent à identifier le supplier    
                 image_retry = Image.open(archive_image_path)
 
-            #on met l'image au standard RGB
-                image_retry_rgb = image_retry.convert("RGB")
+            # #on met l'image au standard RGB
+            #     image_retry_rgb = image_retry.convert("RGB")
 
-            #on convertit l'image en tableau numpy
-                image_retry_array = np.array(image_retry_rgb)
+            # #on convertit l'image en tableau numpy
+            #     image_retry_array = np.array(image_retry_rgb)
 
-            # conversion de l'image en niveau de gris
-                image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
+            # # conversion de l'image en niveau de gris
+            #     image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
 
-            #conversion en HSV pour detecter le stabylo jaune
-                hsv = cv2.cvtColor(image_retry_gray, cv2.COLOR_BGR2HSV)
-                lower_yellow = np.array([20,80,80])
-                upper_yellow = np.array([40,255,255])
-                mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
-                _,mask_text = cv2.threshold(hsv,0,255,cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            # #conversion en HSV pour detecter le stabylo jaune
+            #     hsv = cv2.cvtColor(image_retry_gray, cv2.COLOR_BGR2HSV)
+            #     lower_yellow = np.array([20,80,80])
+            #     upper_yellow = np.array([40,255,255])
+            #     mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
+            #     _,mask_text = cv2.threshold(hsv,0,255,cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
 
             
