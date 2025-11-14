@@ -345,15 +345,6 @@ def process_invoice_pdf(input_pdf:str,
 
             # # conversion de l'image en niveau de gris
                 image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
-
-            # #conversion en HSV pour detecter le stabylo jaune
-            #     hsv = cv2.cvtColor(image_retry_gray, cv2.COLOR_BGR2HSV)
-            #     lower_yellow = np.array([20,80,80])
-            #     upper_yellow = np.array([40,255,255])
-            #     mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
-            #     _,mask_text = cv2.threshold(hsv,0,255,cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-
-
             
             #on detecte le texte de l'image grace à pytesseract
                 text_retry = pytesseract.image_to_string(image_retry_gray)
