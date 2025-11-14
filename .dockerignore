@@ -1,0 +1,12 @@
+data/
+logs/
+
+__pycache__/
+*.pyc
+*.log
+
+.git/
+.gitignore
+
+.env
+.vscode/
