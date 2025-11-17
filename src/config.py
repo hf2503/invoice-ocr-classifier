@@ -20,7 +20,7 @@ FACTURES_BRUTES_DIR = os.path.join(ARCHIVE_DIR,'raw_invoices')
 #csv path
 SUPPLIER_LIST_CSV = os.path.join(DATA_DIR,"supplier_list.csv")
 COMPANY_LIST_CSV = os.path.join(DATA_DIR,"company_list.csv")
-ARCHIVE_CSV = os.path.join(ARCHIVE_DIR,'archived_raw_invocies.csv')
+ARCHIVE_CSV = os.path.join(ARCHIVE_DIR,'archived_raw_invoices.csv')
 SUIVI_CSV = os.path.join(SUIVI_DIR,'processed_invoices_tracking.csv')
 RESULTAT_CSV = os.path.join(OUTPUT_DIR,'results.csv')
 
@@ -57,7 +57,7 @@ else:
 NEW_SUPPLIER = "new_supplier"
 NEW_COMPANY = "new_company"
 
-
-
+#KEY_WORD
+VALIDATION_KEYWORD = "verifie le"
 
 
