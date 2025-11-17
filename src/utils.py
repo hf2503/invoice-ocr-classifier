@@ -11,6 +11,8 @@ import shutil
 import logging
 import hashlib
 
+from . import config
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -104,8 +106,7 @@ def check_invoice(text:str):
         bool: True of False
     """
 
-
-    return "verifie le" in text.lower()
+    return config.VALIDATION_KEYWORD in text.lower()
 
 def check_company(text:str,
                   company_df:pd.DataFrame,
