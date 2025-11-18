@@ -166,6 +166,10 @@ def process_invoice_pdf(input_pdf:str,
     #dictionnary_list:
     row_list = []
     
+    #supplier invoice without key_word
+    supplier_no_key_word = None
+    image_no_key_word = None
+    
     #convert pdf into image
     images = convert_pdf_to_PIL(input_pdf)
     
@@ -189,7 +193,18 @@ def process_invoice_pdf(input_pdf:str,
             
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
             continue
+    #---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------
+        clean_text_ocr = clean_text(text) 
         
+        if not check_invoice(clean_text_ocr) and check_supplier(clean_text_ocr,list_supplier):
+            
+            supplier_no_key_word = check_supplier(clean_text_ocr,list_supplier)
+            image_no_key_word = image
+            continue
+
+    #---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------
+    
+       
         if check_invoice(text):
 
             #feature_dictionnary
@@ -327,6 +342,8 @@ def process_invoice_pdf(input_pdf:str,
             # logging.info(f'ocr_text : {clean_text_ocr}')
             # 
             # logging.info(f'raw_text : {text.lower()}')
+            
+
 
             if supplier_name:
                 
@@ -371,9 +388,25 @@ def process_invoice_pdf(input_pdf:str,
             invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
             
             #----------convert_pdf_format + sauvegarde ------------
-            resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
-            resized_image.convert('RGB').save(invoice_path)
-            logging.info("invoice save to : %s",invoice_path)
+            
+#---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------
+            if supplier_name and supplier_no_key_word in list_supplier:
+                 
+                resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS).convert('RGB')
+                resized_image_no_key_word = image_no_key_word.resize((2000, 2000),Image.Resampling.LANCZOS).convert('RGB')
+                resized_image_no_key_word.save(invoice_path, save_all=True, append_images=[resized_image])
+                logging.info("invoice save to : %s",invoice_path)
+                
+                image_no_key_word = None
+                
+            
+            
+#---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------   
+            
+            else:
+                resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
+                resized_image.convert('RGB').save(invoice_path)
+                logging.info("invoice save to : %s",invoice_path)
 
             #--------feature supplier_name-------------
             row['supplier_name'] = norm_name
