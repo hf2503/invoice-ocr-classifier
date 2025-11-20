@@ -104,6 +104,7 @@ def suivi_resultat_csv(file_path:str,
 
 
 def process_invoice_pdf(input_pdf:str,
+                        key_word = config.VALIDATION_KEYWORD,
                         suivi_dir=config.SUIVI_DIR,
                         archive_suivi_dir=config.FACTURE_CLASSEES_DIR, 
                         company_csv = config.company_df,
@@ -111,6 +112,7 @@ def process_invoice_pdf(input_pdf:str,
                         list_company_invoice=config.LIST_COMPANY_NAME_INVOICE,
                         output_dir= config.OUTPUT_DIR,
                         list_supplier= config.LIST_SUPPLIER,
+                        list_tva_supplier = config.LIST_TVA_SUPPLIER,
                         new_supplier= config.NEW_SUPPLIER,
                         new_company= config.NEW_COMPANY
                         ):
@@ -162,30 +164,61 @@ def process_invoice_pdf(input_pdf:str,
     if not os.path.exists(input_pdf):
         logging.error("file %s not found",input_pdf)
         raise FileNotFoundError(f"the file {input_pdf} is not found")
+    
+    
+    # invoice page
+    page = {}
+    page_no_key = {}
+    page_with_key = {}
 
     #dictionnary_list:
     row_list = []
-    
-    #supplier invoice without key_word
-    supplier_no_key_word = None
-    image_no_key_word = None
     
     #convert pdf into image
     images = convert_pdf_to_PIL(input_pdf)
     
     for i,image in enumerate(images):
         
-        #convert image PIL in RGB 
-        image_rgb = image.convert("RGB")
+        #-----------SAVED IMAGE------------
+        
+        # conversion of pdf format into PNG format
+        image_filename = f"{os.path.basename(input_pdf)}_{i+1}.png"
+        
+        #save the image
+        archive_image_path = os.path.join(suivi_dir,archive_suivi_dir,image_filename)
+        image.save(archive_image_path)
+        logging.info("l'image est enregistré dans : %s",archive_image_path)
+        
+        # #convert image PIL in RGB 
+        # image_rgb = image.convert("RGB")
+        
+        # #preprocessing for pytesseract
+        # img_array = np.array(image_rgb)
+        # gray_image = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+
+        #---------------------------test avec des image au format PNG-----------------------------
+        
+        #open the image PNG of the invoice
+        # img = Image.open(archive_image_path)
+        
+        img = cv2.imread(archive_image_path)
         
         #preprocessing for pytesseract
-        img_array = np.array(image_rgb)
-        gray_image = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-
+        # img_RGB = img.convert('RGB')
+        # img_array = np.array(img_RGB)
+        # img_grey = cv2.cvtColor(img_array,cv2.COLOR_BGR2GRAY)
+        
+        img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+        
+        threshold_img = cv2.threshold(img_gray , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        
+         #---------------------------test concluant pytesseract fonctionne mieux avec des fichier au format PNG-----------------------------
         
         #convert image to string
         try:
-            text = pytesseract.image_to_string(gray_image,config="--psm 6")
+            text = pytesseract.image_to_string(threshold_img  ,config="--psm 6")
+            
+            # text = pytesseract.image_to_string(gray_image,config="--psm 6")
             # logging.info(f"text_pytesseract : {text}")
 
                 
@@ -193,30 +226,71 @@ def process_invoice_pdf(input_pdf:str,
             
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
             continue
-    #---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------
-        clean_text_ocr = clean_text(text) 
-        
-        if not check_invoice(clean_text_ocr) and check_supplier(clean_text_ocr,list_supplier):
-            
-            supplier_no_key_word = check_supplier(clean_text_ocr,list_supplier)
-            image_no_key_word = image
-            continue
-
-    #---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------
     
+    # -------------------------- Detection de facture multipage--------------------------
+
+        
+        
+        
+        
+        text_ocr = clean_text(text)
+        
+        logger.info(text)
+        
+        
+        
+        
+        # caracterisitics of invoice's page
+        
+        page["company"] = check_company(text=text_ocr,
+                                        company_df=company_csv,
+                                        new_company=new_company)
+        
+        page["supplier"] = check_supplier(ocr_text=text_ocr,
+                                          supplier_list=list_supplier)
+        
+        page["key_word"] = check_invoice(text=text_ocr,
+                                         key_word=key_word)
+        
+        page['tva'] = check_tva_supplier(ocr_text=text_ocr,
+                                         list_supplier=list_supplier,
+                                         list_tva=list_tva_supplier)
+        
+        page['path'] = archive_image_path
+        
+        
+        logger.info(f"page : {page}") 
+        
+        
+        if not page["key_word"]:
+            page_no_key = page.copy()
+            continue
+        
+        page_with_key = page.copy()
+            
+           
+        #case where invoice has its pages in order
+        
+        if page_no_key and page_with_key: 
+            if page_no_key["company"] != new_company and page_with_key['company'] == new_company and (page_no_key['supplier'] == page_with_key['supplier'] or 
+                                                                                                      page_no_key['tva'] == page_with_key['tva']):
+                img_concat = cv2.vconcat([cv2.imread(page_no_key['path']),cv2.imread(page_with_key['path'])])
+                try:
+                    text = pytesseract.image_to_string(img_concat,config="--psm 6")
+                    text_ocr = clean_text(text)
+                    
+                    #reset of the variable page, page_no_key,page_with_key
+                    page_no_key = {}
+                    page_with_key = {}
+                except Exception as e:
+                    logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")                   
+         
        
-        if check_invoice(text):
+        if check_invoice(text=text_ocr,key_word=key_word):
 
             #feature_dictionnary
             row={}
             
-            #-----------SAVED IMAGE------------
-            
-            image_filename = f"{os.path.basename(input_pdf)}_{i+1}.png"
-            archive_image_path = os.path.join(suivi_dir,archive_suivi_dir,image_filename)
-            image.save(archive_image_path)
-            logging.info("l'image est enregistré dans : %s",archive_image_path)
-
             #----------feature train_image_path------------
             
             row['train_image_path'] = image_filename
@@ -241,9 +315,9 @@ def process_invoice_pdf(input_pdf:str,
                 directory_parent_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'parent_company'].values
                 directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
                                 
-                logging.info("directory_company_match_size: %s",directory_company_match.size)    
-                logging.info("directory_parent_match_debogage_1: %s",directory_parent_match)
-                logging.info("directory_company_match_debogage_1: %s",directory_company_match)
+                logging.info("directory_company_match_size LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: %s",directory_company_match.size)    
+                logging.info("directory_parent_match_debogage_1 LBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB: %s",directory_parent_match)
+                logging.info("directory_company_match_debogage_1 LCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC: %s",directory_company_match)
                      
                 if directory_company_match.size > 1 :
                     
@@ -264,28 +338,24 @@ def process_invoice_pdf(input_pdf:str,
 
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
 
-                    logging.info("directory_company_path:%s:",directory_company_path)
+                    # logging.info("directory_company_path:%s:",directory_company_path)
 
-                    logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
+                    # logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                 
                 else:
-                    #-------------debogage----------------
-                    # logging.info("directory_parent_match_debogage_2: %s",directory_parent_match)
-                    # logging.info("directory_company_match_debogage_2: %s",directory_company_match)
-                        
-                    #-------------fin_debogage------------------
-                    
-                    # logging.info("company_name[1] : %s",company_name[1])
-                    # logging.info("company_name[0] : %s",company_name[0])
-                    # logging.info("company name '%s' not found in registry; fallback to '%s'",company_name[0],company_name[1])
 
                     #------------feature parent_company-----------
 
                     row['parent_company'] = directory_parent_match[0]
+                    
+                    logging.info("parent_company LDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD: %s",row['parent_company']) 
 
                     #------feature company_name-------
 
                     row['company_name'] = directory_company_match[0]
+                    
+                    logging.info("'company_name' LEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE: %s",row['company_name']) 
+                    
                     directory_parent_company = directory_parent_match[0]
                     directory_company = directory_company_match[0]
                     
@@ -295,8 +365,6 @@ def process_invoice_pdf(input_pdf:str,
                     # logging.info(" directory_company_debogage_4: %s",directory_company)
                     
                     #-------------fin_debogage------------------
-                    
-                    
                     
                     directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
 
@@ -333,7 +401,7 @@ def process_invoice_pdf(input_pdf:str,
                 logging.warning("company name '%s' not matched anywhere; fallback to '%s'", company_name, new_company)
                 directory_company_path = make_directory_company(output_dir, new_company)
 
-            logging.info(f"list_supplier : {list_supplier}")
+            # logging.info(f"list_supplier : {list_supplier}")
 
             #--------------supplier detection----------------------
             supplier_name = check_supplier(clean_text_ocr,
@@ -371,7 +439,7 @@ def process_invoice_pdf(input_pdf:str,
                 logging.info(f"text_retry_ocr = {clean_text_retry_ocr}")
             #---------------------fin debogage-------------------
 
-            #on retry la fonction check supply 
+            #on retry la fonction check supply sur la facure qui a été enregistré au format png
                 supplier_name_retry = check_supplier(ocr_text =clean_text_retry_ocr,
                                                      supplier_list = list_supplier) 
               
@@ -389,24 +457,9 @@ def process_invoice_pdf(input_pdf:str,
             
             #----------convert_pdf_format + sauvegarde ------------
             
-#---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------
-            if supplier_name and supplier_no_key_word in list_supplier:
-                 
-                resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS).convert('RGB')
-                resized_image_no_key_word = image_no_key_word.resize((2000, 2000),Image.Resampling.LANCZOS).convert('RGB')
-                resized_image_no_key_word.save(invoice_path, save_all=True, append_images=[resized_image])
-                logging.info("invoice save to : %s",invoice_path)
-                
-                image_no_key_word = None
-                
-            
-            
-#---------------------------------AMELIORATION POUR TRAITEMENT MULTIPLE FACTURE--------------------------------   
-            
-            else:
-                resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
-                resized_image.convert('RGB').save(invoice_path)
-                logging.info("invoice save to : %s",invoice_path)
+            resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
+            resized_image.convert('RGB').save(invoice_path)
+            logging.info("invoice save to : %s",invoice_path)
 
             #--------feature supplier_name-------------
             row['supplier_name'] = norm_name
@@ -416,6 +469,9 @@ def process_invoice_pdf(input_pdf:str,
             #-------------sauvegarde de la row dans le fichier suivi.csv----------------
 
             suivi_resultat_csv(file_path=invoice_path,row=row)
+            
+            
+            
      
         else:
             logging.info("invoice's page rejected ")
