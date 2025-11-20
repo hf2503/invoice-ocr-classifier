@@ -1,8 +1,10 @@
 import pandas as pd
+import numpy as np
 import unicodedata
 from rapidfuzz import fuzz
 import os
 import re
+import cv2
 import pytesseract
 from pdf2image import convert_from_path
 from datetime import datetime
@@ -55,6 +57,20 @@ def convert_pdf_to_PIL(input_pdf:str):
     
     image = convert_from_path(input_pdf,dpi=300)
     return image
+
+def resize_image_width(image: np,
+                       new_width:int):
+    
+    try:
+        new_height = image.shape[1] * int(image.shape[0]/new_width)
+
+        new_image_resize = cv2.resize(image,(new_height,new_width))
+
+        return new_image_resize
+    
+    except Exception as e:
+        logger.error(f"la fonction resize_image a eu l'erreur suivante : {e}")
+    
 
 
 def clean_text(text:str):
