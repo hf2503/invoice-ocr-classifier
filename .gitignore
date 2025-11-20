@@ -13,13 +13,13 @@ __pycache__/
 data/output/*
 
 #data 
-data/*csv
-data/*
+
 *.pdf
-train_final/*
 data/suivi
-data/factures_brutes_archivees/*
-data/factures_classees/*
+data/archived_raw_invoices
+data/classified_invoices
+data/raw_invoices_to_process
+data/tracking
 
 #log
 src/invoice_processing.log
