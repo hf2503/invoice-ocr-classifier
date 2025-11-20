@@ -95,7 +95,8 @@ def match_word(text:str,
     return score_partial_ratio
 
 
-def check_invoice(text:str):
+def check_invoice(text:str,
+                  key_word:str):
     """
     check the invoice's page where "verifie le " is written
 
@@ -105,8 +106,12 @@ def check_invoice(text:str):
     Returns:
         bool: True of False
     """
-
-    return config.VALIDATION_KEYWORD in text.lower()
+    score_partial = fuzz.partial_ratio(key_word,text)
+    
+    if score_partial > 95:
+        return key_word
+    else:
+        logger.warning(f"score of check_invoice is {score_partial}")
 
 def check_company(text:str,
                   company_df:pd.DataFrame,
@@ -211,6 +216,50 @@ def check_supplier(ocr_text:str,
     logging.info(f"le score max_OCR trouvé est : supplier_name {max(list_score_supplier_ocr)[0]} pour un score de {max(list_score_supplier_ocr)[1]}")
     
     return None
+
+
+def check_tva_supplier(ocr_text:str,
+                       list_supplier:list,
+                       list_tva:str):
+    """
+    Detect the supplier's name in the text OCR cleaned using the fuzzy matching.
+
+    The detection of the supplier name depends of a score (fuzz partial ratio)
+
+    if the score of TVA > 95 it returns the supplier name else return NONE and logs the best score
+
+    Args:
+        text (str): _description_
+        supplier_list (list): _description_
+
+    Returns:
+        str or None
+            the supplier name (with a threshol >90) or None
+    """
+    list_score_tva_supplier = []
+    
+    for tva,supplier_name in zip(list_tva,list_supplier):
+        
+        # clean_supplier_name = clean_text(supplier_name)
+        clean_tva = clean_text(tva)
+        
+        score_match_tva_ocr = match_word(clean_tva,ocr_text)
+        
+        # logger.info(f"score_tva : {score_match_tva_ocr}")
+        
+        list_score_tva_supplier.append(score_match_tva_ocr)
+        
+        if score_match_tva_ocr >= 90 :
+                logging.info("supplier_name:%s , tva_supplier:%s",supplier_name,tva)
+                return supplier_name
+    
+    logging.info(f"the score max_OCR found is : {supplier_name} with score_match tva {max(list_score_tva_supplier)}")
+        
+            
+    
+
+
+
 
 
 
