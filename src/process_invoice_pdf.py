@@ -16,7 +16,9 @@ import pandas as pd
 from datetime import datetime
 import cv2
 import os
+import io
 from PIL import Image
+from PIL import ImageFile
 import logging
 import csv
 import datetime
@@ -170,7 +172,7 @@ def process_invoice_pdf(input_pdf:str,
     page = {}
     page_no_key = {}
     page_with_key = {}
-    path_prev_invoice_class = None
+    path_prev_invoice_class_pdf = None
     previous_image_path = None
 
     #dictionnary_list:
@@ -258,8 +260,8 @@ def process_invoice_pdf(input_pdf:str,
         
         
         # saved the image path into a variable in case a multi pdf facture
-        if page_with_key and not page_no_key:
-            previous_image_path = archive_image_path
+        # if page_with_key and not page_no_key:
+        #     previous_image_path = archive_image_path
         
         
         if not page["key_word"]:
@@ -270,68 +272,70 @@ def process_invoice_pdf(input_pdf:str,
             if page_no_key["company"] == new_company and  (page_no_key['supplier'] == new_supplier or page_no_key['supplier'] != new_supplier):
         
                 previous_image_cv = cv2.imread(previous_image_path)
-                image_cv = cv2.imread(archive_image_path)
+                image_cv = cv2.imread(page_no_key['path'])
 
-        #concatenate actual image with previous image
+                #concatenate actual image with previous image
                 new_image_cv = cv2.vconcat([previous_image_cv,image_cv])
 
-        #convert new_image and save into a format pdf
+                #convert new_image and save into a format pdf
                 new_image = Image.fromarray(new_image_cv)
                 max_size = (1654, 2339)
                 new_image_rgb = new_image.convert('RGB')
                 new_image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
 
-        #save multipage_invoice pdf
-                new_image_rgb.save(path_prev_invoice_class,"PDF")
+                #save multipage_invoice pdf
+                new_image_rgb.save(path_prev_invoice_class_pdf,"PDF")
 
-        #save image
+                #save image
                 new_image_rgb.save(previous_image_path)
                 logger.info(f"the invoice's page has been added at the previous invoice {os.path.basename(previous_image_path)}")
+                
+                #reset of the variable page, page_no_key,page_with_key
+                page_no_key = {}
+                # page_with_key = {}
+                continue
         
         #--------------------------------case where invoice has 2 pages but the key word is on first page and its pages are out of order----------------------------
             elif page_no_key["company"] != new_company and (page_no_key['supplier'] == new_supplier or page_no_key['supplier'] != new_supplier):
-
+                
+                
+                logger.info(f"page_key FACTUREEEEEEEEEEEEEEEEE: {page_with_key}")
+                logger.info(f"page_no_key FACTUREEEEEEEEEEEEEEE:{page_no_key}")
+                
+              
                 previous_image_cv = cv2.imread(previous_image_path)
-                image_cv = cv2.imread(archive_image_path)
+                image_cv = cv2.imread(page_no_key['path'])
         
-        #resize the two image at he same width before the concatenation
+                #resize the two image at he same width before the concatenation
+        
                 new_width = 2339 
                 previous_image_cv = resize_image_width(previous_image_cv,new_width)
+                image_cv = resize_image_width(image_cv,new_width)
 
-                print(f"dimension_1:{previous_image_cv.shape}")
-                print(f"dimension_2:{image_cv.shape}")
-
-                new_image_cv = resize_image_width(new_image_cv,new_width)
-
-        #concatenate actual image with previous image but we inverse the order because the invoice's pages are out of order
-                # print(f"dimension_1:{previous_image_cv.shape}")
-                # print(f"dimension_2:{image_cv.shape}")
-
-                print(f"dimension_1:{previous_image_cv.shape}")
-                print(f"dimension_2:{image_cv.shape}")
+                #concatenate actual image with previous image but we inverse the order because the invoice's pages are out of order
                 new_image_cv = cv2.vconcat([image_cv,previous_image_cv])
 
-        #convert new_image and save into a format pdf
+                #convert new_image and save into a format pdf
                 new_image = Image.fromarray(new_image_cv)
                 max_size = (1654, 2339)
                 new_image_rgb = new_image.convert('RGB')
                 new_image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
 
-        #save multipage_invoice pdf
-                new_image_rgb.save(path_prev_invoice_class,"PDF")
-
-                continue
+                #save multipage_invoice pdf
+                new_image_rgb.save(path_prev_invoice_class_pdf,"PDF")
+                
+                #reset of the variable page, page_no_key,page_with_key
+                page_no_key = {}
+                page_with_key = {}
+                
             else:
                 continue
         
         page_with_key = page.copy()
 
-        # # saved the image path into a variable in case a multi pdf facture
-        # if page_with_key and not page_no_key:
-        #     previous_image_path = archive_image_path
 
 
-        #-------------------case where invoice has its pages in order------------------------
+        #-------------------case where invoice has its pages in order and key word on the last page------------------------
         
         if page_no_key and page_with_key: 
             if page_no_key["company"] != new_company and page_with_key['company'] == new_company and (page_no_key['supplier'] == page_with_key['supplier'] or 
@@ -551,7 +555,7 @@ def process_invoice_pdf(input_pdf:str,
             
             #------------save the invoice_pdf path in case of mulitpage invoice--------------
 
-            path_prev_invoice_class = invoice_path
+            path_prev_invoice_class_pdf = invoice_path
             
      
         else:
