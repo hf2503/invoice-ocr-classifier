@@ -61,16 +61,20 @@ def convert_pdf_to_PIL(input_pdf:str):
 def resize_image_width(image: np,
                        new_width:int):
     
-    try:
-        new_height = image.shape[0] * int(new_width/image.shape[0])
-
-        new_image_resize = cv2.resize(image,(new_height,new_width))
-
-        return new_image_resize
     
-    except Exception as e:
-        logger.error(f"la fonction resize_image a eu l'erreur suivante : {e}")
-    
+        try:
+            
+            w = image.shape[1]
+            h = image.shape[0]
+            new_height = int(h * new_width/w)
+            new_image_resize = cv2.resize(image,(new_height,new_width))
+            
+            return new_image_resize
+        
+        except Exception as e:
+            logger.info(f"la fonction resize_image_width a rencontré l'erreur suivante : {e}")
+        
+
 
 
 def clean_text(text:str):
