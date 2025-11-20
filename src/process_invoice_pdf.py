@@ -170,6 +170,8 @@ def process_invoice_pdf(input_pdf:str,
     page = {}
     page_no_key = {}
     page_with_key = {}
+    path_prev_invoice_class = None
+    previous_image_path = None
 
     #dictionnary_list:
     row_list = []
@@ -179,7 +181,7 @@ def process_invoice_pdf(input_pdf:str,
     
     for i,image in enumerate(images):
         
-        #-----------SAVED IMAGE------------
+        #-----------SAVE IMAGE------------
         
         # conversion of pdf format into PNG format
         image_filename = f"{os.path.basename(input_pdf)}_{i+1}.png"
@@ -188,6 +190,8 @@ def process_invoice_pdf(input_pdf:str,
         archive_image_path = os.path.join(suivi_dir,archive_suivi_dir,image_filename)
         image.save(archive_image_path)
         logging.info("l'image est enregistré dans : %s",archive_image_path)
+
+        #-------------SAVE PATH in case of multi_page_pdf------------------
         
         # #convert image PIL in RGB 
         # image_rgb = image.convert("RGB")
@@ -229,16 +233,10 @@ def process_invoice_pdf(input_pdf:str,
     
     # -------------------------- Detection de facture multipage--------------------------
 
-        
-        
-        
-        
+        #cleaning text before OCR  
         text_ocr = clean_text(text)
         
-        # logger.info(text_ocr)
-        
-        
-        
+  
         
         # caracterisitics of invoice's page
         
@@ -259,17 +257,81 @@ def process_invoice_pdf(input_pdf:str,
         page['path'] = archive_image_path
         
         
-        
+        # saved the image path into a variable in case a multi pdf facture
+        if page_with_key and not page_no_key:
+            previous_image_path = archive_image_path
         
         
         if not page["key_word"]:
             page_no_key = page.copy()
-            continue
+
+        #---------------------case where invoice has 2 pages but the key word is on first page and its pages are in order----------------------
+
+            if page_no_key["company"] == new_company and  (page_no_key['supplier'] == new_supplier or page_no_key['supplier'] != new_supplier):
+        
+                previous_image_cv = cv2.imread(previous_image_path)
+                image_cv = cv2.imread(archive_image_path)
+
+        #concatenate actual image with previous image
+                new_image_cv = cv2.vconcat([previous_image_cv,image_cv])
+
+        #convert new_image and save into a format pdf
+                new_image = Image.fromarray(new_image_cv)
+                max_size = (1654, 2339)
+                new_image_rgb = new_image.convert('RGB')
+                new_image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
+
+        #save multipage_invoice pdf
+                new_image_rgb.save(path_prev_invoice_class,"PDF")
+
+        #save image
+                new_image_rgb.save(previous_image_path)
+                logger.info(f"the invoice's page has been added at the previous invoice {os.path.basename(previous_image_path)}")
+        
+        #--------------------------------case where invoice has 2 pages but the key word is on first page and its pages are out of order----------------------------
+            elif page_no_key["company"] != new_company and (page_no_key['supplier'] == new_supplier or page_no_key['supplier'] != new_supplier):
+
+                previous_image_cv = cv2.imread(previous_image_path)
+                image_cv = cv2.imread(archive_image_path)
+        
+        #resize the two image at he same width before the concatenation
+                new_width = 2339 
+                previous_image_cv = resize_image_width(previous_image_cv,new_width)
+
+                print(f"dimension_1:{previous_image_cv.shape}")
+                print(f"dimension_2:{image_cv.shape}")
+
+                new_image_cv = resize_image_width(new_image_cv,new_width)
+
+        #concatenate actual image with previous image but we inverse the order because the invoice's pages are out of order
+                # print(f"dimension_1:{previous_image_cv.shape}")
+                # print(f"dimension_2:{image_cv.shape}")
+
+                print(f"dimension_1:{previous_image_cv.shape}")
+                print(f"dimension_2:{image_cv.shape}")
+                new_image_cv = cv2.vconcat([image_cv,previous_image_cv])
+
+        #convert new_image and save into a format pdf
+                new_image = Image.fromarray(new_image_cv)
+                max_size = (1654, 2339)
+                new_image_rgb = new_image.convert('RGB')
+                new_image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
+
+        #save multipage_invoice pdf
+                new_image_rgb.save(path_prev_invoice_class,"PDF")
+
+                continue
+            else:
+                continue
         
         page_with_key = page.copy()
-            
-           
-        #case where invoice has its pages in order
+
+        # # saved the image path into a variable in case a multi pdf facture
+        # if page_with_key and not page_no_key:
+        #     previous_image_path = archive_image_path
+
+
+        #-------------------case where invoice has its pages in order------------------------
         
         if page_no_key and page_with_key: 
             if page_no_key["company"] != new_company and page_with_key['company'] == new_company and (page_no_key['supplier'] == page_with_key['supplier'] or 
@@ -292,16 +354,12 @@ def process_invoice_pdf(input_pdf:str,
                     logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")
                     
 
-        #case where invoice has 2 pages but the key word is on first page and its pages are in order
-        
-        # if page_no_key:
-            
-        
-        
-                           
-        
+
        
         if check_invoice(text=text_ocr,key_word=key_word):
+
+            previous_image_path = archive_image_path
+
 
             #feature_dictionnary
             row={}
@@ -477,6 +535,7 @@ def process_invoice_pdf(input_pdf:str,
             image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
             image_rgb.save(invoice_path,"PDF",resolution=300)
             
+
             # resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
             # resized_image.convert('RGB').save(invoice_path)
             # logging.info("invoice save to : %s",invoice_path)
@@ -490,7 +549,9 @@ def process_invoice_pdf(input_pdf:str,
 
             suivi_resultat_csv(file_path=invoice_path,row=row)
             
-            
+            #------------save the invoice_pdf path in case of mulitpage invoice--------------
+
+            path_prev_invoice_class = invoice_path
             
      
         else:
