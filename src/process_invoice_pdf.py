@@ -289,7 +289,16 @@ def process_invoice_pdf(input_pdf:str,
                     page_no_key = {}
                     page_with_key = {}
                 except Exception as e:
-                    logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")                   
+                    logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")
+                    
+
+        #case where invoice has 2 pages but the key word is on first page and its pages are in order
+        
+        # if page_no_key:
+            
+        
+        
+                           
         
        
         if check_invoice(text=text_ocr,key_word=key_word):
