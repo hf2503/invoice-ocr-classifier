@@ -235,7 +235,7 @@ def process_invoice_pdf(input_pdf:str,
         
         text_ocr = clean_text(text)
         
-        logger.info(text)
+        # logger.info(text_ocr)
         
         
         
@@ -259,7 +259,7 @@ def process_invoice_pdf(input_pdf:str,
         page['path'] = archive_image_path
         
         
-        logger.info(f"page : {page}") 
+        
         
         
         if not page["key_word"]:
@@ -275,16 +275,22 @@ def process_invoice_pdf(input_pdf:str,
             if page_no_key["company"] != new_company and page_with_key['company'] == new_company and (page_no_key['supplier'] == page_with_key['supplier'] or 
                                                                                                       page_no_key['tva'] == page_with_key['tva']):
                 img_concat = cv2.vconcat([cv2.imread(page_no_key['path']),cv2.imread(page_with_key['path'])])
+                os.remove(page_with_key['path'])
+                os.remove(page_no_key['path'])
+                image = Image.fromarray(img_concat)
+                image.save(archive_image_path)
                 try:
                     text = pytesseract.image_to_string(img_concat,config="--psm 6")
                     text_ocr = clean_text(text)
+                    
+                    logger.info(f"page : {text_ocr}") 
                     
                     #reset of the variable page, page_no_key,page_with_key
                     page_no_key = {}
                     page_with_key = {}
                 except Exception as e:
                     logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")                   
-         
+        
        
         if check_invoice(text=text_ocr,key_word=key_word):
 
@@ -300,7 +306,7 @@ def process_invoice_pdf(input_pdf:str,
             clean_text_ocr = clean_text(text)
 
             #----- COMPANY DETECTION--------
-            company_name = check_company(clean_text_ocr,
+            company_name = check_company(text=clean_text_ocr,
                                          company_df=company_csv,
                                          new_company=new_company
                                          )
@@ -457,9 +463,14 @@ def process_invoice_pdf(input_pdf:str,
             
             #----------convert_pdf_format + sauvegarde ------------
             
-            resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
-            resized_image.convert('RGB').save(invoice_path)
-            logging.info("invoice save to : %s",invoice_path)
+            max_size = (1654, 2339) #200 DPI
+            image_rgb = image.convert('RGB')
+            image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
+            image_rgb.save(invoice_path,"PDF",resolution=300)
+            
+            # resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
+            # resized_image.convert('RGB').save(invoice_path)
+            # logging.info("invoice save to : %s",invoice_path)
 
             #--------feature supplier_name-------------
             row['supplier_name'] = norm_name
