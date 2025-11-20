@@ -62,7 +62,7 @@ def resize_image_width(image: np,
                        new_width:int):
     
     try:
-        new_height = image.shape[1] * int(image.shape[0]/new_width)
+        new_height = image.shape[0] * int(new_width/image.shape[0])
 
         new_image_resize = cv2.resize(image,(new_height,new_width))
 
