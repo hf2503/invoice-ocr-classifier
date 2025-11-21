@@ -126,12 +126,15 @@ def check_invoice(text:str,
     Returns:
         bool: True of False
     """
+    
+    key_word = clean_text(key_word)
     score_partial = fuzz.partial_ratio(key_word,text)
     
-    if score_partial > 85:
+    if score_partial >= 80:
         return True
     else:
         logger.warning(f"score of check_invoice is {score_partial}")
+        logger.warning(f"text : {text}")
 
 def check_company(text:str,
                   company_df:pd.DataFrame,
