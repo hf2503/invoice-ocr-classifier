@@ -7,8 +7,8 @@ import shutil
 
 # data_path = r'C:\Users\User\Documents\LUX_INVOICE_2\data'
 
-shutil.rmtree(r'C:\Users\User\Documents\LUX_INVOICE_2\data\archived_raw_invoices')
-shutil.rmtree(r'C:\Users\User\Documents\LUX_INVOICE_2\data\classified_invoices')
-shutil.rmtree(r'C:\Users\User\Documents\LUX_INVOICE_2\data\tracking')
+shutil.rmtree(r'C:\Users\Windows\Documents\LUX_INVOICE_2\data\archived_raw_invoices', ignore_errors=True)
+shutil.rmtree(r'C:\Users\Windows\Documents\LUX_INVOICE_2\data\classified_invoices',ignore_errors=True)
+shutil.rmtree(r'C:\Users\Windows\Documents\LUX_INVOICE_2\data\tracking',ignore_errors=True)
 
-shutil.copy(r'C:\Users\User\Documents\LUX_INVOICE_2\invoice_issue\SPAM\SPAM FRS 03 11 25.pdf',r'C:\Users\User\Documents\LUX_INVOICE_2\data\raw_invoices_to_process')
+shutil.copy(r'C:\Users\Windows\Documents\LUX_INVOICE_2\invoice_issue\SPAM\SPAM FRS 16 09 2025.pdf',r'C:\Users\Windows\Documents\LUX_INVOICE_2\data\raw_invoices_to_process')
