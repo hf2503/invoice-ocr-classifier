@@ -138,7 +138,7 @@ def check_invoice(text:str,
         return True
     else:
         logger.warning(f"score of check_invoice is {score_partial}")
-        logger.warning(f"text : {text}")
+        # logger.warning(f"text : {text}")
 
 
 
@@ -242,7 +242,7 @@ def check_supplier(ocr_text:str,
             logging.info("supplier_name:%s",supplier_name)
             return supplier_name
     
-    logging.info(f"le score max_OCR trouvé est : supplier_name {max(list_score_supplier_ocr)[0]} pour un score de {max(list_score_supplier_ocr)[1]}")
+    logging.info(f"le score max pour le supplier suivant ests : supplier_name {max(list_score_supplier_ocr)[0]} pour un score de {max(list_score_supplier_ocr)[1]}")
     
     return None
 
@@ -272,15 +272,20 @@ def check_tva_supplier(ocr_text:str,
         # clean_supplier_name = clean_text(supplier_name)
         clean_tva = clean_text(tva)
         
+        # text_tva = clean_tva.replace(' ','').replace('-','')
+        
         score_match_tva_ocr = match_word(clean_tva,ocr_text)
+        
+        # score_match_tva_text_without_space = match_word(clean_tva,text_tva)
         
         # logger.info(f"score_tva : {score_match_tva_ocr}")
         
         list_score_tva_supplier.append(score_match_tva_ocr)
         
-        if score_match_tva_ocr >= 90 :
+        if score_match_tva_ocr >= 90:
                 logging.info("supplier_name:%s , tva_supplier:%s",supplier_name,tva)
                 return supplier_name
+
     
     logging.info(f"the score max_OCR found is : {supplier_name} with score_match tva {max(list_score_tva_supplier)}")
         
