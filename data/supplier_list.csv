@@ -53,8 +53,8 @@ Luxembourg_online,Luxembourg_online,LU16788935
 maxgas,maxgas,********
 marc_decker,marc_decker,LU23004064
 mettler,mettler,LU25803928
-muller&wegener,muller&wegener,LU10720347
-muller_associes,muller&associes,LU16693358
+muller_wegener,muller_wegener,LU10720347
+muller_associes,muller_associes,LU16693358
 nespresso,nespresso,LU214435442
 ogc,ogc,LU25176775
 olinn,olinn,LU10467309
@@ -71,7 +71,7 @@ reiserbann,reiserbann,LU32255115
 rentokil_initial,rentokil_initial,LU16255541
 scapa,scapa,FR23537871535
 schaller,schaller,LU18405806
-scheidt&bachmann,scheidt&bachmann,LU30172414
+scheidt&bachmann,scheidt_bachmann,LU30172414
 schindler,schindler,LU11059658
 sd_worx,sd_worx,LU19477139
 separc,separc,LU17639800
