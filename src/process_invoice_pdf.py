@@ -183,8 +183,10 @@ def process_invoice_pdf(input_pdf:str,
     
     for i,image in enumerate(images):
         
+        print('--------------------------------------------------------------------------------------------------------------------------------------------')
+        
         #-----------SAVE IMAGE------------
-        logger.info(f"PATHHHHHHHHHHHHH: {path_prev_invoice_class_pdf}")
+        logger.info(f"PATHHHHHHHHHHHHHIMAGEEEEEEEEEEEEEEEEEEEEEEEEEE: {path_prev_invoice_class_pdf}")
         # conversion of pdf format into PNG format
         image_filename = f"{os.path.basename(input_pdf)}_{i+1}.png"
         
@@ -321,6 +323,49 @@ def process_invoice_pdf(input_pdf:str,
 
                 except Exception as e:
                     logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")
+                    
+                    
+ #-------------------case where invoice has its pages in order and key word on the first page and second page has the company name------------------------        
+                    
+            # elif page_no_key["company"] != new_company and page_with_key['company']== page_no_key["company"] :
+                
+            #     logger.info(f"page_key CONDITIOOON 111111111111111,5: {page_with_key}")
+            #     logger.info(f"page_no_key CONDITION 11111111111111,5:{page_no_key}")      
+                    
+            #     previous_image_cv = cv2.imread(page_with_key['path'])
+            #     image_cv = cv2.imread(page_no_key['path'])
+
+            #     #concatenate actual image with previous image
+            #     new_image_cv = cv2.vconcat([previous_image_cv,image_cv])
+            #     os.remove(page_no_key['path'])
+            #     #save the new_image
+            #     image = Image.fromarray(new_image_cv)
+            #     image.save(page_with_key['path'])
+
+            #     #convert new_image and save into a format pdf
+            #     new_image_gray = cv2.cvtColor(new_image_cv,cv2.COLOR_BGR2GRAY)
+                
+            #     threshold_img = cv2.threshold(new_image_gray,0,255,cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]  
+                
+            #     try:
+            #         text = pytesseract.image_to_string(new_image_gray,config='--psm 4')
+            #         text_ocr = clean_text(text)
+            #         logger.warning(f"page condition 1 : {text_ocr}")
+
+            #         #delete the previous pdf file
+            #         if os.path.basename(path_prev_invoice_class_pdf) != new_company :
+            #             shutil.rmtree(os.path.dirname(path_prev_invoice_class_pdf))
+            #         else :
+            #             os.remove(page_with_key['path'])
+
+            #         #reset of the variable page, page_no_key,page_with_key
+            #         page_no_key = {}
+            #         page_with_key = {}
+
+            #     except Exception as e:
+            #         logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")                  
+                    
+                    
 
         #-------------------case where invoice has its pages in order and key word on the last page------------------------
             elif page_no_key["company"] != new_company and page_with_key['company'] == new_company and (page_no_key['supplier'] == page_with_key['supplier'] or 
@@ -386,8 +431,8 @@ def process_invoice_pdf(input_pdf:str,
                 # image_with_key.save(page_with_key['path_pdf'],format='pdf',save_all=True,append_images=[image_no_key])
 
                 #reset of the variable page, page_no_key,page_with_key
-                page_no_key = {}
-                page_with_key = {}
+                # page_no_key = {}
+                # page_with_key = {}
                     
             #--------------------------------case where invoice has 2 pages but the key word is on first page and its pages are out of order----------------------------
             elif page_no_key["company"] != new_company and (page_no_key['supplier'] != new_supplier and page_with_key['company'] == new_company):
@@ -556,36 +601,36 @@ def process_invoice_pdf(input_pdf:str,
                 registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
                 norm_name = normalise_supply_name(text = registery_name[0])
 
-            else:
-            #on retente le process sur l'image png sauvegardé , le deuxième traitement arrive souvent à identifier le supplier    
-                image_retry = Image.open(archive_image_path)
+            # else:
+            # #on retente le process sur l'image png sauvegardé , le deuxième traitement arrive souvent à identifier le supplier    
+            #     image_retry = Image.open(archive_image_path)
 
-            # #on met l'image au standard RGB
-                image_retry_rgb = image_retry.convert("RGB")
+            # # #on met l'image au standard RGB
+            #     image_retry_rgb = image_retry.convert("RGB")
 
-            # #on convertit l'image en tableau numpy
-                image_retry_array = np.array(image_retry_rgb)
+            # # #on convertit l'image en tableau numpy
+            #     image_retry_array = np.array(image_retry_rgb)
 
-            # # conversion de l'image en niveau de gris
-                image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
+            # # # conversion de l'image en niveau de gris
+            #     image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
             
-            #on detecte le texte de l'image grace à pytesseract
-                text_retry = pytesseract.image_to_string(image_retry_gray,config='--psm 4')
-                clean_text_retry_ocr = clean_text(text_retry) 
+            # #on detecte le texte de l'image grace à pytesseract
+            #     text_retry = pytesseract.image_to_string(image_retry_gray,config='--psm 4')
+            #     clean_text_retry_ocr = clean_text(text_retry) 
 
-            #--------------------debogage------------------------
-                logging.info(f"text_retry_ocr = {clean_text_retry_ocr}")
-            #---------------------fin debogage-------------------
+            # #--------------------debogage------------------------
+            #     logging.info(f"text_retry_ocr = {clean_text_retry_ocr}")
+            # #---------------------fin debogage-------------------
 
-            #on retry la fonction check supply sur la facure qui a été enregistré au format png
-                supplier_name_retry = check_supplier(ocr_text =clean_text_retry_ocr,
-                                                     supplier_list = list_supplier) 
+            # #on retry la fonction check supply sur la facure qui a été enregistré au format png
+            #     supplier_name_retry = check_supplier(ocr_text =clean_text_retry_ocr,
+            #                                          supplier_list = list_supplier) 
               
-                if supplier_name_retry:
-                    registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name_retry]['supplier_registery'].unique()
-                    norm_name = normalise_supply_name(text = registery_name[0])
-                else:
-                    norm_name = normalise_supply_name(text =new_supplier)
+            #     if supplier_name_retry:
+            #         registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name_retry]['supplier_registery'].unique()
+            #         norm_name = normalise_supply_name(text = registery_name[0])
+            #     else:
+            #         norm_name = normalise_supply_name(text =new_supplier)
         
             #--------------creation du chemin de la facture-----------------------    
             
@@ -620,7 +665,7 @@ def process_invoice_pdf(input_pdf:str,
             
      
         else:
-            logging.info("no validation key on the invoice ")
+            logging.warning("no validation key on the invoice ")
     
     
         #-------------Fin sauvegarde de la row_list dans le fichier suivi.csv----------------
