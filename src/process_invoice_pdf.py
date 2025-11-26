@@ -195,41 +195,16 @@ def process_invoice_pdf(input_pdf:str,
         image.save(archive_image_path)
         logging.info("l'image est enregistré dans : %s",archive_image_path)
 
-        #-------------SAVE PATH in case of multi_page_pdf------------------
-        
-        # #convert image PIL in RGB 
-        # image_rgb = image.convert("RGB")
-        
-        # #preprocessing for pytesseract
-        # img_array = np.array(image_rgb)
-        # gray_image = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-
-        #---------------------------test avec des image au format PNG-----------------------------
-        
-        #open the image PNG of the invoice
-        # img = Image.open(archive_image_path)
-        
         img = cv2.imread(archive_image_path)
-        
-        #preprocessing for pytesseract
-        # img_RGB = img.convert('RGB')
-        # img_array = np.array(img_RGB)
-        # img_grey = cv2.cvtColor(img_array,cv2.COLOR_BGR2GRAY)
-        
         img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        
         threshold_img = cv2.threshold(img_gray , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-        
-         #---------------------------test concluant pytesseract fonctionne mieux avec des fichier au format PNG-----------------------------
         
         #convert image to string
         try:
             text = pytesseract.image_to_string(threshold_img  ,config="--psm 4")
-            
             # text = pytesseract.image_to_string(gray_image,config="--psm 6")
             # logging.info(f"text_pytesseract : {text}")
-
-                
+           
         except Exception as e:
             
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
@@ -239,9 +214,7 @@ def process_invoice_pdf(input_pdf:str,
 
         #cleaning text
         text_ocr = clean_text(text)
-        
-  
-        
+
         # caracterisitics of invoice's page
         
         page["company"] = check_company(text=text_ocr,
@@ -261,8 +234,6 @@ def process_invoice_pdf(input_pdf:str,
         page['path'] = archive_image_path
         
         page['path_pdf'] = path_prev_invoice_class_pdf
-        
-        
         
         logger.info(f"page : {page}")
         
@@ -286,7 +257,7 @@ def process_invoice_pdf(input_pdf:str,
         #---------------------case where invoice has 2 pages but the key word is on first page and its pages are in order----------------------
         if page_no_key and page_with_key: 
 
-            if page_no_key["company"] == new_company and page_with_key['company']!= new_company :
+            if page_no_key["company"] == new_company and page_with_key['company']!= new_company and (page_no_key['supplier'] != None or page_no_key['tva'] != None ):
                 
                 logger.info(f"page_key CONDITIOOON 111111111111111: {page_with_key}")
                 logger.info(f"page_no_key CONDITION 11111111111111:{page_no_key}")
@@ -367,74 +338,74 @@ def process_invoice_pdf(input_pdf:str,
                     
                     
 
-        #-------------------case where invoice has its pages in order and key word on the last page------------------------
-            elif page_no_key["company"] != new_company and page_with_key['company'] == new_company and (page_no_key['supplier'] == page_with_key['supplier'] or 
-                                                                                                      page_no_key['tva'] == page_with_key['tva']):
+        # #-------------------case where invoice has its pages in order and key word on the last page------------------------
+        #     elif page_no_key["company"] != new_company and page_with_key['company'] == new_company and (page_no_key['supplier'] == page_with_key['supplier'] or 
+        #                                                                                               page_no_key['tva'] == page_with_key['tva']):
                 
-                logger.info(f"page_key CONDITIOOON 22222222222222: {page_with_key}")
-                logger.info(f"page_no_key CONDITION 22222222222222:{page_no_key}")
+        #         logger.info(f"page_key CONDITIOOON 22222222222222: {page_with_key}")
+        #         logger.info(f"page_no_key CONDITION 22222222222222:{page_no_key}")
 
-                img_concat = cv2.vconcat([cv2.imread(page_no_key['path']),cv2.imread(page_with_key['path'])])
-                os.remove(page_with_key['path'])
-                os.remove(page_no_key['path'])
-                image = Image.fromarray(img_concat)
-                image.save(archive_image_path)
-                try:
-                    text = pytesseract.image_to_string(img_concat,config="--psm 4")
-                    text_ocr = clean_text(text)
-                    logger.warning(f"page condition2 : {text_ocr}")
+        #         img_concat = cv2.vconcat([cv2.imread(page_no_key['path']),cv2.imread(page_with_key['path'])])
+        #         os.remove(page_with_key['path'])
+        #         os.remove(page_no_key['path'])
+        #         image = Image.fromarray(img_concat)
+        #         image.save(archive_image_path)
+        #         try:
+        #             text = pytesseract.image_to_string(img_concat,config="--psm 4")
+        #             text_ocr = clean_text(text)
+        #             logger.warning(f"page condition2 : {text_ocr}")
 
-                    #delete the previous pdf file
-                    if os.path.basename(path_prev_invoice_class_pdf) != new_company :
-                        shutil.rmtree(os.path.dirname(path_prev_invoice_class_pdf))
-                    else :
-                        os.remove(path_prev_invoice_class_pdf)
+        #             #delete the previous pdf file
+        #             if os.path.basename(path_prev_invoice_class_pdf) != new_company :
+        #                 shutil.rmtree(os.path.dirname(path_prev_invoice_class_pdf))
+        #             else :
+        #                 os.remove(path_prev_invoice_class_pdf)
                     
-                    #reset of the variable page, page_no_key,page_with_key
-                    page_no_key = {}
-                    page_with_key = {}
-                except Exception as e:
-                    logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")
+        #             #reset of the variable page, page_no_key,page_with_key
+        #             page_no_key = {}
+        #             page_with_key = {}
+        #         except Exception as e:
+        #             logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")
             
-            elif page_no_key["company"] != new_company and page_with_key['company'] == page_no_key["company"] and(page_no_key["supplier"] == page_with_key['supplier'] 
-                                                                                                        or page_no_key['tva'] == page_with_key['tva']):
-                # image_no_key = Image.open(page_no_key['path'])
-                # image_with_key = Image.open(page_with_key['path'])
+        #     elif page_no_key["company"] != new_company and page_with_key['company'] == page_no_key["company"] and(page_no_key["supplier"] == page_with_key['supplier'] 
+        #                                                                                                 or page_no_key['tva'] == page_with_key['tva']):
+        #         # image_no_key = Image.open(page_no_key['path'])
+        #         # image_with_key = Image.open(page_with_key['path'])
 
-                logger.info(f"page_key CONDITIOOON 3333333333333333: {page_with_key}")
-                logger.info(f"page_no_key CONDITION 3333333333333333:{page_no_key}")
+        #         logger.info(f"page_key CONDITIOOON 3333333333333333: {page_with_key}")
+        #         logger.info(f"page_no_key CONDITION 3333333333333333:{page_no_key}")
 
-                img_concat = cv2.vconcat([cv2.imread(page_no_key['path']),cv2.imread(page_with_key['path'])])
+        #         img_concat = cv2.vconcat([cv2.imread(page_no_key['path']),cv2.imread(page_with_key['path'])])
 
-                os.remove(page_with_key['path'])
-                os.remove(page_no_key['path'])
-                image = Image.fromarray(img_concat)
-                image.save(archive_image_path)
+        #         os.remove(page_with_key['path'])
+        #         os.remove(page_no_key['path'])
+        #         image = Image.fromarray(img_concat)
+        #         image.save(archive_image_path)
 
 
-                try:
-                    text = pytesseract.image_to_string(img_concat,config="--psm 4")
-                    text_ocr = clean_text(text)
+        #         try:
+        #             text = pytesseract.image_to_string(img_concat,config="--psm 4")
+        #             text_ocr = clean_text(text)
                     
-                    logger.warning(f"page condition 3 : {text_ocr}") 
+        #             logger.warning(f"page condition 3 : {text_ocr}") 
                     
-                    #reset of the variable page, page_no_key,page_with_key
-                    page_no_key = {}
-                    page_with_key = {}
+        #             #reset of the variable page, page_no_key,page_with_key
+        #             page_no_key = {}
+        #             page_with_key = {}
                     
-                    logger.info(f"PATHHHHHHHHHHHHH: {path_prev_invoice_class_pdf}")
-                    os.remove(path_prev_invoice_class_pdf)
-                except Exception as e:
-                    logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")
+        #             logger.info(f"PATHHHHHHHHHHHHH: {path_prev_invoice_class_pdf}")
+        #             os.remove(path_prev_invoice_class_pdf)
+        #         except Exception as e:
+        #             logging.error(f"on a eu l'erreur suivant pour la multiple facture {page['path']} : {e} ")
 
-                # image_with_key.save(page_with_key['path'],format='PNG',save_all=True,append_images=[image_no_key])
-                # image_with_key.save(page_with_key['path_pdf'],format='pdf',save_all=True,append_images=[image_no_key])
+        #         # image_with_key.save(page_with_key['path'],format='PNG',save_all=True,append_images=[image_no_key])
+        #         # image_with_key.save(page_with_key['path_pdf'],format='pdf',save_all=True,append_images=[image_no_key])
 
-                #reset of the variable page, page_no_key,page_with_key
-                # page_no_key = {}
-                # page_with_key = {}
+        #         #reset of the variable page, page_no_key,page_with_key
+        #         # page_no_key = {}
+        #         # page_with_key = {}
                     
-            #--------------------------------case where invoice has 2 pages but the key word is on first page and its pages are out of order----------------------------
+            # #--------------------------------case where invoice has 2 pages but the key word is on first page and its pages are out of order----------------------------
             elif page_no_key["company"] != new_company and (page_no_key['supplier'] != new_supplier and page_with_key['company'] == new_company):
                 
                 
