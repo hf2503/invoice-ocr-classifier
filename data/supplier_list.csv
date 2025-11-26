@@ -85,6 +85,7 @@ service impositions communales,service impositions communales,*********
 spuerkeess,spuerkeess,LU11408778
 tango,tango,LU15605033
 Administration communale de la Ville d'Esch-sur-Alzette,taxes_communales,LU10286570
+taxes_communales,taxes_communales,LU10286570
 taxes_communales_dechets_vdl,taxes_communales_dechets_vdl,LU9801415100
 taxes_communales_grand_duche,taxes_communales_grand_duche,LU10286570
 taxes_communales_differdange,taxes_communales_differdange,LU10284954
