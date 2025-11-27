@@ -94,6 +94,7 @@ def clean_text(text:str):
     text = text.encode('ascii', 'ignore').decode('utf-8')  # remove non-ascii
     text = text.replace("-", " ").replace("_", " ")  # standardize séparators
     text = re.sub(r"[^\w\s]", "", text)  # drop ponctuation
+    # text = text.replace(" ","").replace("\n","")
 
     return text.strip()
 
@@ -267,6 +268,9 @@ def check_tva_supplier(ocr_text:str,
     """
     list_score_tva_supplier = []
     
+    #this text without space and line breaks make easier the tva's detection
+    text_tva = ocr_text.replace(' ','').replace('\n','')
+    
     for tva,supplier_name in zip(list_tva,list_supplier):
         
         # clean_supplier_name = clean_text(supplier_name)
@@ -274,7 +278,7 @@ def check_tva_supplier(ocr_text:str,
         
         # text_tva = clean_tva.replace(' ','').replace('-','')
         
-        score_match_tva_ocr = match_word(clean_tva,ocr_text)
+        score_match_tva_ocr = match_word(clean_tva,text_tva)
         
         # score_match_tva_text_without_space = match_word(clean_tva,text_tva)
         
@@ -289,12 +293,6 @@ def check_tva_supplier(ocr_text:str,
     
     logging.info(f"the score max_OCR found is : {supplier_name} with score_match tva {max(list_score_tva_supplier)}")
         
-            
-    
-
-
-
-
 
 
 def normalise_supply_name(text:str):
