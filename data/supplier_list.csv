@@ -18,6 +18,7 @@ clean_center,clean_center,tva20152212314
 climalux,climalux,LU19097974
 club_de_football,club_de_football,+++++++++
 comptoir_des_fers_et_metaux,comptoir_des_fers_et_metaux,LU18879516
+depannage_pere_fils,depannage_pere_fils,LU32121009
 creos,creos,LU10320554
 douane_accises_grand_duche,douane_accises_grand_duche,caisse.centrale@do.etat.lu
 douane,douane_accises_grand_duche,caisse.centrale@do.etat.lu
@@ -84,7 +85,7 @@ sudenergie,sudenergie,LU320026185595897600
 service impositions communales,service impositions communales,*********
 spuerkeess,spuerkeess,LU11408778
 tango,tango,LU15605033
-Administration communale de la Ville d'Esch-sur-Alzette,taxes_communales,LU10286570
+taxes_communales,taxes_communales,LU10286570
 taxes_communales,taxes_communales,LU10286570
 taxes_communales_dechets_vdl,taxes_communales_dechets_vdl,LU9801415100
 taxes_communales_grand_duche,taxes_communales_grand_duche,LU10286570
