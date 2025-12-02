@@ -170,15 +170,11 @@ def process_invoice_pdf(input_pdf:str,
     
     # invoice page
     page = {}
-    page_no_key = {}
-    page_with_key = {}
-    path_prev_invoice_class_pdf = None
+    two_page_invoice_list = []
+    solo_page_invoice = []
+    used_indexes = set()
     page_list = []
-    previous_image_path = None
     
-    # incrementaion for the loop
-    i = 0
-
     #dictionnary_list for the page:
     row_list = []
     
@@ -188,22 +184,17 @@ def process_invoice_pdf(input_pdf:str,
     
     # loop for the scan of the page's image 
     for i,image in enumerate(images):
-        
-        i += 1
+
         print(f"******************************** {i}")
         print('--------------------------------------------------------------------------------------------------------------------------------------------')
-        
-        #-----------SAVE IMAGE------------
-        logger.info(f"PATHHHHHHHHHHHHHIPDFFFFFFFFFFFFFFF: {path_prev_invoice_class_pdf}")
-        
-        # conversion of pdf format into PNG format
+
+        # conversion of pdf format into PNG format and save the image
         image_filename = f"{os.path.basename(input_pdf)}_{i+1}.png"
-        
-        #save the image
         archive_image_path = os.path.join(suivi_dir,archive_suivi_dir,image_filename)
         image.save(archive_image_path)
         logging.info("l'image est enregistré dans : %s",archive_image_path)
 
+        # preprocessing of the invoice's image in PNG format
         img = cv2.imread(archive_image_path)
         img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         threshold_img = cv2.threshold(img_gray , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
@@ -211,17 +202,15 @@ def process_invoice_pdf(input_pdf:str,
         #convert image to string
         try:
             text = pytesseract.image_to_string(threshold_img  ,config="--psm 4")
-            # text = pytesseract.image_to_string(gray_image,config="--psm 6")
-            # logging.info(f"text_pytesseract : {text}")
            
         except Exception as e:
             
             logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
             continue
     
-    # -------------------------- Detection de facture multipage--------------------------
+    # -------------------------- invoice detection--------------------------
 
-        #cleaning text
+        #cleaning text from pytesseract OCR
         text_ocr = clean_text(text)
 
         # caracterisitics of invoice's page
@@ -245,8 +234,61 @@ def process_invoice_pdf(input_pdf:str,
         
         logger.info(f"page : {page}")
         
+        page_list.append(page.copy())
+    
+    #detection of 2 pages invoice and one page invoice
+    
+    for k,p1 in enumerate(page_list):
+        if k in used_indexes:
+            continue
+        for l in range(k +1,len(page_list)):
+            p2 = page_list[l]
+    
+            keyword_condition =  p1['key_word'] != p2['key_word']
+    
+            same_supplier = p1['supplier'] != None and (p1['supplier'] == p2['supplier'] or p1['tva'] == p2['supplier'] or p1['tva'] == p2['tva'] or p1['tva'] == p2['supplier'])
+    
+            position_close = abs(p1['position'] - p2['position']) <=1
+            
+            if keyword_condition and same_supplier and position_close:
+                
+                #2 page invoices
+                two_page_invoice_list.append((p1,p2))
+                used_indexes.add(p1['position'])
+                used_indexes.add(p2['position'])
  
+
+    #solo page invocie
+    
+    solo_page_invoice = [one_page for one_page in page_list if one_page['position'] not in used_indexes]
  
+    #invoice 2-page concatenation
+    
+    for image_two_page in two_page_invoice_list :
+        img_page_1 = cv2.imread(image_two_page[0]['path'])
+        img_page_2 = cv2.imread(image_two_page[1]['path'])
+        
+        #concatenation
+        img_concat = cv2.vconcat(img_page_1,img_page_2)
+        
+        #image to string
+        img_gray = cv2.cvtColor(img_concat,cv2.COLOR_BGR2GRAY)
+        threshold_img = cv2.threshold(img_gray , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        
+    #merge of the two list 
+    
+    invoice_list_final = solo_page_invoice + 
+        
+        # #convert image to string
+        # try:
+        #     text_2_img = pytesseract.image_to_string(threshold_img  ,config="--psm 4")
+           
+        # except Exception as e:
+            
+        #     logging.error(f"L'OCR pytesseract failed on the 2 page invoice  {os.path.basename(image_two_page[0]['path'])}")
+        #     continue
+        
+
        
     if check_invoice(text=text_ocr,key_word=key_word):
         
@@ -383,38 +425,7 @@ def process_invoice_pdf(input_pdf:str,
             
             registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
             norm_name = normalise_supply_name(text = registery_name[0])
-
-        # else:
-        # #on retente le process sur l'image png sauvegardé , le deuxième traitement arrive souvent à identifier le supplier    
-        #     image_retry = Image.open(archive_image_path)
-
-        # # #on met l'image au standard RGB
-        #     image_retry_rgb = image_retry.convert("RGB")
-
-        # # #on convertit l'image en tableau numpy
-        #     image_retry_array = np.array(image_retry_rgb)
-
-        # # # conversion de l'image en niveau de gris
-        #     image_retry_gray = cv2.cvtColor(image_retry_array,cv2.COLOR_BGR2GRAY)
         
-        # #on detecte le texte de l'image grace à pytesseract
-        #     text_retry = pytesseract.image_to_string(image_retry_gray,config='--psm 4')
-        #     clean_text_retry_ocr = clean_text(text_retry) 
-
-        # #--------------------debogage------------------------
-        #     logging.info(f"text_retry_ocr = {clean_text_retry_ocr}")
-        # #---------------------fin debogage-------------------
-
-        # #on retry la fonction check supply sur la facure qui a été enregistré au format png
-        #     supplier_name_retry = check_supplier(ocr_text =clean_text_retry_ocr,
-        #                                          supplier_list = list_supplier) 
-            
-        #     if supplier_name_retry:
-        #         registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name_retry]['supplier_registery'].unique()
-        #         norm_name = normalise_supply_name(text = registery_name[0])
-        #     else:
-        #         norm_name = normalise_supply_name(text =new_supplier)
-    
         #--------------creation du chemin de la facture-----------------------    
         
         dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
