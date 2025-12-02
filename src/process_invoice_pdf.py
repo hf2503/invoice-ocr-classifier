@@ -171,10 +171,16 @@ def process_invoice_pdf(input_pdf:str,
     # invoice page
     page = {}
     two_page_invoice_list = []
-    two_page_invoice_list_concatenate = []
+    
     solo_page_invoice_list = []
+    # solo_page_image_invoice_list = []
     used_indexes = set()
     page_list = []
+    # two_page_image_invoice_list = []
+    two_page_invoice_list_final = []
+    
+    #invoice final list
+    invoice_list = []
     
     #dictionnary_list for the page:
     row_list = []
@@ -270,344 +276,219 @@ def process_invoice_pdf(input_pdf:str,
         img_page_2 = cv2.imread(image_two_page[1]['path'])
         
         #concatenation
-        img_concat = cv2.vconcat(img_page_1,img_page_2)
+        img_concat = cv2.vconcat([img_page_1,img_page_2])
         
-        two_page_invoice_list_concatenate.append(img_concat)
-        #image to string
-        # img_gray = cv2.cvtColor(img_concat,cv2.COLOR_BGR2GRAY)
-        # threshold_img = cv2.threshold(img_gray , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        cv2.imwrite(image_two_page[0]['path'],img_concat)
         
-    #merge of the two list 
-    
-    invoice_list_final = solo_page_invoice_list + two_page_invoice_list
-
-    # print(invoice_list_final)
+        page_multi =  image_two_page[0].copy()
         
-    # invoice detection and classification
-    #--------------------------------------------------------------------------------------------try----------------------------
+        two_page_invoice_list_final.append(page_multi)
+        
+        
+  
     directory_company_path = None
     directory_parent_company = None
     row = {}
+    # solo_page_invoice_list = [page for page in solo_page_invoice_list if page['key_word'] != None]
+    # solo_page_image_invoice_list = [cv2.imread(page['path']) for page in solo_page_invoice_list]
 
-    for invoice_page in solo_page_invoice_list:
-        row['train_image_path'] = invoice_page['path']
-
-        company_name = invoice_page['company']
-
-        if isinstance(company_name, tuple):
-            #directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
-            directory_parent_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'parent_company'].values
-            directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
-
-            if directory_company_match.size > 1 :
-                
-                directory_parent_company = directory_parent_match[0]
-
-                #------------feature parent_company-----------
-
-                row['parent_company'] = directory_parent_match[0]
-
-                #------feature company_name-------
-                row['company_name'] = directory_parent_match[1]
-
-                logging.info("directory_parent_company:%s:",directory_parent_company)
-
-                directory_company = directory_company_match[0]  
-
-                logging.info("directory_company:%s:",directory_company)
-
-                directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
+    invoice_list = solo_page_invoice_list + two_page_invoice_list_final
+    
+    logging.info(f"invoice_list: {invoice_list}")
+    
+    for invoice in invoice_list:
+        
+        # preprocessing of the invoice's image in PNG format
+        image_invoice = cv2.imread(invoice['path'])
+        img_gray = cv2.cvtColor(image_invoice,cv2.COLOR_BGR2GRAY)
+        threshold_img = cv2.threshold(img_gray  , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        
+        #convert image to string
+        try:
+            text_invoice = pytesseract.image_to_string(threshold_img  ,config="--psm 4")
+            clean_text_ocr_invoice = clean_text(text_invoice)
+            print(f"bizarrrrrrrrrrrrrrrrrrrrre_2 : {clean_text_ocr_invoice}")
+           
+        except Exception as e:
             
-            else:
-
-                #------------feature parent_company-----------
-
-                row['parent_company'] = directory_parent_match[0]
-                
-                logging.info("parent_company LDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD: %s",row['parent_company']) 
-
-                #------feature company_name-------
-
-                row['company_name'] = directory_company_match[0]
-                
-                logging.info("'company_name' LEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE: %s",row['company_name']) 
-                
-                directory_parent_company = directory_parent_match[0]
-                directory_company = directory_company_match[0]
-
-                
-                directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
+            logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
+            continue
 
 
-        #------------------cas ou il n'y a pas de societe mere------------------
-        elif company_name in list_company_invoice or company_name == 'new_company':
-            directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
+        if check_invoice(text=clean_text_ocr_invoice,key_word=key_word):
             
-            #------------------no parent_company--------------
-            row['parent_company'] = 0
-
-            if directory_company_match.size > 0:
-                logging.info(f"directory_company_match : {directory_company_match}")
-                
-                row['company_name'] = directory_company_match[0]
-                directory_company = directory_company_match[0]   
-                directory_company_path = make_directory_company(output_dir,directory_company)
-                logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
-                print(directory_company_path)
             
-            else:
-                row['company_name'] = new_company
-                #row['parent_company'] = new_company
-                logging.info("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
-                directory_company_path = make_directory_company(output_dir,new_company)
-        else:
-            logging.warning("company name '%s' not matched anywhere; fallback to '%s'", company_name, new_company)
-            directory_company_path = make_directory_company(output_dir, new_company)
-
-
-        #--------------supplier detection and check with TVA----------------------
-        supplier_name = invoice_page['supplier']
-        
-        supplier_tva = invoice_page['tva']
-        
-        if supplier_tva !=None and supplier_tva != supplier_name :
-            supplier_name = supplier_tva
-
-
-        if supplier_name:
             
-            registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
-            norm_name = normalise_supply_name(text = registery_name[0])
+            
+            print(f"bizarrrrrrrrrrrrrrrrrrrrre : {clean_text_ocr_invoice}")
+            #feature_dictionnary
+            row={}
+            
+            #----------feature train_image_path------------
+            
+            row['train_image_path'] = image_filename
 
-        #--------------creation du chemin de la facture-----------------------    
-        
-        dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
+            directory_company_path = None
+            directory_parent_company = None
+            # clean_text_ocr = clean_text(text)
 
+            #----- COMPANY DETECTION------------------------
+            company_name = check_company(text=clean_text_ocr_invoice,
+                                            company_df=company_csv,
+                                            new_company=new_company
+                                            )
+            
+            logging.debug("Detected company name : %s", company_name)
 
-        #----------convert_pdf_format + sauvegarde ------------
-        
-        max_size = (1654, 2339) #200 DPI
-        image_rgb = image.convert('RGB')
-        image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
-        image_rgb.save(invoice_path,"PDF",resolution=300)
-        
-        #--------feature supplier_name-------------
-        row['supplier_name'] = norm_name
+            print(f"company name : {company_name}")
 
-        row_list.append(row)
+            if isinstance(company_name, tuple) :
 
-        #-------------sauvegarde de la row dans le fichier suivi.csv----------------
-
-        suivi_resultat_csv(file_path=invoice_path,row=row)
-        
-        #------------save the invoice_pdf path in case of mulitpage invoice--------------
-
-        # path_prev_invoice_class_pdf = invoice_path
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # if check_invoice(text=text_ocr,key_word=key_word):
-        
-        
-    #     print(f"bizarrrrrrrrrrrrrrrrrrrrre : {text_ocr}")
-    #     #feature_dictionnary
-    #     row={}
-        
-    #     #----------feature train_image_path------------
-        
-    #     row['train_image_path'] = image_filename
-
-    #     directory_company_path = None
-    #     directory_parent_company = None
-    #     clean_text_ocr = clean_text(text)
-
-    #     #----- COMPANY DETECTION------------------------
-    #     company_name = check_company(text=clean_text_ocr,
-    #                                     company_df=company_csv,
-    #                                     new_company=new_company
-    #                                     )
-        
-    #     logging.debug("Detected company name : %s", company_name)
-
-    #     print(f"company name : {company_name}")
-
-    #     if isinstance(company_name, tuple) :
-
-    #         #directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
-    #         directory_parent_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'parent_company'].values
-    #         directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
-                            
-    #         logging.info("directory_company_match_size LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: %s",directory_company_match.size)    
-    #         logging.info("directory_parent_match_debogage_1 LBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB: %s",directory_parent_match)
-    #         logging.info("directory_company_match_debogage_1 LCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC: %s",directory_company_match)
+                #directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
+                directory_parent_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'parent_company'].values
+                directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name[1],'company_name_registery'].values
+                                
+                logging.info("directory_company_match_size LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: %s",directory_company_match.size)    
+                logging.info("directory_parent_match_debogage_1 LBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB: %s",directory_parent_match)
+                logging.info("directory_company_match_debogage_1 LCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC: %s",directory_company_match)
+                        
+                if directory_company_match.size > 1 :
                     
-    #         if directory_company_match.size > 1 :
+                    directory_parent_company = directory_parent_match[0]
+
+                    #------------feature parent_company-----------
+
+                    row['parent_company'] = directory_parent_match[0]
+
+                    #------feature company_name-------
+                    row['company_name'] = directory_parent_match[1]
+
+                    logging.info("directory_parent_company:%s:",directory_parent_company)
+
+                    directory_company = directory_company_match[0]  
+
+                    logging.info("directory_company:%s:",directory_company)
+
+                    directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
+
+                    # logging.info("directory_company_path:%s:",directory_company_path)
+
+                    # logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
                 
-    #             directory_parent_company = directory_parent_match[0]
+                else:
 
-    #             #------------feature parent_company-----------
+                    #------------feature parent_company-----------
 
-    #             row['parent_company'] = directory_parent_match[0]
+                    row['parent_company'] = directory_parent_match[0]
+                    
+                    logging.info("parent_company LDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD: %s",row['parent_company']) 
 
-    #             #------feature company_name-------
-    #             row['company_name'] = directory_parent_match[1]
+                    #------feature company_name-------
 
-    #             logging.info("directory_parent_company:%s:",directory_parent_company)
+                    row['company_name'] = directory_company_match[0]
+                    
+                    logging.info("'company_name' LEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE: %s",row['company_name']) 
+                    
+                    directory_parent_company = directory_parent_match[0]
+                    directory_company = directory_company_match[0]
+                    
+                    #-------------debogage----------------
+                    
+                    # logging.info("directory_parent_company_debogage_4: %s",directory_parent_company)
+                    # logging.info(" directory_company_debogage_4: %s",directory_company)
+                    
+                    #-------------fin_debogage------------------
+                    
+                    directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
 
-    #             directory_company = directory_company_match[0]  
+            #------------------cas ou il n'y a pas de societe mere------------------
+            elif company_name in list_company_invoice or company_name == 'new_company':
+                directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
+                
+                #------------------pas de société mère--------------
+                row['parent_company'] = 0
 
-    #             logging.info("directory_company:%s:",directory_company)
+                
+                if directory_company_match.size > 0:
+                    
 
-    #             directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
+                    logging.info(f"directory_company_match : {directory_company_match}")
+                    
+                    row['company_name'] = directory_company_match[0]
+                    
+                    # row['parent_company'] = directory_company_match[0]
+                    
+                    
+                    
+                    directory_company = directory_company_match[0]   
+                    directory_company_path = make_directory_company(output_dir,directory_company)
+                    logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
+                    print(directory_company_path)
+                else:
+                    row['company_name'] = new_company
+                    #row['parent_company'] = new_company
+                    logging.info("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
+                    directory_company_path = make_directory_company(output_dir,new_company)
 
-    #             # logging.info("directory_company_path:%s:",directory_company_path)
+            else:
+                logging.warning("company name '%s' not matched anywhere; fallback to '%s'", company_name, new_company)
+                directory_company_path = make_directory_company(output_dir, new_company)
 
-    #             # logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
+            # logging.info(f"list_supplier : {list_supplier}")
+
+            #--------------supplier detection and check with TVA----------------------
+            supplier_name = check_supplier(clean_text_ocr_invoice,
+                                            list_supplier)
             
-    #         else:
-
-    #             #------------feature parent_company-----------
-
-    #             row['parent_company'] = directory_parent_match[0]
-                
-    #             logging.info("parent_company LDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD: %s",row['parent_company']) 
-
-    #             #------feature company_name-------
-
-    #             row['company_name'] = directory_company_match[0]
-                
-    #             logging.info("'company_name' LEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE: %s",row['company_name']) 
-                
-    #             directory_parent_company = directory_parent_match[0]
-    #             directory_company = directory_company_match[0]
-                
-    #             #-------------debogage----------------
-                
-    #             # logging.info("directory_parent_company_debogage_4: %s",directory_parent_company)
-    #             # logging.info(" directory_company_debogage_4: %s",directory_company)
-                
-    #             #-------------fin_debogage------------------
-                
-    #             directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
-
-    #     #------------------cas ou il n'y a pas de societe mere------------------
-    #     elif company_name in list_company_invoice or company_name == 'new_company':
-    #         directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
+            supplier_tva = check_tva_supplier(clean_text_ocr_invoice,
+                                                list_supplier,
+                                                list_tva_supplier)
             
-    #         #------------------pas de société mère--------------
-    #         row['parent_company'] = 0
+            if supplier_tva !=None and supplier_tva != supplier_name :
+                supplier_name = supplier_tva
 
+
+            if supplier_name:
+                
+                registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
+                norm_name = normalise_supply_name(text = registery_name[0])
             
-    #         if directory_company_match.size > 0:
-                
-
-    #             logging.info(f"directory_company_match : {directory_company_match}")
-                
-    #             row['company_name'] = directory_company_match[0]
-                
-    #             # row['parent_company'] = directory_company_match[0]
-                
-                
-                
-    #             directory_company = directory_company_match[0]   
-    #             directory_company_path = make_directory_company(output_dir,directory_company)
-    #             logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
-    #             print(directory_company_path)
-    #         else:
-    #             row['company_name'] = new_company
-    #             #row['parent_company'] = new_company
-    #             logging.info("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
-    #             directory_company_path = make_directory_company(output_dir,new_company)
-
-    #     else:
-    #         logging.warning("company name '%s' not matched anywhere; fallback to '%s'", company_name, new_company)
-    #         directory_company_path = make_directory_company(output_dir, new_company)
-
-    #     # logging.info(f"list_supplier : {list_supplier}")
-
-    #     #--------------supplier detection and check with TVA----------------------
-    #     supplier_name = check_supplier(clean_text_ocr,
-    #                                     list_supplier)
-        
-    #     supplier_tva = check_tva_supplier(text_ocr,
-    #                                         list_supplier,
-    #                                         list_tva_supplier)
-        
-    #     if supplier_tva !=None and supplier_tva != supplier_name :
-    #         supplier_name = supplier_tva
-
-
-    #     if supplier_name:
+            #--------------creation du chemin de la facture-----------------------    
             
-    #         registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
-    #         norm_name = normalise_supply_name(text = registery_name[0])
+            dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
+            
+            #----------convert_pdf_format + sauvegarde ------------
+            
+            max_size = (1654, 2339) #200 DPI
+            image_from_array = Image.fromarray(image_invoice)
+            image_rgb = image_from_array.convert('RGB')
+            image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
+            image_rgb.save(invoice_path,"PDF",resolution=300)
+            
+
+            # resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
+            # resized_image.convert('RGB').save(invoice_path)
+            # logging.info("invoice save to : %s",invoice_path)
+
+            #--------feature supplier_name-------------
+            row['supplier_name'] = norm_name
+
+            row_list.append(row)
+
+            #-------------sauvegarde de la row dans le fichier suivi.csv----------------
+
+            suivi_resultat_csv(file_path=invoice_path,row=row)
+            
+            #------------save the invoice_pdf path in case of mulitpage invoice--------------
+
+            path_prev_invoice_class_pdf = invoice_path
+            
         
-    #     #--------------creation du chemin de la facture-----------------------    
+        else:
+            logging.warning("no validation key on the invoice ")
+
+
+        #-------------Fin sauvegarde de la row_list dans le fichier suivi.csv----------------
         
-    #     dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
-    #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    #     invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
-        
-    #     #----------convert_pdf_format + sauvegarde ------------
-        
-    #     max_size = (1654, 2339) #200 DPI
-    #     image_rgb = image.convert('RGB')
-    #     image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
-    #     image_rgb.save(invoice_path,"PDF",resolution=300)
-        
-
-    #     # resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
-    #     # resized_image.convert('RGB').save(invoice_path)
-    #     # logging.info("invoice save to : %s",invoice_path)
-
-    #     #--------feature supplier_name-------------
-    #     row['supplier_name'] = norm_name
-
-    #     row_list.append(row)
-
-    #     #-------------sauvegarde de la row dans le fichier suivi.csv----------------
-
-    #     suivi_resultat_csv(file_path=invoice_path,row=row)
-        
-    #     #------------save the invoice_pdf path in case of mulitpage invoice--------------
-
-    #     path_prev_invoice_class_pdf = invoice_path
-        
-    
-    # else:
-    #     logging.warning("no validation key on the invoice ")
-
-
-    # #-------------Fin sauvegarde de la row_list dans le fichier suivi.csv----------------
-    
