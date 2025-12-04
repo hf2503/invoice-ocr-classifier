@@ -307,7 +307,7 @@ def process_invoice_pdf(input_pdf:str,
         try:
             text_invoice = pytesseract.image_to_string(threshold_img  ,config="--psm 4")
             clean_text_ocr_invoice = clean_text(text_invoice)
-            print(f"bizarrrrrrrrrrrrrrrrrrrrre_2 : {clean_text_ocr_invoice}")
+            # print(f"bizarrrrrrrrrrrrrrrrrrrrre_2 : {clean_text_ocr_invoice}")
            
         except Exception as e:
             
@@ -320,7 +320,8 @@ def process_invoice_pdf(input_pdf:str,
             
             
             
-            print(f"bizarrrrrrrrrrrrrrrrrrrrre : {clean_text_ocr_invoice}")
+            # print(f"bizarrrrrrrrrrrrrrrrrrrrre : {clean_text_ocr_invoice}")
+            logging.info(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {invoice['path']}")
             #feature_dictionnary
             row={}
             
