@@ -216,110 +216,53 @@ def process_invoice_pdf(input_pdf:str,
             continue
     
     # -------------------------- invoice detection--------------------------
-
-        #cleaning text from pytesseract OCR
+    #cleaning text from pytesseract OCR
         text_ocr = clean_text(text)
-
-        # caracterisitics of invoice's page
-        
-        page["company"] = check_company(text=text_ocr,
-                                        company_df=company_csv,
-                                        new_company=new_company)
-        
-        page["supplier"] = check_supplier(ocr_text=text_ocr,
-                                          supplier_list=list_supplier)
-        
-        page["key_word"] = check_invoice(text=text_ocr,
-                                         key_word=key_word)
-        
-        page['tva'] = check_tva_supplier(ocr_text=text_ocr,
-                                         list_supplier=list_supplier,
-                                         list_tva=list_tva_supplier)  
-        page['path'] = archive_image_path
-        
-        page['position'] = i
-        
-        logger.info(f"page : {page}")
-        
-        page_list.append(page.copy())
+    
+        page = analyse_invoice_page(image_path=archive_image_path,
+                                    clean_text_ocr=text_ocr,
+                                    company_df=company_csv,
+                                    supplier_list=list_supplier,
+                                    tva_supplier_list=list_tva_supplier,
+                                    new_company=new_company,
+                                    key_word=key_word,
+                                    position=i)
+    
+        page_list.append(page)
     
     #detection of 2 pages invoice and one page invoice
     
-    for k,p1 in enumerate(page_list):
-        if k in used_indexes:
-            continue
-        for l in range(k +1,len(page_list)):
-            p2 = page_list[l]
+    two_page_invoice_list, used_indexes = detection_two_page_invoice(page_list)
     
-            keyword_condition =  p1['key_word'] != p2['key_word']
-    
-            same_supplier = p1['supplier'] != None and (p1['supplier'] == p2['supplier'] or p1['tva'] == p2['supplier'] or p1['tva'] == p2['tva'] or p1['tva'] == p2['supplier'])
-    
-            position_close = abs(p1['position'] - p2['position']) <=1
-            
-            if keyword_condition and same_supplier and position_close:
-                
-                #2 page invoices
-                two_page_invoice_list.append((p1,p2))
-                used_indexes.add(p1['position'])
-                used_indexes.add(p2['position'])
- 
 
     #solo page invoice
     
-    solo_page_invoice_list = [one_page for one_page in page_list if one_page['position'] not in used_indexes]
- 
+    solo_page_invoice_list = detection_one_page_invoice(page_list = page_list,
+                                                        used_indexes = used_indexes)
+    
     #invoice 2-page concatenation
     
-    for image_two_page in two_page_invoice_list :
-        img_page_1 = cv2.imread(image_two_page[0]['path'])
-        img_page_2 = cv2.imread(image_two_page[1]['path'])
+    two_page_invoice_list_final = concat_invoice_two_page(two_page_invoice_list)
         
-        #concatenation
-        img_concat = cv2.vconcat([img_page_1,img_page_2])
-        
-        cv2.imwrite(image_two_page[0]['path'],img_concat)
-        
-        page_multi =  image_two_page[0].copy()
-        
-        two_page_invoice_list_final.append(page_multi)
-        
-        
-  
     directory_company_path = None
     directory_parent_company = None
     row = {}
-    # solo_page_invoice_list = [page for page in solo_page_invoice_list if page['key_word'] != None]
-    # solo_page_image_invoice_list = [cv2.imread(page['path']) for page in solo_page_invoice_list]
+
 
     invoice_list = solo_page_invoice_list + two_page_invoice_list_final
     
     logging.info(f"invoice_list: {invoice_list}")
     
-    for invoice in invoice_list:
+    for i,invoice in enumerate(invoice_list):
         
-        # preprocessing of the invoice's image in PNG format
-        image_invoice = cv2.imread(invoice['path'])
-        img_gray = cv2.cvtColor(image_invoice,cv2.COLOR_BGR2GRAY)
-        threshold_img = cv2.threshold(img_gray  , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        #preprocessing image +  #convert image to string
         
-        #convert image to string
-        try:
-            text_invoice = pytesseract.image_to_string(threshold_img  ,config="--psm 4")
-            clean_text_ocr_invoice = clean_text(text_invoice)
-            # print(f"bizarrrrrrrrrrrrrrrrrrrrre_2 : {clean_text_ocr_invoice}")
-           
-        except Exception as e:
-            
-            logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
-            continue
-
+        image_invoice,clean_text_ocr_invoice = image_to_text(path=invoice[config.PATH],
+                                               config_tesseract = config.PYTESSERACT_CONFIG,
+                                               index=i)
 
         if check_invoice(text=clean_text_ocr_invoice,key_word=key_word):
-            
-            
-            
-            
+                       
             # print(f"bizarrrrrrrrrrrrrrrrrrrrre : {clean_text_ocr_invoice}")
             logging.info(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {invoice['path']}")
             #feature_dictionnary
@@ -336,8 +279,7 @@ def process_invoice_pdf(input_pdf:str,
             #----- COMPANY DETECTION------------------------
             company_name = check_company(text=clean_text_ocr_invoice,
                                             company_df=company_csv,
-                                            new_company=new_company
-                                            )
+                                            new_company=new_company)
             
             logging.debug("Detected company name : %s", company_name)
 
