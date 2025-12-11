@@ -201,23 +201,14 @@ def process_invoice_pdf(input_pdf:str,
         image.save(archive_image_path)
         logging.info("l'image est enregistré dans : %s",archive_image_path)
 
-        # preprocessing of the invoice's image in PNG format
-        img = cv2.imread(archive_image_path)
-        img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        threshold_img = cv2.threshold(img_gray , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-        
-        #convert image to string
-        try:
-            text = pytesseract.image_to_string(threshold_img  ,config="--psm 4")
-           
-        except Exception as e:
-            
-            logging.error("L'OCR pytesseract failed on page %d of file %s: %s", i+1,os.path.basename(input_pdf),e)
-            continue
+
+        threshold_img, text_ocr = image_to_text(path=archive_image_path,
+                      config_tesseract=config.PYTESSERACT_CONFIG,
+                      index=i)
     
     # -------------------------- invoice detection--------------------------
     #cleaning text from pytesseract OCR
-        text_ocr = clean_text(text)
+        # text_ocr = clean_text(text)
     
         page = analyse_invoice_page(image_path=archive_image_path,
                                     clean_text_ocr=text_ocr,
@@ -278,8 +269,8 @@ def process_invoice_pdf(input_pdf:str,
 
             #----- COMPANY DETECTION------------------------
             company_name = check_company(text=clean_text_ocr_invoice,
-                                            company_df=company_csv,
-                                            new_company=new_company)
+                                         company_df=company_csv,
+                                         new_company=new_company)
             
             logging.debug("Detected company name : %s", company_name)
 
