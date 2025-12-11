@@ -52,12 +52,20 @@ if system == 'Windows':
 else:
     TESSERACT_PATH = os.getenv("TESSERACT_PATH_LINUX", "tesseract")
     
+#config pytesseract
+PYTESSERACT_CONFIG = '--psm 4'
 
-#constant
+#Constant
 NEW_SUPPLIER = "new_supplier"
 NEW_COMPANY = "new_company"
 
+#constant Page_invoice_key
+COMPANY = 'company'
+SUPPLIER = 'supplier'
+KEY_WORD = 'key_word'
+TVA = 'tva'
+PATH = 'path'
+POSITION = 'position'
+
 #KEY_WORD
 VALIDATION_KEYWORD = "verifie le"
-
-
