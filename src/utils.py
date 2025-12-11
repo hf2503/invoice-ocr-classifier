@@ -455,3 +455,120 @@ def clear_result_csv(dir_path :str):
     
     logger.info(f"le fichier {elmt_path} a été supprimée avec succés")
 
+def analyse_invoice_page(image_path:str,
+                         clean_text_ocr:str,
+                         company_df:pd.DataFrame,
+                         supplier_list:list,
+                         tva_supplier_list:list,
+                         new_company:str,
+                         key_word:str,
+                         position:int):
+
+    page = {}
+    
+    page[config.COMPANY] = check_company(text=clean_text_ocr,
+                                         company_df = company_df,
+                                         new_company=new_company)
+    
+    page[config.SUPPLIER] = check_supplier(ocr_text=clean_text_ocr,
+                                           supplier_list = supplier_list)
+    
+    page[config.KEY_WORD] = check_invoice(text = clean_text_ocr,
+                                          key_word = key_word)
+    
+    page[config.TVA] = check_tva_supplier(ocr_text = clean_text_ocr,
+                                          list_supplier = supplier_list,
+                                          list_tva=tva_supplier_list)
+    
+    page[config.PATH] = image_path
+    
+    page[config.POSITION] = position
+    
+    return page
+
+
+def detection_two_page_invoice(page_list:list):
+    used_indexes = set()
+    two_page_invoice_list = []
+    
+    for i,p1 in enumerate(page_list):
+        if i in used_indexes:
+            continue
+        for j in range(i+1,len(page_list)):
+            p2 = page_list[j]
+            
+            keyword_condition =  p1[config.KEY_WORD] != p2[config.KEY_WORD]
+            
+            same_supplier = p1[config.SUPPLIER] != None and (p1[config.SUPPLIER] == p2[config.SUPPLIER] or 
+                                                        p1[config.TVA] == p2[config.SUPPLIER] or 
+                                                        p1[config.TVA] == p2[config.TVA] or 
+                                                        p1[config.TVA] == p2[config.SUPPLIER])
+            
+            position_close = abs(p1[config.POSITION] - p2[config.POSITION]) <=1
+            
+            if keyword_condition and same_supplier and position_close:
+                two_page_invoice_list.append((p1,p2))
+                used_indexes.add(p1[config.POSITION])
+                used_indexes.add(p2[config.POSITION])
+                
+    return two_page_invoice_list, used_indexes
+
+
+def detection_one_page_invoice(page_list:list,
+                               used_indexes:set):
+    
+    solo_page_invoice_list = [one_page for one_page in page_list if one_page[config.POSITION] not in used_indexes]
+    
+    return solo_page_invoice_list
+                
+                
+def concat_invoice_two_page(two_page_invoice_list : list):
+    
+    two_page_invoice_list_final = []
+    
+    for image in two_page_invoice_list :
+        
+        logging.info(image)
+        
+        img_page_1 = cv2.imread(image[0][config.PATH])
+        img_page_2 = cv2.imread(image[1][config.PATH])
+    
+        #concatenation
+        img_concat = cv2.vconcat([img_page_1,img_page_2])
+        
+        cv2.imwrite(image[0][config.PATH],img_concat)
+        
+        two_page_invoice_list_final.append(image[0])
+        
+    return two_page_invoice_list_final
+    
+    
+def image_to_text(path:str,
+                  config_tesseract:str,
+                  index:int):
+    
+    #preprocessing image
+    image_invoice = cv2.imread(path)
+    img_gray = cv2.cvtColor(image_invoice,cv2.COLOR_BGR2GRAY)
+    threshold_img = cv2.threshold(img_gray  , 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    
+    #convert image to string
+    try:
+        text_invoice = pytesseract.image_to_string(threshold_img  ,config=config_tesseract)
+        clean_text_ocr_invoice = clean_text(text_invoice)
+        return image_invoice , clean_text_ocr_invoice
+    
+    except Exception as e:
+        logging.error("L'OCR pytesseract failed on page %d of file %s: %s", index+1,os.path.basename(path),e)
+        
+
+        
+        
+                
+                
+                
+                
+                
+                
+                
+                
