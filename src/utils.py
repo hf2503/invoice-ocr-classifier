@@ -562,7 +562,7 @@ def image_to_text(path:str,
         logging.error("L'OCR pytesseract failed on page %d of file %s: %s", index+1,os.path.basename(path),e)
         
 
-def resolve_company(company_csv:pd.DataFrame,
+def resolve_company_path(company_csv:pd.DataFrame,
                     company_name,
                     output_dir:str,
                     list_company_invoice:list,
@@ -571,9 +571,13 @@ def resolve_company(company_csv:pd.DataFrame,
     if isinstance(company_name, tuple):
         parent_company = company_name[0]
         company_name = company_name[1]
+        
+        logging.info("parent_company_debug : %s",parent_company)
+        logging.info("company_name_debug : %s",company_name)
+        
 
         #directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
-        directory_parent_match = company_csv.loc[company_csv['company_name_invoice'] == parent_company,'parent_company'].values
+        directory_parent_match = company_csv.loc[company_csv['parent_company'] == parent_company,'parent_company'].values
         directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
 
         logging.info("directory_company_match_size LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: %s",directory_company_match.size)    
@@ -596,6 +600,7 @@ def resolve_company(company_csv:pd.DataFrame,
 
         else:
 
+            logging.info("directory_company_match_debug:%s",directory_parent_match)
             directory_parent_company = directory_parent_match[0]
             logging.info("direcory_parent_company LDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD: %s",directory_parent_company)
 
@@ -607,7 +612,7 @@ def resolve_company(company_csv:pd.DataFrame,
             return directory_company_path
 
 
-    elif company_name in list_company_invoice or company_name == 'new_company':
+    elif company_name in list_company_invoice or company_name == new_company:
         directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
 
 
@@ -618,18 +623,43 @@ def resolve_company(company_csv:pd.DataFrame,
             directory_company_path = make_directory_company(output_dir,directory_company)
             logging.info("using directory for registered company '%s' : %s ",directory_company,directory_company_path)
             logging.info(directory_company_path)
+            return directory_company_path
         
         else :
 
             logging.info("company name '%s' not found in registry; fallback to '%s'",company_name,new_company)
             directory_company_path = make_directory_company(output_dir,new_company)
+            return directory_company_path
     
     else:
         logging.warning("company name '%s' not matched anywhere; fallback to '%s'", company_name, new_company)
         directory_company_path = make_directory_company(output_dir, new_company)
+        return directory_company_path
 
 
+def resolve_supplier_path(clean_text_ocr_invoice:str,
+                          list_supplier:list,
+                          list_tva_supplier:list,
+                          supplier_csv:pd.DataFrame
+                          ):
+    
+    supplier_name = check_supplier(clean_text_ocr_invoice,
+                                   list_supplier)
+            
+    supplier_tva = check_tva_supplier(clean_text_ocr_invoice,
+                                      list_supplier,
+                                      list_tva_supplier)
+    
+    if supplier_tva !=None and supplier_tva != supplier_name :
+                supplier_name = supplier_tva
 
+
+    if supplier_name:
+        
+        registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
+        norm_name = normalise_supply_name(text = registery_name[0])
+    
+    pass
 
 
 
