@@ -202,9 +202,9 @@ def process_invoice_pdf(input_pdf:str,
         logging.info("l'image est enregistré dans : %s",archive_image_path)
 
 
-        threshold_img, text_ocr = image_to_text(path=archive_image_path,
-                      config_tesseract=config.PYTESSERACT_CONFIG,
-                      index=i)
+        text_ocr = image_to_text(path=archive_image_path,
+                                 config_tesseract=config.PYTESSERACT_CONFIG,
+                                 index=i)[1]
     
     # -------------------------- invoice detection--------------------------
     #cleaning text from pytesseract OCR
@@ -248,15 +248,13 @@ def process_invoice_pdf(input_pdf:str,
         
         #preprocessing image +  #convert image to string
         
-        image_invoice,clean_text_ocr_invoice = image_to_text(path=invoice[config.PATH],
+        image_invoice,clean_text_ocr_invoice = image_to_text(path = invoice[config.PATH],
                                                config_tesseract = config.PYTESSERACT_CONFIG,
-                                               index=i)
+                                               index = i)
 
         if check_invoice(text=clean_text_ocr_invoice,key_word=key_word):
                        
-            # print(f"bizarrrrrrrrrrrrrrrrrrrrre : {clean_text_ocr_invoice}")
-            logging.info(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {invoice['path']}")
-            #feature_dictionnary
+            logging.info(f"{invoice['path']}")
             row={}
             
             #----------feature train_image_path------------
@@ -276,28 +274,18 @@ def process_invoice_pdf(input_pdf:str,
 
             print(f"company name : {company_name}")
 
-            directory_company_path = resolve_company_path(company_csv=company_csv,
-                                                     company_name= company_name,
-                                                     output_dir=output_dir,
-                                                     list_company_invoice=list_company_invoice,
-                                                     new_company=new_company)
+            directory_company_path = resolve_company_path(company_csv = company_csv,
+                                                     company_name = company_name,
+                                                     output_dir = output_dir,
+                                                     list_company_invoice = list_company_invoice,
+                                                     new_company = new_company)
 
             #--------------supplier detection and check with TVA----------------------
-            supplier_name = check_supplier(clean_text_ocr_invoice,
-                                            list_supplier)
             
-            supplier_tva = check_tva_supplier(clean_text_ocr_invoice,
-                                                list_supplier,
-                                                list_tva_supplier)
-            
-            if supplier_tva !=None and supplier_tva != supplier_name :
-                supplier_name = supplier_tva
-
-
-            if supplier_name:
-                
-                registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
-                norm_name = normalise_supply_name(text = registery_name[0])
+            norm_name = resolve_supplier_path(clean_text_ocr_invoice = clean_text_ocr_invoice,
+                                              list_supplier = list_supplier,
+                                              list_tva_supplier = list_tva_supplier,
+                                              supplier_csv = supplier_csv)
             
             #--------------creation du chemin de la facture-----------------------    
             
