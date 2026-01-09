@@ -651,15 +651,17 @@ def resolve_supplier_path(clean_text_ocr_invoice:str,
                                       list_tva_supplier)
     
     if supplier_tva !=None and supplier_tva != supplier_name :
-                supplier_name = supplier_tva
+        supplier_name = supplier_tva
+        norm_name = normalise_supply_name(text = supplier_name)
+        return norm_name
 
 
     if supplier_name:
         
         registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
         norm_name = normalise_supply_name(text = registery_name[0])
-    
-    pass
+        return norm_name
+
 
 
 
