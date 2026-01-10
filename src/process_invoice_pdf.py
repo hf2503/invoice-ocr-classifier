@@ -273,6 +273,10 @@ def process_invoice_pdf(input_pdf:str,
             logging.debug("Detected company name : %s", company_name)
 
             print(f"company name : {company_name}")
+            
+            
+            #--------------company and parent company path ----------------------
+            
 
             directory_company_path = resolve_company_path(company_csv = company_csv,
                                                      company_name = company_name,
@@ -287,7 +291,7 @@ def process_invoice_pdf(input_pdf:str,
                                               list_tva_supplier = list_tva_supplier,
                                               supplier_csv = supplier_csv)
             
-            #--------------creation du chemin de la facture-----------------------    
+            #--------------invoice path creation-----------------------    
             
             dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -301,11 +305,6 @@ def process_invoice_pdf(input_pdf:str,
             image_rgb.thumbnail(max_size,Image.Resampling.LANCZOS)
             image_rgb.save(invoice_path,"PDF",resolution=300)
             
-
-            # resized_image = image.resize((2000, 2000),Image.Resampling.LANCZOS)
-            # resized_image.convert('RGB').save(invoice_path)
-            # logging.info("invoice save to : %s",invoice_path)
-
             #--------feature supplier_name-------------
             row['supplier_name'] = norm_name
 
@@ -314,10 +313,6 @@ def process_invoice_pdf(input_pdf:str,
             #-------------sauvegarde de la row dans le fichier suivi.csv----------------
 
             suivi_resultat_csv(file_path=invoice_path,row=row)
-            
-            #------------save the invoice_pdf path in case of mulitpage invoice--------------
-
-            path_prev_invoice_class_pdf = invoice_path
             
         
         else:
