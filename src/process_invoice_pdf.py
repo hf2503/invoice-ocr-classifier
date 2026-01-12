@@ -90,16 +90,18 @@ def suivi_resultat_csv(file_path:str,
     file_exists_result = os.path.exists(csv_path_result)
     
     #ajout des resultats dans le fichier suivi.csv
-    with open(csv_path_suivi,'a',newline='',encoding='utf-8') as f:
+    with open(csv_path_suivi,'a',newline='',encoding='utf-8-sig') as f:
         writer = csv.writer(f,delimiter=';')
         if not file_exists_suivi:
+            f.write("sep=;\n")
             writer.writerow(columns)
         writer.writerow(values)
     
     #ecriture des resultats dans resultats.csv  
-    with open(csv_path_result,'a',newline='',encoding='utf-8') as f:
+    with open(csv_path_result,'a',newline='',encoding='utf-8-sig') as f:
         writer = csv.writer(f,delimiter=';')
         if not file_exists_result:
+            f.write("sep=;\n")
             writer.writerow(columns)
         writer.writerow(values)
 
