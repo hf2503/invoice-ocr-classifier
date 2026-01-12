@@ -274,7 +274,10 @@ def process_invoice_pdf(input_pdf:str,
             
             logging.debug("Detected company name : %s", company_name)
 
-            print(f"company name : {company_name}")
+            if isinstance(company_name,tuple):
+                row['parent_company']=company_name[0]
+            else:
+                row['parent_company']= 0
             
             
             #--------------company and parent company path ----------------------
@@ -285,6 +288,8 @@ def process_invoice_pdf(input_pdf:str,
                                                      output_dir = output_dir,
                                                      list_company_invoice = list_company_invoice,
                                                      new_company = new_company)
+            
+            row[company_name] = os.path.basename(directory_company_path)
 
             #--------------supplier detection and check with TVA----------------------
             
@@ -295,6 +300,11 @@ def process_invoice_pdf(input_pdf:str,
             
             #--------------invoice path creation-----------------------    
             
+            #---------------------------------debogage--------------------
+            logging.info(f"DEBOGAGE------- : directory_company : {directory_company_path}")
+            logging.info(f"DEBOGAGE------- : directory_supplier : {norm_name}")
+            #________________fin de bogaga____________________________
+
             dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             invoice_path = os.path.join(dir_path_supply,f"facture{timestamp}.pdf")
