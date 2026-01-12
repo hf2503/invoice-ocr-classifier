@@ -186,6 +186,7 @@ def process_invoice_pdf(input_pdf:str,
     
     #dictionnary_list for the page:
     row_list = []
+    row = {}
     
     #convert pdf into image
     images = convert_pdf_to_PIL(input_pdf)
@@ -202,7 +203,7 @@ def process_invoice_pdf(input_pdf:str,
         archive_image_path = os.path.join(suivi_dir,archive_suivi_dir,image_filename)
         image.save(archive_image_path)
         logging.info("l'image est enregistré dans : %s",archive_image_path)
-
+        # row['train_image_path'] = archive_image_path
 
         text_ocr = image_to_text(path=archive_image_path,
                                  config_tesseract=config.PYTESSERACT_CONFIG,
@@ -238,8 +239,8 @@ def process_invoice_pdf(input_pdf:str,
     two_page_invoice_list_final = concat_invoice_two_page(two_page_invoice_list)
         
     directory_company_path = None
-    directory_parent_company = None
-    row = {}
+    # directory_parent_company = None
+    # row = {}
 
 
     invoice_list = solo_page_invoice_list + two_page_invoice_list_final
@@ -261,7 +262,7 @@ def process_invoice_pdf(input_pdf:str,
             
             #----------feature train_image_path------------
             
-            row['train_image_path'] = image_filename
+            row['train_image_path'] = os.path.basename(invoice['path'])
 
             directory_company_path = None
             directory_parent_company = None
