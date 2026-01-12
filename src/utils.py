@@ -640,7 +640,8 @@ def resolve_company_path(company_csv:pd.DataFrame,
 def resolve_supplier_path(clean_text_ocr_invoice:str,
                           list_supplier:list,
                           list_tva_supplier:list,
-                          supplier_csv:pd.DataFrame
+                          supplier_csv:pd.DataFrame,
+                          new_supplier=config.NEW_SUPPLIER
                           ):
     
     supplier_name = check_supplier(clean_text_ocr_invoice,
@@ -656,13 +657,13 @@ def resolve_supplier_path(clean_text_ocr_invoice:str,
         return norm_name
 
 
-    if supplier_name:
-        
+    elif supplier_name != None:
         registery_name = supplier_csv[supplier_csv['supplier_invoice'] == supplier_name]['supplier_registery'].unique()
         norm_name = normalise_supply_name(text = registery_name[0])
         return norm_name
 
-
+    else :
+        return new_supplier
 
 
 
