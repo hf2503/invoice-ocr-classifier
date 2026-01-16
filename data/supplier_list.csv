@@ -3,9 +3,9 @@ agimex,agimex,LU30148542
 arthur_welter_transport,arthur_welter_transport,LU16468636
 atelier_de_reliure,atelier_de_reliure,LU32492171
 BMW_dealer,BMW_dealer,LU21427047
-BSL-Ticket,BSL_ticket,LU*********
+BSL-Ticket,BSL_ticket,*********
 berner,berner,LU13387923
-beil_Sa_rl,beil_Sa_rl,LU 16644515
+beil_Sa_rl,beil_Sa_rl,LU16644515
 3c_payment,3c_payment,LU28264772
 LS_avocat_a_la_cour,LS_avocat_a_la_cour,LU23014984
 bilia,bilia,LU21427047
@@ -56,7 +56,6 @@ garage_reiserbann,garage_reseirbann,LU32255115
 Gilbert,Gilbert,LU18554771
 grun_signalisation,grun_signalisation,19922405320
 grun,grun_signalisation,15315171
-hach,hach,LU10403280
 hotel_simoncini,hotel_simoncini,LU17109638
 hotel_standinn,hotel_standinn,LU18856361
 Hurasys,Hurasys,LU32477211
@@ -132,7 +131,7 @@ service_eaux,service_eaux,LU10355144
 taxe_communale_eau_theatre,taxe_communale_eau_theatre,eau-guichets@vdl.lu
 taxe_communale_eau_theatre,taxe_communale_eau_theatre,LU10355144
 tk_elevator,tk_elevator,LU13312267
-tracing,lu,tracing_lu,LU23737108
+tracing,tracing_lu,LU23737108
 Service_biens_communaux,Service_biens_communaux,biens@vdl.lu
 société_nationale_de_controle_technique,société_nationale_de_controle_technique,LU391111700891660000
 socom,socom,LU16208516
