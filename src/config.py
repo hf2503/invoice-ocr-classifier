@@ -25,8 +25,9 @@ SUIVI_CSV = os.path.join(SUIVI_DIR,'processed_invoices_tracking.csv')
 RESULTAT_CSV = os.path.join(OUTPUT_DIR,'results.csv')
 
 #read csv
-supplier_df = pd.read_csv(SUPPLIER_LIST_CSV ,sep=',')
-company_df = pd.read_csv(COMPANY_LIST_CSV,sep=',')
+supplier_df = pd.read_csv(SUPPLIER_LIST_CSV ,sep=';',encoding='utf-8-sig')
+company_df = pd.read_csv(COMPANY_LIST_CSV,sep=';',encoding='utf-8-sig')
+
 
 LIST_COMPANY_NAME_INVOICE = list(company_df['company_name_invoice'])
 LIST_COMPANY_NAME_DIRECTORY = list(company_df['company_name_registery'])
