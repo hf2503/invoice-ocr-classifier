@@ -455,7 +455,7 @@ def clear_result_csv(dir_path :str):
     
     logger.info(f"le fichier {elmt_path} a été supprimée avec succés")
 
-    
+
 
 def analyse_invoice_page(image_path:str,
                          clean_text_ocr:str,
@@ -465,6 +465,30 @@ def analyse_invoice_page(image_path:str,
                          new_company:str,
                          key_word:str,
                          position:int):
+    
+    """
+    scan an invoice page extracting the main features
+
+    this fonction identifies :
+        - the supplier sending the invoice
+        - the company receiving the invoice
+        - supplier's tva_number
+
+    it returns  a dictionnary containing the information avalaible or identified on the invoice 
+
+    args:
+
+        image_path(str) : path to the image of analyzed invoice page
+        clean_text_ocr (str) : cleaned OCR text extracted from the image
+
+    Returns:
+        _type_: _description_
+    """
+
+
+
+
+
 
     page = {}
     
