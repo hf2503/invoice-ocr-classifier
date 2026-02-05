@@ -455,6 +455,8 @@ def clear_result_csv(dir_path :str):
     
     logger.info(f"le fichier {elmt_path} a été supprimée avec succés")
 
+    
+
 def analyse_invoice_page(image_path:str,
                          clean_text_ocr:str,
                          company_df:pd.DataFrame,
