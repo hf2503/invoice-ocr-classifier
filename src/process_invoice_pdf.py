@@ -1,12 +1,24 @@
 """
     invoice processing and filing utilities
 
-    this module : 
-      - configure Tesseract path and logging
-      - converts PDFs to images and performs OCR with pytesseract
-      - detects the target company, parent company and the supplier
-      - create the folder structure and save the invoice's page in pdf/png format according to the filing logic
-      - save the results into CSV files
+    this module provide an end-to-end pipeline to extract, validate, 
+    and file scanned invocies from pdf documents . It combines PDF-to-image conversion,
+    OpenCV preprocessing, OCR extraction using pytesseract and ruke-based matching to detect companies, 
+    parent companies, suppliers, and supplier VAT numbers.
+    Classified invoices are then saved to a structured output directory and tracked
+    in CSV files.
+
+    The differents actions of this module are : 
+    
+    - Configure Tesseract (path) and application logging
+    - Convert input PDFs into page images and run OCR (pytesseract)
+    - Analyze each page to detect:
+        * target company / parent company
+        * supplier name and/or supplier VAT number
+        * invoice validation keyword
+    - Detect two-page invoices and optionally concatenate page images
+    - Create the output folder structure and save each classified invoice as PDF
+    - Append processing results to tracking CSV files
 
 """
 
@@ -121,42 +133,70 @@ def process_invoice_pdf(input_pdf:str,
                         new_company= config.NEW_COMPANY
                         ):
     """
+    
+    This function processes an input PDF containing scanned invoices and automatically classifies
+    the invoices by company and supplier.
 
-    process a pdf file containing numerous invoices
+    This function orchestrates the full invoice processing pipeline:
+        - convert the PDF into images (one image per page)
+        - apply OCR with preprocessing (OpenCV + Pytesseract)
+        - analyze each page (company, supplier, VAT,validation keyword)
+        - detect two-page invoices aned concatenate images when necessary
+        - validate invoices using a keyword check
+        - resolve the output diectories (company / parrent / supplier)
+        - Generate and save one classified PDF per invoice
+        - Log results into a tracking CSV file
 
-    the function perfomr the following tasks:
-        - convert the pdf file into PIL format
-        - convert each image into string format
-        - filter the image 
+    The final directory structure under `output_dir` is typically:
+    output_dir / <company> / <normalized_supplier> / invoice<timestamp>.pdf
 
+    Side effects:
+        - Creates directories (`suivi_dir`, `output_dir`, `archive_suivi_dir`) if missing
+        - Saves intermediate PNG images extracted from the PDF
+        - May overwrite images during two-page invoice concatenation
+        - Writes classified invoice PDFs to disk
+        - Appends metadata rows to a tracking CSV file via `suivi_resultat_csv`
 
     Args:
-        input_pdf (str): Path to the actual pdf file containing numerous invoices
-        suivi_dir (str): Folder tracking for processed invoice. Defaults to config.SUIVI_DIR.
-        archive_suivi_dir (str): Folder containing the process invoice filed into their corresponding folder . Defaults to config.FACTURE_CLASSEES_DIR.
-        company_csv (pandas.DataFrame): DataFrame containing the name of companies, parent companies and TVA. Defaults to config.company_df.
-        list_company_invoice (list[str]): list containing the name of the company . Defaults to config.LIST_COMPANY_NAME_INVOICE.
-        output_dir (str): Path of the folder who contains the filed invoices. Defaults to config.OUTPUT_DIR.
-        list_supplier (list[str]): Fallback label. Defaults to config.LIST_SUPPLIER.
-        new_supplier (str): Fallback label when no supplier has been identified . Defaults to config.NEW_SUPPLIER.
-        new_company (_type_, optional): Fallback label when no company has been identified . Defaults to config.NEW_COMPANY.
+        input_pdf (str): Path to the input PDF file to process
 
-    Return:
+        key_word (str): Validation keyword used to confirm that a page
+        corresponds to a valid invoice. Defaults to `config.VALIDATION_KEYWORD`.
 
-        None : Writes files to disk, logs, and updates tracking csv    
+        suivi_dir (str):Root directory used to store intermediate files (e.g., extracted PNG images). 
+        Defaults to `config.SUIVI_DIR`.
+
+        archive_suivi_dir (str): Subdirectory used to archive extracted
+        invoice pages. Defaults to `config.FACTURE_CLASSEES_DIR`.
+
+        company_csv (pd.DataFrame): Company registry dataframe used to resolve company 
+        and parent company directories.
+
+        supplier_csv (pd.DataFrame): Supplier registry dataframe used to
+        normalize and resolve supplier names. Defaults to config.supplier_df.
+
+        list_company_invoice (list): Approved list of known company names
+        used for direct matching. Defaults to config.LIST_COMPANY_NAME_INVOICE.
+
+        output_dir (str): Root output directory where classified invoices will be saved.
+        Defaults to config.OUTPUT_DIR.
+
+        list_supplier (list): List of known suppliers used for detection.
+
+        list_tva_supplier (list): List of known supplier TVA numbers used
+        for TVA-based matching. Defaults to config.LIST_TVA_SUPPLIER.
+
+        new_supplier (str): Default supplier name used if no match is found. Defaults to config.NEW_SUPPLIER.
     
-        
-    Side Effects :
-        - create directories
-        - Writes/appends lines to csv files
-        - produces log messages
-    
+        new_company (str): Default company name used if no match is found. Defaults to config.NEW_COMPANY.
+
+    return
+
+        None : this function does not explicitly return a value
+        Results are written to disk and logged in the tracking CSV file
+
     Raises:
-        FileNotFoundError: _description_
-        Exception : any exception from ocr
-
-    
-    
+        FileNotFoundError: If `input_pdf` does not exist.
     """
     
     #création des dossiers
@@ -300,11 +340,7 @@ def process_invoice_pdf(input_pdf:str,
                                               supplier_csv = supplier_csv)
             
             #--------------invoice path creation-----------------------    
-            
-            #---------------------------------debogage--------------------
-            logging.info(f"DEBOGAGE------- : directory_company : {directory_company_path}")
-            logging.info(f"DEBOGAGE------- : directory_supplier : {norm_name}")
-            #________________fin de bogaga____________________________
+        
 
             dir_path_supply = make_directory_supply(directory_company=directory_company_path,directory_supplier=norm_name)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

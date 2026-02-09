@@ -478,18 +478,25 @@ def analyse_invoice_page(image_path:str,
 
     args:
 
-        image_path(str) : path to the image of analyzed invoice page
+        image_path(str) : Path to the image of analyzed invoice page
         clean_text_ocr (str) : cleaned OCR text extracted from the image
+        company_df(pd.DataFrame) : DataFrame containing the list of companies
+        supplier_list (list) : List of known suppliers
+        tva_supplier_list (list) : Supplier TVA number
+        new_company : name of the fallback , when a company name is not in list of company
+        key_word : name of the tampon of validation of the invoice, this argument is very important
+        position : page position in the global pdf document (a kind of page number)
 
     Returns:
-        _type_: _description_
+        dict : dictionnary containing the analyzed informations for the page 
+        including :
+                    - COMPANY: Identified company
+                    - SUPPLIER: Detected supplier
+                    - KEY_WORD: Invoice keyword detection result
+                    - TVA: Supplier VAT number if detected
+                    - PATH: Path to the analyzed image
+                    - POSITION: Page position within the document
     """
-
-
-
-
-
-
     page = {}
     
     page[config.COMPANY] = check_company(text=clean_text_ocr,
@@ -514,6 +521,27 @@ def analyse_invoice_page(image_path:str,
 
 
 def detection_two_page_invoice(page_list:list):
+
+    """
+    this function detect two page invoice within a list of analyzed invoice page
+
+    Args:
+
+        page_list (list) : list of dictionaries representing pages of analyzed invoices
+
+        Each dictionnary must contain :
+            - KEY_WORD
+            - SUPPLIER
+            - TVA
+            - POSITION
+
+
+    Returns:
+        Tuple: A list of tuples (page1,page2) representing detected two-page invocies
+        set : A set of page positions that have been grouped and marked as used
+    """
+
+
     used_indexes = set()
     two_page_invoice_list = []
     
@@ -542,6 +570,21 @@ def detection_two_page_invoice(page_list:list):
 
 def detection_one_page_invoice(page_list:list,
                                used_indexes:set):
+    """
+    This fonction detects the single-page invoice. 
+    It's activated after the detection of multi-page invoices in the analysis pipeline
+
+
+
+
+    Args:
+        page_list (list): List of dictionaries representing the anlysed invoice pages
+        used_indexes (set): set of page positions that have already been associated with 2-pages invoices
+
+    Returns:
+        list: list of pages considered to be a single-page invoices
+    """
+
     
     solo_page_invoice_list = [one_page for one_page in page_list if one_page[config.POSITION] not in used_indexes]
     
@@ -549,6 +592,17 @@ def detection_one_page_invoice(page_list:list,
                 
                 
 def concat_invoice_two_page(two_page_invoice_list : list):
+    """
+    this function concatenates two-page invoice images into a single image file and 
+    overwrites the first page image file.
+
+    Args:
+        two_page_invoice_list (list): list of tuples (page1,page2) representing the
+        two pages invoices
+
+    Returns:
+        list: list of dictionaries representing the merged invoices
+    """
     
     two_page_invoice_list_final = []
     
@@ -573,6 +627,19 @@ def image_to_text(path:str,
                   config_tesseract:str,
                   index:int):
     
+    """
+    Extracts OCR text from an invoice image after OpenCV preprocessing.
+
+    args:
+        path (str): Path to the image file to be processed.
+        config_tesseract (str): Configuration string passed to pytesseract
+        index (int): Page index within the document
+    Returns:
+        tuple : (image_invoice, clean_text_ocr_invoice) where:
+            - image_invoice : original image loaded with OpenCV
+            - clean-text_ocr_invocie (str) : Cleaned OCR-text extracted 
+    """
+    
     #preprocessing image
     image_invoice = cv2.imread(path)
     img_gray = cv2.cvtColor(image_invoice,cv2.COLOR_BGR2GRAY)
@@ -589,26 +656,45 @@ def image_to_text(path:str,
         
 
 def resolve_company_path(company_csv:pd.DataFrame,
-                    company_name,
+                    company_name:str,
                     output_dir:str,
                     list_company_invoice:list,
                     new_company:str) :
+    
+    """
+    Determines and resolves the directory path based on the company name
+    This function maps an extracted `company_name` ( coming from OCR / classification)
+    to a filesystem directory (`output_dir`).
+
+    args:
+
+    company_csv (str): Company registry dataframe used to resolve directory names.
+
+    company_name (str) Company name identified, extracted from OCR-text
+
+    output_dir : Root output directory where company folders are created 
+
+    list_company_invoice (list): list of aproved comany name used for the matching
+
+    new_company (str): default directory name used when no registry match is found
+
+    Returns:
+        str : directory path for the given company
+    """
         
     if isinstance(company_name, tuple):
         parent_company = company_name[0]
         company_name = company_name[1]
         
-        logging.info("parent_company_debug : %s",parent_company)
-        logging.info("company_name_debug : %s",company_name)
+        logging.info("parent_company : %s",parent_company)
+        logging.info("company_name : %s",company_name)
         
 
         #directory_parent_match = company_csv.loc[company_csv['parent_company'] == company_name[0],'parent_company'].values
         directory_parent_match = company_csv.loc[company_csv['parent_company'] == parent_company,'parent_company'].values
         directory_company_match = company_csv.loc[company_csv['company_name_invoice'] == company_name,'company_name_registery'].values
 
-        logging.info("directory_company_match_size LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: %s",directory_company_match.size)    
-        logging.info("directory_parent_match_debogage_1 LBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB: %s",directory_parent_match)
-        logging.info("directory_company_match_debogage_1 LCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC: %s",directory_company_match)
+        logging.info("directory_company_match_size: %s",directory_company_match.size)    
 
         if directory_company_match.size > 1 :
                 
@@ -626,12 +712,12 @@ def resolve_company_path(company_csv:pd.DataFrame,
 
         else:
 
-            logging.info("directory_company_match_debug:%s",directory_parent_match)
+            logging.info("directory_company_match:%s",directory_parent_match)
             directory_parent_company = directory_parent_match[0]
-            logging.info("direcory_parent_company LDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD: %s",directory_parent_company)
+            logging.info("direcory_parent_company : %s",directory_parent_company)
 
             directory_company = directory_company_match[0]
-            logging.info("company_name LDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD: %s",directory_company)
+            logging.info("company_name : %s",directory_company)
 
             directory_company_path = make_directory_mother_company(output_dir,directory_parent_company,directory_company)
 
@@ -669,6 +755,26 @@ def resolve_supplier_path(clean_text_ocr_invoice:str,
                           supplier_csv:pd.DataFrame,
                           new_supplier=config.NEW_SUPPLIER
                           ):
+    
+    """
+    Resolve and normalize the supplier name from the clean OCR invoice text 
+
+    args:
+
+    clean_text_ocr_invoice (str) : Cleaned OCR text extracted from the invoice
+    list_supplier (list): List of known supplier names used for detection.
+
+    list_tva_supplier (list): List of known supplier VAT numbers.
+
+    supplier_csv (pd.DataFrame): Mapping dataframe between detected supplier
+
+    names (`supplier_invoice`) and official registry names (`supplier_registery`).
+
+    new_supplier (str): Default value returned when no supplier match is found.
+
+    Returns:
+        _type_: _description_
+    """
     
     supplier_name = check_supplier(clean_text_ocr_invoice,
                                    list_supplier)
