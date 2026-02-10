@@ -30,7 +30,17 @@ For each invoice, the system :
   - Archive the raw/original pdf
   - Save traceability information in csv files
 
+## Installation
 
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/invoice_classifier/classifier.git
+cd classifier
+
+### 2. start the application with docker
+
+docker-compose up -d --build
 
 
 
