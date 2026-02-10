@@ -22,6 +22,17 @@ The project addresses this problem by automatically analysing each pdf , detecti
 
 For each invoice, the system :
 
-  - 
+  -  Extract text from the PDF's file scanned
+  -  Identifies the target subsidiary of the receiving organisation and the supplier
+  -  Validates that the page is an invoice detecting the validation internal stamp configurable in the system settings
+  -  handler invoices-two-page
+  -  Saved the processed invoiced in the appropriate directory
+  - Archive the raw/original pdf
+  - Save traceability information in csv files
+
+
+
+
+
 
 
