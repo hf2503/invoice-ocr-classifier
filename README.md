@@ -37,10 +37,14 @@ For each invoice, the system :
 ```bash
 git clone https://github.com/invoice_classifier/classifier.git
 cd classifier
+```
 
-### 2. start the application with docker
+### 2. Run docker-compose:
 
+```bash
 docker-compose up -d --build
+```
+
 
 
 
