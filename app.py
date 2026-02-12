@@ -65,10 +65,26 @@ def reset_uploader():
     st.session_state["uploader_key"] += 1
 
 
+
+
 left,right = st.columns([1,2],gap ='large')
 
 
 with left:
+    
+    st.subheader("Configuration")
+    stamp_text = st.text_input(
+        "Tampon de validation",
+        value= "", #valeur par défaut
+        placeholder="verifie le",
+        help = "texte utilisé pour valider que le document est une facture"
+    )
+    
+    stamp_text = stamp_text.strip() or "verifie le"
+
+    # st.sidebar.radio('write your company stamp')
+
+    
     st.subheader("Importer des PDF")
     uploaded_files = st.file_uploader("Déposez vos factures PDF:",
                                       type="pdf",
@@ -130,7 +146,7 @@ with left:
             
         #     Bouton pour retester sans recharger la page
             if st.button("🔁 Réessayer"):
-                 st.rerun()
+                st.rerun()
 
         else:
 
@@ -138,7 +154,8 @@ with left:
                             show_time=True,
                             width="content"):
 
-                batch_invoice_preprocessing(config.INPUT_DIR)
+                batch_invoice_preprocessing(config.INPUT_DIR,
+                                            key_word=stamp_text)
                 st.toast("Traitement terminé",icon="😍")
                 st.balloons()
                 # reset_uploader()
