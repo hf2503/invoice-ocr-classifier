@@ -89,6 +89,7 @@ def archive_csv(file_path,
 def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
                                 archive_input_pdf_folder = config.ARCHIVE_DIR,
                                 raw_invoice_folder = config.FACTURES_BRUTES_DIR,
+                                key_word = config.VALIDATION_KEYWORD
                                 ):
     """
 
@@ -163,7 +164,8 @@ def batch_invoice_preprocessing(input_pdf_folder = config.INPUT_DIR,
         archive_csv(file_path)
             
         try:
-            process_invoice_pdf(input_pdf=file_path)
+            process_invoice_pdf(input_pdf=file_path,
+                                key_word=key_word)
 
         #sauvegarde du fichier pdf brut dans un le dossier  facture brute archive
             archive_path = os.path.join(archive_input_pdf_folder,raw_invoice_folder,filename)
