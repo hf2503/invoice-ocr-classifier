@@ -89,18 +89,18 @@ LUX_INVOICE_2/
 
 ```mermaid
 flowchart TD
-    A[Input folder<br/>PDFs with mixed invoices] --> B[Batch ingestion<br/>batch_invoice_preprocessing.py]
-    B -->|Archive raw PDF + SHA-1| C[Archive CSV<br/>archive_csv]
-    B --> D[OCR + Classification<br/>process_invoice_pdf.py]
-    D --> E[PDF → Images<br/>pdf2image]
-    E --> F[OCR<br/>pytesseract + OpenCV]
-    F --> G[Page analysis<br/>company / supplier / VAT]
-    G --> H[Invoice validation stamp<br/>config.VALIDATION_KEYWORD]
-    H --> I[Multi-page detection<br/>2-page concat]
-    I --> J[Output filing<br/>OUTPUT_DIR/<company>/<supplier>/]
-    J --> K[Tracking CSV<br/>suivi_resultat_csv]
-    D --> L[Logs<br/>logs/invoice_processing.log]
+    A[Raw PDF input] --> B[Batch ingestion]
+    B --> C[Archive raw PDF and SHA1]
+    B --> D[OCR and page analysis]
+    D --> E[Detect and merge multi page invoices]
+    E --> F[Validate invoice stamp]
+    F --> G[Classify by company and supplier]
+    G --> H[Save classified invoice PDFs]
+    H --> I[Write tracking CSV and logs]
+    D --> J[Store PNG pages for audit]
+
 ```
+
 
 
 
