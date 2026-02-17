@@ -89,17 +89,33 @@ LUX_INVOICE_2/
 
 ```mermaid
 flowchart TD
-    A[Raw PDF input] --> B[Batch ingestion]
-    B --> C[Archive raw PDF and SHA1]
-    B --> D[OCR and page analysis]
-    D --> E[Detect and merge multi page invoices]
-    E --> F[Validate invoice stamp]
-    F --> G[Classify by company and supplier]
-    G --> H[Save classified invoice PDFs]
-    H --> I[Write tracking CSV and logs]
-    D --> J[Store PNG pages for audit]
+
+    A[Input folder raw invoices to process]
+    B[Batch ingestion]
+    C[Invoice processing]
+    D[Convert pdf to png pages]
+    E[OCR and page analysis]
+    F[Detect and merge multi page invoices]
+    G[Validate invoice stamp]
+    H[Resolve company and supplier paths]
+    I[Save classified invoice pdf]
+
+    AR[Archive raw pdf and archive csv]
+    LG[Write logs]
+    PG[Store png pages for audit]
+    RS[Write results csv]
+    TR[Write tracking csv]
+
+    A --> B --> C --> D --> E --> F --> G --> H --> I
+
+    B --> AR
+    C --> LG
+    D --> PG
+    I --> RS
+    I --> TR
 
 ```
+
 
 
 
