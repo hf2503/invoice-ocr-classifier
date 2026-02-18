@@ -127,20 +127,35 @@ flowchart TD
 
   Archive of processed raw PDFs
     - Store the original PDF before preprocessing
+
+  #### Tracking file
   
-    #####archive_raw_invoices.csv
-    colummns : 
-      - raw_invoice
-      - date
-      - check-in time
-      - sha1_pdf
+    **Archive_raw_invoices.csv** :
     
-    this file ensures traceability of incoming documents 
+    colummns : 
+        - raw_invoice
+        - date
+        - check-in time
+        - sha1_pdf
+    
+      this file ensures traceability of incoming documents
 
+### classified_invoices/
 
+This folder contains the filed pdf invoices , result of the pipeline .
 
+Invoices are saved on the following path (2 configurations) : 
+  - company/supplier/invoice_time_stamp.pdf
+  - parent_company/company/supplier/invoice_timestamp.pdf 
 
+  ### Session summary file
 
+    ** results.csv **
+
+      columns : 
+          - 
+      
+    - Contains the results of the session
 
 
 
