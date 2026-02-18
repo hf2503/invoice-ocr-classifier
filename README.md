@@ -122,7 +122,7 @@ flowchart TD
   - Each file contain multiple mixed invoice
   - After successful processing, files are moved to the archive folder archived_raw_invoices/raw_invoices/,ensuring that it will not be processed again
 
-  #### raw_invoices/
+  ##### raw_invoices/
   The main purpose of this folder is to track processed file and ensured that files are not preprocessed twice
 
   Archive of processed raw PDFs
@@ -152,7 +152,7 @@ Invoices are saved on the following path (2 configurations) :
 
 ```
 
-  ### Session summary file
+  #### Session summary file
 
   results.csv 
 
@@ -170,11 +170,11 @@ Invoices are saved on the following path (2 configurations) :
 
 This folder contains files and folder for tracking and checking results
 
-  ### Processed_invoice_archive/
+  #### Processed_invoice_archive/
   This folder contains all the invoice's page on the format PNG. For exemple 50 pages PDF generates 50 PNG files.
   In addition it allows manual verification by accounting staff
 
-  ## Processed_invoices_tracking.csv
+  #### Processed_invoices_tracking.csv
   
   columns : 
   - invoice_processed
@@ -203,6 +203,7 @@ This folder contains files and folder for tracking and checking results
 
  These files contain reference data used to match OCR-extracted text with the name of the company (company_name_invoice) . The system searches for a match with the VAT number or the company name or supplier name 
  written on the invoice.
+
 
 
 
