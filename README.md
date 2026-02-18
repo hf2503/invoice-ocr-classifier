@@ -45,8 +45,9 @@ cd classifier
 docker-compose up -d --build
 ```
 
-## Architecture
+### 3. Architecture
 
+#### Project structure
 ```
 
 LUX_INVOICE_2/
@@ -83,9 +84,7 @@ LUX_INVOICE_2/
 
 ```
 
-### Folder Descriptions
-
-## Architecture Diagram
+#### Architecture Diagram
 
 ```mermaid
 flowchart TD
@@ -115,9 +114,23 @@ flowchart TD
     I --> TR
 
 ```
+## 4.  Folder Description
 
+# raw_invoices_to_process
 
+  - Contains raw pdf files to be processesd
+  - Each file contain multiple mixed invoice
+  - After successful processing, files are moved to the archive folder archived_raw_invoices/raw_invoices/,ensuring that it will not be processed again
 
+# archive_raw_invoices.csv
+
+colummns : 
+  - raw_invoice
+  - date
+  - check-in time
+  - sha1_pdf
+
+this file guarantees traceability of incoming documents
 
 
 
