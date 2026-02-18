@@ -45,8 +45,9 @@ cd classifier
 docker-compose up -d --build
 ```
 
-## Architecture
+### 3. Architecture
 
+#### Project structure
 ```
 
 LUX_INVOICE_2/
@@ -83,9 +84,7 @@ LUX_INVOICE_2/
 
 ```
 
-### Folder Descriptions
-
-## Architecture Diagram
+#### Architecture Diagram
 
 ```mermaid
 flowchart TD
@@ -115,7 +114,69 @@ flowchart TD
     I --> TR
 
 ```
+## 4.  Folder Description
 
+### raw_invoices_to_process/
+
+  - Contains raw pdf files to be processesd
+  - Each file contain multiple mixed invoice
+  - After successful processing, files are moved to the archive folder archived_raw_invoices/raw_invoices/,ensuring that it will not be processed again
+
+  #### raw_invoices/
+  The main purpose of this folder is to track processed file and ensured that files are not preprocessed twice
+
+  Archive of processed raw PDFs
+    - Store the original PDF before preprocessing
+
+  #### Tracking file
+  
+  **Archive_raw_invoices.csv** :
+    
+  colummns : 
+    - raw_invoice
+    - date
+    - check-in time
+    - sha1_pdf
+
+this file ensures traceability of incoming documents
+
+### classified_invoices/
+
+This folder contains the filed pdf invoices , result of the pipeline .
+
+Invoices are saved on the following path (2 configurations) : 
+
+```
+  - company/supplier/invoice_time_stamp.pdf
+  - parent_company/company/supplier/invoice_timestamp.pdf
+
+```
+
+  ### Session summary file
+
+  results.csv 
+
+  columns : 
+  - invoice_processed
+  - parent_company
+  - company_name
+  - supplier_name
+  - date
+  - sha1_pdf
+    
+  This file is used for result verification and control at the end of the session
+
+### tracking/
+
+This folder contains files and folder for tracking and checking results
+
+  ### Processed_invoice_archive/
+  This folder contains all the invoice's page on the format PNG. For exemple 50 pages PDF generates 50 PNG files.
+  In addition it allows manual verification by accounting staff
+
+  ## Processed_invoices_tracking.csv
+
+  
 
 
 
