@@ -175,8 +175,35 @@ This folder contains files and folder for tracking and checking results
   In addition it allows manual verification by accounting staff
 
   ## Processed_invoices_tracking.csv
-
   
+  columns : 
+  - invoice_processed
+  - parent_company
+  - company_name
+  - supplier_name
+  - date
+  - sha1_pdf
+
+ ### Reference and mapping table 
+
+ The systeme relies on two CSV mapping table
+
+  company_list.csv
+  columns : 
+    - company_name_invoice (company name in the invoice)
+    - company_name_registery (folder name)
+    - ID_TVA
+    - parent_company
+
+  supplier_list.csv
+  columns : 
+    - supplier_invoice (supplier name on the invoice)
+    - supplier registery (folder name)
+    - TVA
+
+ These files contain reference data used to match OCR-extracted text with the name of the company (company_name_invoice) . The system searches for a match with the VAT number or the company name or supplier name 
+ written on the invoice.
+
 
 
 
