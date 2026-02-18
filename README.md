@@ -153,9 +153,20 @@ Invoices are saved on the following path (2 configurations) :
     ** results.csv **
 
       columns : 
-          - 
-      
-    - Contains the results of the session
+          - invoice_processed
+          - parent_company
+          - company_name
+          - supplier_name
+          - date
+          - sha1_pdf
+    
+    This file is used for result verification and control at the end of the session
+
+### tracking
+
+This folder contains files and folder for tracking and checking results
+  
+
 
 
 
