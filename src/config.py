@@ -35,8 +35,8 @@ LIST_COMPANY_TVA = list(company_df['ID_TVA'])
 PARENT_COMPANY = 'SPG'
 
 #Colonnes suivi.csv et facture_brutes_archivees.csv
-COLUMNS_SUIVI_BRUTE = ['facture_brute','date','heure','sha1_pdf']
-COLUMNS_SUIVI = ['facture_traitee','parent_company','company_name','supplier_name','date','sha1_pdf']
+COLUMNS_SUIVI_BRUTE = ['raw_invoice','date','check-in time','sha1_pdf']
+COLUMNS_SUIVI = ['invoice_processed','parent_company','company_name','supplier_name','date','sha1_pdf']
 
 
 LIST_SUPPLIER = list(supplier_df['supplier_invoice'])
