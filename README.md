@@ -170,8 +170,14 @@ Invoices are saved on the following path (2 configurations) :
 
 This folder contains files and folder for tracking and checking results
 
-  ### processd_invoice_archive/
-  This folder contains all the invoice's page on the format PNG. For exemple 50 pages PDF 
+  ### Processed_invoice_archive/
+  This folder contains all the invoice's page on the format PNG. For exemple 50 pages PDF generates 50 PNG files.
+  In addition it allows manual verification by accounting staff
+
+  ## Processed_invoices_tracking.csv
+
+  
+
 
 
 
