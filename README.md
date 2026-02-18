@@ -145,8 +145,12 @@ this file ensures traceability of incoming documents
 This folder contains the filed pdf invoices , result of the pipeline .
 
 Invoices are saved on the following path (2 configurations) : 
+
+```
   - company/supplier/invoice_time_stamp.pdf
-  - parent_company/company/supplier/invoice_timestamp.pdf 
+  - parent_company/company/supplier/invoice_timestamp.pdf
+
+```
 
   ### Session summary file
 
@@ -162,10 +166,12 @@ Invoices are saved on the following path (2 configurations) :
     
   This file is used for result verification and control at the end of the session
 
-### tracking
+### tracking/
 
 This folder contains files and folder for tracking and checking results
 
+  ### processd_invoice_archive/
+  This folder contains all the invoice's page on the format PNG. For exemple 50 pages PDF 
 
 
 
