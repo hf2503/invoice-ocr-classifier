@@ -150,7 +150,7 @@ Invoices are saved on the following path (2 configurations) :
 
   ### Session summary file
 
-    ** results.csv **
+  'results.csv' 
 
       columns : 
           - invoice_processed
@@ -160,12 +160,13 @@ Invoices are saved on the following path (2 configurations) :
           - date
           - sha1_pdf
     
-    This file is used for result verification and control at the end of the session
+  This file is used for result verification and control at the end of the session
 
 ### tracking
 
 This folder contains files and folder for tracking and checking results
   
+
 
 
 
