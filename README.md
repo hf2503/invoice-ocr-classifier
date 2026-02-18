@@ -116,21 +116,27 @@ flowchart TD
 ```
 ## 4.  Folder Description
 
-# raw_invoices_to_process
+### raw_invoices_to_process/
 
   - Contains raw pdf files to be processesd
   - Each file contain multiple mixed invoice
   - After successful processing, files are moved to the archive folder archived_raw_invoices/raw_invoices/,ensuring that it will not be processed again
 
-# archive_raw_invoices.csv
+  #### raw_invoices/
+  The main purpose of this folder is to track processed file and ensured that files are not preprocessed twice
 
-colummns : 
-  - raw_invoice
-  - date
-  - check-in time
-  - sha1_pdf
+  Archive of processed raw PDFs
+    - Store the original PDF before preprocessing
+  
+    #####archive_raw_invoices.csv
+    colummns : 
+      - raw_invoice
+      - date
+      - check-in time
+      - sha1_pdf
+    
+    this file ensures traceability of incoming documents 
 
-this file guarantees traceability of incoming documents
 
 
 
