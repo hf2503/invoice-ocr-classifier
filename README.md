@@ -122,21 +122,21 @@ flowchart TD
   - Each file contain multiple mixed invoice
   - After successful processing, files are moved to the archive folder archived_raw_invoices/raw_invoices/,ensuring that it will not be processed again
 
-#### raw_invoices/
-The main purpose of this folder is to track processed file and ensured that files are not preprocessed twice
+  #### raw_invoices/
+  The main purpose of this folder is to track processed file and ensured that files are not preprocessed twice
 
-Archive of processed raw PDFs
-  - Store the original PDF before preprocessing
+  Archive of processed raw PDFs
+    - Store the original PDF before preprocessing
 
-#### Tracking file
+  #### Tracking file
   
-**Archive_raw_invoices.csv** :
+  **Archive_raw_invoices.csv** :
     
-colummns : 
-  - raw_invoice
-  - date
-  - check-in time
-  - sha1_pdf
+  colummns : 
+    - raw_invoice
+    - date
+    - check-in time
+    - sha1_pdf
 
 this file ensures traceability of incoming documents
 
@@ -148,11 +148,11 @@ Invoices are saved on the following path (2 configurations) :
   - company/supplier/invoice_time_stamp.pdf
   - parent_company/company/supplier/invoice_timestamp.pdf 
 
-### Session summary file
+  ### Session summary file
 
-results.csv 
+  results.csv 
 
-columns : 
+  columns : 
   - invoice_processed
   - parent_company
   - company_name
@@ -160,12 +160,13 @@ columns :
   - date
   - sha1_pdf
     
-This file is used for result verification and control at the end of the session
+  This file is used for result verification and control at the end of the session
 
 ### tracking
 
 This folder contains files and folder for tracking and checking results
-  
+
+
 
 
 
