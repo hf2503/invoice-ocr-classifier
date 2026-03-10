@@ -244,7 +244,8 @@ def check_supplier(ocr_text:str,
             logging.info("supplier_name:%s",supplier_name)
             return supplier_name
     
-    logging.info(f"le score max pour le supplier suivant ests : supplier_name {max(list_score_supplier_ocr)[0]} pour un score de {max(list_score_supplier_ocr)[1]}")
+    if list_score_supplier_ocr is not None:
+        logging.info(f"The highest supplier score is: %s with a score of %s : supplier_name {max(list_score_supplier_ocr)[0]} pour un score de {max(list_score_supplier_ocr)[1]}")
     
     return None
 
