@@ -11,7 +11,7 @@ from src.utils import clear_result_and_raw,clear_result_csv
 # ----------------- Page -----------------
 st.set_page_config(page_title="Invoice Classifier",
                    layout="wide",
-                   page_icon=':grinning:',
+                   page_icon='📄 Invoice Classifier',
                    initial_sidebar_state="collapsed"
                    )
 st.title(f"{':grinning:'} CLASSIFIEUR DE FACTURES")
