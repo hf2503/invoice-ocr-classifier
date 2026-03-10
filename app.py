@@ -9,13 +9,13 @@ from src.utils import clear_result_and_raw,clear_result_csv
 
 
 # ----------------- Page -----------------
-st.set_page_config(page_title="Classifieur de factures",
+st.set_page_config(page_title="Invoice Classifier",
                    layout="wide",
                    page_icon=':grinning:',
                    initial_sidebar_state="collapsed"
                    )
 st.title(f"{':grinning:'} CLASSIFIEUR DE FACTURES")
-st.caption("Reconnaissance semi-automatique + correction comptable")
+st.caption("Semi-automatic recognition + accounting validation")
 
 #on s'assure de l'existence du dossier des inputs
 os.makedirs(config.INPUT_DIR, exist_ok=True)
@@ -74,19 +74,19 @@ with left:
     
     st.subheader("Configuration")
     stamp_text = st.text_input(
-        "Tampon de validation",
+        "Validation Stamp",
         value= "", #valeur par défaut
-        placeholder="verifie le",
-        help = "texte utilisé pour valider que le document est une facture"
+        placeholder="verified on",
+        help = "text used to validate that the document is an invoice"
     )
     
-    stamp_text = stamp_text.strip() or "verifie le"
+    stamp_text = stamp_text.strip() or "verified on"
 
     # st.sidebar.radio('write your company stamp')
 
     
     st.subheader("Importer des PDF")
-    uploaded_files = st.file_uploader("Déposez vos factures PDF:",
+    uploaded_files = st.file_uploader("Drop your invoice PDFs:",
                                       type="pdf",
                                       accept_multiple_files=True,
                                       key=f"uploader_{st.session_state['uploader_key']}")
@@ -99,22 +99,22 @@ with left:
 
             #on vérifie que le file n'a pas été dèja traité
             if filename in already_archived:
-                st.warning(f" ⚠️ le fichier {filename} a déja été traité")
+                st.warning(f" ⚠️ The file {filename} has already been processed")
                 continue
 
             save_path = os.path.join(config.INPUT_DIR,filename) 
             with open(save_path,'wb') as f:
                 f.write(files.getbuffer())
-        st.success(f"{len(uploaded_files)} fichier(s) pdf ont été ajoutée(s) au dossier {config.INPUT_DIR}")
+        st.success(f"{len(uploaded_files)} PDF file(s) added to folder {config.INPUT_DIR}")
 
     else :
-        st.info("il y aucun fichier à traiter")
+        st.info("No files to process")
         st.stop()
 
     st.divider()
     c1,c2 = st.columns(2)
     process_clicked = c1.button(":shark: Traiter",type = "primary",use_container_width=True)
-    clear_clicked = c2.button("\U0001F528 Effacer",type ="secondary",use_container_width=True)
+    clear_clicked = c2.button("\U0001F528 Clear",type ="secondary",use_container_width=True)
 
     if process_clicked:
 
@@ -135,38 +135,38 @@ with left:
                 csv_error.append(os.path.basename(csv_path))
 
             except Exception as e:
-                st.error(f"❌ erreur inattendue : {e}")
+                st.error(f"❌ Unexpected error: {e}")
                 st.stop()
             
         if csv_error:
             #-------------debug---------------------
             st.write(f"les erreurs sont {csv_error}")
-            st.error(f"⚠️ Impossible de lancer le traitement, un (ou plusieurs) des fichiers suivants : {''.join(csv_error)} sont ouverts dans excel . \n\n"
-                     "Fermez les puis réessayez")
+            st.error(f"⚠️ Processing cannot start because the following file(s) are open in Excel: {''.join(csv_error)}.\n\n"
+                     "Please close them and try again.")
             
         #     Bouton pour retester sans recharger la page
-            if st.button("🔁 Réessayer"):
+            if st.button("🔁 Retry"):
                 st.rerun()
 
         else:
 
-            with st.spinner(text="\U000023F0 en cours de traitement",
+            with st.spinner(text="\U000023F0 Processing in progress",
                             show_time=True,
                             width="content"):
 
                 batch_invoice_preprocessing(config.INPUT_DIR,
                                             key_word=stamp_text)
-                st.toast("Traitement terminé",icon="😍")
+                st.toast("Processing completed",icon="😍")
                 st.balloons()
                 # reset_uploader()
     
     if clear_clicked:
-        with st.spinner(text=" 🫧nettoyage"):
+        with st.spinner(text=" 🫧Cleaning"):
             #clear_result_and_raw(config.OUTPUT_DIR)
             clear_result_csv(config.OUTPUT_DIR)
             clear_result_and_raw(config.INPUT_DIR)
             st.balloons()
-        st.toast("pdf importés effacés", icon="😄")
+        st.toast("Uploaded PDFs removed", icon="😄")
         reset_uploader()
         st.rerun()
     
@@ -177,21 +177,21 @@ with left:
         if os.path.exists(resultat_csv) and os.path.getsize(resultat_csv):
             
             df = pd.read_csv(resultat_csv,sep=';')
-            st.info(f"{df.shape[0]} factures ont été traitées")
+            st.info(f"{df.shape[0]} invoices processed")
             st.dataframe(df)
         
         else:
             df = None
-            st.info("il n'y a pas de resultats")
+            st.info("No results available")
     
-    with st.expander(":point_right: Aide/Guide d'utlisation"):
-        st.subheader("info & chemins")
-        st.write(f" Dossier d'entrée : {config.INPUT_DIR}")
-        st.write(f" Dossier de sortie : {config.OUTPUT_DIR}")
-        st.write(f" Tableaux recap des résultats : {config.RESULTAT_CSV}")
-        st.info("Astuce : utilisez l'onglet ** importer ** pour ajouter des pdf , puis **traiter**."
-                "le bouton **Effacer** remets tout à zéro")
-        st.info(f"Les fichiers excels {','.join([config.ARCHIVE_CSV,config.SUIVI_CSV,config.RESULTAT_CSV])} doivent être fermés pour lancer le traitement")
+    with st.expander(":point_right: Help / User Guide"):
+        st.subheader("Information & Paths")
+        st.write(f" Input folder : {config.INPUT_DIR}")
+        st.write(f" Output folder : {config.OUTPUT_DIR}")
+        st.write(f" Results summary table : {config.RESULTAT_CSV}")
+        st.info("Tip: use the **Upload** section to add PDFs, then click **Process**.\n"
+                "The **Clear** button resets everything.")
+        st.info(f"The Excel files {','.join([config.ARCHIVE_CSV,config.SUIVI_CSV,config.RESULTAT_CSV])} must be closed before starting the processing.")
 
 
 
