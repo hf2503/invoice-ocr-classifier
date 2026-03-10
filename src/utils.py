@@ -250,7 +250,7 @@ def check_supplier(ocr_text:str,
             return supplier_name
     
     if best_supplier is not None:
-        logging.info(f"The highest supplier score is: %s with a score of %s : supplier_name {best_supplier} pour un score de {best_score}")
+        logging.info("The highest supplier score is:{best_supplier} with a score of {best_score} : supplier_name {best_supplier} pour un score de {best_score}")
     
     return None
 
