@@ -8,14 +8,13 @@ __pycache__/
 # Notebooks temporaires
 .ipynb_checkpoints/
 
-
 # Données temporaires
 data/output/*
 
 #data 
 
 *.pdf
-data/suivi
+
 data/archived_raw_invoices
 data/classified_invoices
 data/raw_invoices_to_process
@@ -26,18 +25,9 @@ src/invoice_processing.log
 invoice_processing.log
 
 #variable d'environnement
-#.env
+.env
 .vscode
-
-#dossier
-FACTURES FOURNISSEURS LUXEMBOURG 2025
-invoice_issue
-
-#brouillon notebook
-expand.ipynb
 
 #docker
 *.tar
 
-#tree
-tree.txt
