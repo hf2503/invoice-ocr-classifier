@@ -1,9 +1,12 @@
 version: "3.9"
 
 services:
-  app:
-    image: compta_lux_6
-    container_name: lux_invoice_app_6
+  invoice_app:
+    build :
+      context: .
+      dockerfile: Dockerfile
+    image: invoice_ocr_classifier_image
+    container_name: lux_invoice_ocr_classifier
     ports:
       - "8501:8501"
     volumes:
