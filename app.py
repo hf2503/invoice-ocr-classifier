@@ -14,7 +14,7 @@ st.set_page_config(page_title="Invoice Classifier",
                    page_icon='📄 Invoice Classifier',
                    initial_sidebar_state="collapsed"
                    )
-st.title(f"{':grinning:'} CLASSIFIEUR DE FACTURES")
+st.title(f"📄 INVOICE CLASSIFIER")
 st.caption("Semi-automatic recognition + accounting validation")
 
 #on s'assure de l'existence du dossier des inputs
