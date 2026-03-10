@@ -230,7 +230,8 @@ def check_supplier(ocr_text:str,
         str or None
             the supplier name (with a threshol >90) or None
     """
-
+    best_supplier = None
+    best_score = -1
     list_score_supplier_ocr = []
     for supplier_name in supplier_list:
         clean_supplier_name = clean_text(supplier_name)
@@ -239,13 +240,17 @@ def check_supplier(ocr_text:str,
         
         list_score_supplier_ocr.append((supplier_name,score_match_supplier_ocr))
         
-
+        if score_match_supplier_ocr > best_score : 
+            best_score = score_match_supplier_ocr
+            best_supplier = supplier_name
+        
+        
         if score_match_supplier_ocr > 90 :
             logging.info("supplier_name:%s",supplier_name)
             return supplier_name
     
-    if list_score_supplier_ocr is not None:
-        logging.info(f"The highest supplier score is: %s with a score of %s : supplier_name {max(list_score_supplier_ocr)[0]} pour un score de {max(list_score_supplier_ocr)[1]}")
+    if best_supplier is not None:
+        logging.info(f"The highest supplier score is: %s with a score of %s : supplier_name {best_supplier} pour un score de {best_score}")
     
     return None
 
