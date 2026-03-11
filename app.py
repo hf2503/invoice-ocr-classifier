@@ -51,7 +51,7 @@ for path, columns in csv_a_initialiser.items():
 
 
     except PermissionError:
-        st.error(f"veuillez fermer le fichier excel suivant : {os.path.basename(path)}")
+        st.error(f"Please close the following Excel file : {os.path.basename(path)}")
 
 
 #key pour modifier l'état du widget traitement des factures pour vider le buffer de streamlit
