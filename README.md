@@ -206,7 +206,7 @@ This folder contains files and folder for tracking and checking results
 
 ## HOW TO USE
 
-![Upload interface](screenshots/image_1.png)
+
 
 
 
