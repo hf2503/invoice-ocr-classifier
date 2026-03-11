@@ -205,6 +205,7 @@ This folder contains files and folder for tracking and checking results
  written on the invoice.
 
 ## HOW TO USE
+![Alt text](screenshot/image_1.png)
 
 
 
