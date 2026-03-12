@@ -10,9 +10,23 @@ from invoice documents.
 
 This system is built to support the batch processing, the file structured and full traceability through csv tracking and logging.
 
-## Table of contents
 
-## Introduction
+
+## Table of Contents
+ 
+1. Introduction  
+2. Installation  
+3. Architecture  
+4. Folder Description  
+5. How to Use  
+6. Conclusion and Future Improvements  
+
+
+
+
+
+
+## 1.  Introduction
 
 Sometimes in accounting workflows, PDF file can contain numerous invoices merged and scanned in a random order. These files mix lot of different information like company, supplier...
 
@@ -30,9 +44,9 @@ For each invoice, the system :
   - Archive the raw/original pdf
   - Save traceability information in csv files
 
-## Installation
+## 2. Installation
 
-### 1. Clone the repository
+### 2.1 Clone the repository
 
 ```bash
 git clone https://github.com/invoice_classifier/classifier.git
@@ -45,9 +59,9 @@ cd classifier
 docker-compose up -d --build
 ```
 
-### 3. Architecture
+## 3. Architecture
 
-#### Project structure
+### 3.1 Project structure
 ```
 
 LUX_INVOICE_2/
@@ -84,7 +98,7 @@ LUX_INVOICE_2/
 
 ```
 
-#### Architecture Diagram
+### 3.2 Architecture Diagram
 
 ```mermaid
 flowchart TD
@@ -116,7 +130,7 @@ flowchart TD
 ```
 ## 4.  Folder Description
 
-### raw_invoices_to_process/
+### 4.1 raw_invoices_to_process/
 
   - Contains raw pdf files to be processesd
   - Each file contain multiple mixed invoice
@@ -140,7 +154,7 @@ flowchart TD
 
 this file ensures traceability of incoming documents
 
-### classified_invoices/
+### 4.2 classified_invoices/
 
 This folder contains the filed PDF invoices , results of the pipeline .
 
@@ -166,7 +180,7 @@ Invoices are saved on the following path (2 configurations) :
     
   This file is used for result verification and control at the end of the session
 
-### tracking/
+### 4.3 tracking/
 
 This folder contains files and folder for tracking and checking results
 
@@ -184,7 +198,7 @@ This folder contains files and folder for tracking and checking results
   - date
   - sha1_pdf
 
- ### Reference and mapping table 
+ ### 4.4 Reference and mapping table 
 
  The systeme relies on two CSV mapping table
 
@@ -204,9 +218,9 @@ This folder contains files and folder for tracking and checking results
  These files contain reference data used to match OCR-extracted text with the name of the company (company_name_invoice) . The system searches for a match with the VAT number or the company name or supplier name 
  written on the invoice.
 
-## HOW TO USE
+## 5. HOW TO USE
 
-### 1 . Launch the application and start the application with docker
+### 5.1 Launch the application and start the application with docker
 ```
 git clone https://https://github.com/hf2503/invoice-ocr-classifier.git
 cd invoice-ocr-classifier
@@ -225,7 +239,7 @@ The validation stamp field defines the internal accounting validation stamp used
 
 Once uploaded, the files will be prepared for processing by the OCR pipeline
 
-
+### 5.2 Upload Invoice Documents
 
 ![Alt text](screenshot/image_2.png)
 
@@ -246,6 +260,31 @@ classified_invoices
 ```
 
 
+# Conclusion and future improvements:
+
+Possible improvements
+
+Several enhancements could further improve the system:
+
+Machine learning based classification
+Replace or complement rule-based matching with machine learning models to improve supplier and company detection.
+
+Automatic invoice number detection
+Extract invoice numbers and other key metadata to enrich traceability.
+
+Better OCR accuracy
+Integrate additional preprocessing techniques or advanced OCR models to improve recognition on low-quality scans.
+
+Real-time CSV reloading
+Allow the application to automatically reload reference tables (company_list.csv, supplier_list.csv) without restarting the container.
+
+API integration
+Expose the processing pipeline as a REST API to integrate the system with accounting software or document management systems.
+
+User interface improvements
+Add more visual feedback during processing and allow manual correction of classification results.
+
+These improvements would make the system more robust and suitable for larger-scale document processing environments.
 
 
 
