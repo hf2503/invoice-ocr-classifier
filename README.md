@@ -231,11 +231,19 @@ Once uploaded, the files will be prepared for processing by the OCR pipeline
 
 Once the application is open, users can upload invoice documents using the drag-and-drop area or by clicking the browse files button.
 
-A confirmation message appears to indicate that the file has bee,n successfully added to theprocessing folder
+A confirmation message appears to indicate that the file has been successfully added to the processing folder
 
-At the stage, the file is ready to be analyzed by the OCR pipeline. To start the invoice analysis,click the button Traiter
+At the stage, the file is ready to be analyzed by the OCR pipeline. To start the invoice analysis,click the button Process
 
 
+Once the processing pipeline is complete, the application display's a summary of the results in the Results section of the interface.
+
+All classufued invoices are stored in the following folder:
+
+```
+classified_invoices
+
+```
 
 
 
