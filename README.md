@@ -205,7 +205,16 @@ This folder contains files and folder for tracking and checking results
  written on the invoice.
 
 ## HOW TO USE
+
+### 1 . Launch the application and start the application with docker
+```
+git clone https://https://github.com/hf2503/invoice-ocr-classifier.git
+cd invoice-ocr-classifier
+docker compose up --build
+```
+
 ![Alt text](screenshot/image_1.png)
+
 
 
 
