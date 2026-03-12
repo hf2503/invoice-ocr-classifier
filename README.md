@@ -252,7 +252,7 @@ At the stage, the file is ready to be analyzed by the OCR pipeline. To start the
 
 Once the processing pipeline is complete, the application display's a summary of the results in the Results section of the interface.
 
-All classufued invoices are stored in the following folder:
+All classified invoices are stored in the following folder:
 
 ```
 classified_invoices
@@ -285,6 +285,7 @@ User interface improvements
 Add more visual feedback during processing and allow manual correction of classification results.
 
 These improvements would make the system more robust and suitable for larger-scale document processing environments.
+
 
 
 
