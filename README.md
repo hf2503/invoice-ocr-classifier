@@ -205,7 +205,42 @@ This folder contains files and folder for tracking and checking results
  written on the invoice.
 
 ## HOW TO USE
+
+### 1 . Launch the application and start the application with docker
+```
+git clone https://https://github.com/hf2503/invoice-ocr-classifier.git
+cd invoice-ocr-classifier
+docker compose up --build
+```
+Once the container is running, open your browser and go to  http://localhost:8501
+
 ![Alt text](screenshot/image_1.png)
+
+
+This will display the streamlit interface of the invoice Classifier application
+
+The main page allows users to configure the validation settings and upload invoie documents for processing.
+
+The validation stamp field defines the internal accounting validation stamp used to confirm that a pahe coressponds to a valid invoice
+
+Once uploaded, the files will be prepared for processing by the OCR pipeline
+
+
+
+![Alt text](screenshot/image_2.png)
+
+Once the application is open, users can upload invoice documents using the drag-and-drop area or by clicking the browse files button.
+
+A confirmation message appears to indicate that the file has bee,n successfully added to theprocessing folder
+
+At the stage, the file is ready to be analyzed by the OCR pipeline. To start the invoice analysis,click the button Traiter
+
+
+
+
+
+
+
 
 
 
