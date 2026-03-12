@@ -212,8 +212,21 @@ git clone https://https://github.com/hf2503/invoice-ocr-classifier.git
 cd invoice-ocr-classifier
 docker compose up --build
 ```
+Once the container is running, open your browser and go to  http://localhost:8501
 
 ![Alt text](screenshot/image_1.png)
+
+
+This will display the streamlit interface of the invoice Classifier application
+
+The main page allows users to configure the validation settings and upload invoie documents for processing.
+
+The validation stamp field defines the internal accounting validation stamp used to confirm that a pahe coressponds to a valid invoice
+
+Once uploaded, the files will be prepared for processing by the OCR pipeline
+
+
+
 
 
 
