@@ -204,6 +204,10 @@ This folder contains files and folder for tracking and checking results
  These files contain reference data used to match OCR-extracted text with the name of the company (company_name_invoice) . The system searches for a match with the VAT number or the company name or supplier name 
  written on the invoice.
 
+## HOW TO USE
+![Alt text](screenshot/image_1.png)
+
+
 
 
 
