@@ -232,6 +232,7 @@ Once uploaded, the files will be prepared for processing by the OCR pipeline
 ![Alt text](screenshot/image_2.png)
 
 
+![Application interface](screenshots/image_2.png)
 
 
 
