@@ -227,7 +227,13 @@ Once uploaded, the files will be prepared for processing by the OCR pipeline
 
 
 
-![Alt text](screenshot/image_2 .png)
+![Alt text](screenshot/image_2.png)
+
+Once the application is open, users can upload invoice documents using the drag-and-drop area or by clicking the browse files button.
+
+A confirmation message appears to indicate that the file has bee,n successfully added to theprocessing folder
+
+At the stage, the file is ready to be analyzed by the OCR pipeline. To start the invoice analysis,click the button Traiter
 
 
 
