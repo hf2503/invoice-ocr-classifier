@@ -260,7 +260,7 @@ classified_invoices
 ```
 
 
-# Conclusion and future improvements:
+## Conclusion and future improvements:
 
 Possible improvements
 
@@ -285,6 +285,7 @@ User interface improvements
 Add more visual feedback during processing and allow manual correction of classification results.
 
 These improvements would make the system more robust and suitable for larger-scale document processing environments.
+
 
 
 
