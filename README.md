@@ -225,7 +225,12 @@ The validation stamp field defines the internal accounting validation stamp used
 
 Once uploaded, the files will be prepared for processing by the OCR pipeline
 
+
+
+
+
 ![Alt text](screenshot/image_2.png)
+
 
 
 
