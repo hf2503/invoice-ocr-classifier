@@ -85,7 +85,7 @@ with left:
     # st.sidebar.radio('write your company stamp')
 
     
-    st.subheader("Importer des PDF")
+    st.subheader("upload PDF files")
     uploaded_files = st.file_uploader("Drop your invoice PDFs:",
                                       type="pdf",
                                       accept_multiple_files=True,
@@ -113,7 +113,7 @@ with left:
 
     st.divider()
     c1,c2 = st.columns(2)
-    process_clicked = c1.button(":shark: Traiter",type = "primary",use_container_width=True)
+    process_clicked = c1.button(":shark: process",type = "primary",use_container_width=True)
     clear_clicked = c2.button("\U0001F528 Clear",type ="secondary",use_container_width=True)
 
     if process_clicked:
