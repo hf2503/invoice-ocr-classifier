@@ -1,5 +1,12 @@
 # Automated Invoice OCR & Filing System
 
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![Docker](https://img.shields.io/badge/docker-containerized-blue)
+![Tesseract OCR](https://img.shields.io/badge/OCR-Tesseract-green)
+![OpenCV](https://img.shields.io/badge/OpenCV-image--processing-orange)
+![Streamlit](https://img.shields.io/badge/UI-Streamlit-red)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
 ## Project Overview
 
 This project implements an automated invoice processing system designed to extract,classify and file scanned pdf invoices
