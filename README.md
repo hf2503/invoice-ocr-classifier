@@ -77,8 +77,6 @@ LUX_INVOICE_2/
 ├── logs/
 │   └── invoice_processing.log      # Application logs
 │
-├── script/
-│   └── Lancer_LuxInvoice.bat       # Windows launcher
 │
 ├── src/
 │   ├── __init__.py
